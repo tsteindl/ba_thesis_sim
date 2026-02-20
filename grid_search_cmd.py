@@ -77,8 +77,9 @@ def main():
             param_grid = {
                 "m_exploration": m_exploration_vals,
                 "m_exploitation": m_exploitation_vals,
-                "lookback_window": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 50],
-                "safeguard": [0, 1, 2, 3, 4, 5, 8, 10, 15],
+                "lookback_window": [1, 2, 3, 4, 5, 8, 10],
+                "safeguard": [0, 1, 2, 3, 4, 5],
+                "inc": [1, 2, 3, 4, 5, 10],
             }
 
         elif algorithm_name == "reverse_engineering":
@@ -91,30 +92,43 @@ def main():
 
 
     elif eps == 1e-4:
-        m_exploration_vals = np.unique(np.logspace(2, 3, 60, dtype=int))
-        m_exploitation_vals = np.unique(np.logspace(3, 5, 60, dtype=int))
+        m_exploration_vals = np.unique(np.logspace(2, 4, 60, dtype=int))
+        m_exploitation_vals = np.unique(np.logspace(4, 7, 60, dtype=int))
 
         if algorithm_name == "binary_search":
             param_grid = {
                 "m_exploration": m_exploration_vals,
                 "m_exploitation": m_exploitation_vals,
-                "conf": [0.4, 0.5, 0.6, 0.7, 0.8, 0.95],
-                "safeguard": [2, 5, 10, 15, 20, 30],
+                "conf": [0.5, 0.75, 0.8, 0.95, 0.975],
+                "safeguard": [0, 1, 2, 3, 4, 5, 8, 10, 15],
+            }
+        
+        elif algorithm_name == "binary_search_anneal_m":
+            param_grid = {
+                "m_exploration": m_exploration_vals,
+                "m_exploitation": m_exploitation_vals,
+                "conf": [0.5, 0.55, 0.6, 0.7, 0.8, 0.9, 0.95],
+                "safeguard": [1, 2, 3, 5],
+                "max_b_steps_sub": [-10, 0, 1, 2, 3],
+                "delta": [1, 2, 3, 4],
+                # "annealing_factor": [1, 2, 3, 4]
             }
 
         elif algorithm_name == "linear_search":
             param_grid = {
                 "m_exploration": m_exploration_vals,
                 "m_exploitation": m_exploitation_vals,
-                "lookback_window": [5, 10, 15, 20, 30, 50],
-                "safeguard": [2, 5, 10, 15, 20, 30],
+                "lookback_window": [1, 2, 3, 4, 5, 8, 10],
+                "safeguard": [0, 1, 2, 3, 4, 5, 8, 10, 15],
+                "inc": [1, 2, 3, 4, 5, 10],
             }
 
         elif algorithm_name == "reverse_engineering":
+            m_exploration_vals = np.unique(np.logspace(4, 6, 60, dtype=int))
             param_grid = {
                 "m_exploration": m_exploration_vals,
                 "m_exploitation": m_exploitation_vals,
-                "safeguard": [0.7, 0.8, 0.9],
+                "safeguard": [0.5, 0.75, 0.8, 0.85, 0.90],
             }
 
             

@@ -1,7 +1,7 @@
 import numpy as np
 from sim import simulate_errors
 
-def find_phi_linear_search(rng, phi, phi_max, phi_min, m_exploration=10, m_exploitation=1_000, lookback_window=5, safeguard=1):
+def find_phi_linear_search(rng, phi, phi_max, phi_min, m_exploration=10, m_exploitation=1_000, lookback_window=5, safeguard=1, inc=1):
     N_min = np.pi//(2*phi_max)
     N_max = np.pi//(2*phi_min)
     N = max(1, N_min)
@@ -31,7 +31,7 @@ def find_phi_linear_search(rng, phi, phi_max, phi_min, m_exploration=10, m_explo
         elif N >= N_max:
             done = True
         else:
-            N += 1
+            N += inc
     
     # remaining_budget = budget-budget_used
     # if remaining_budget <= 0:
