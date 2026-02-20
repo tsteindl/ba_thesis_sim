@@ -2,7 +2,7 @@ import numpy as np
 from sim import simulate_errors
 
 def find_phi_linear_search(rng, phi, phi_max, phi_min, m_exploration=10, m_exploitation=1_000, lookback_window=5, safeguard=1, inc=1):
-    N_min = np.pi//(2*phi_max)
+    N_min = max(np.pi//(2*phi_max), 1)
     N_max = np.pi//(2*phi_min)
     N = max(1, N_min)
     

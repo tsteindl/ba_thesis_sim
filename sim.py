@@ -5,6 +5,8 @@ def simulate(rng, phi, m, n, n_simulations=1):
     return shots_mat[0] if n_simulations == 1 else shots_mat
 
 def simulate_errors(rng, phi, m, N, n_simulations=1):
+    N = max(N, 1)
+    
     if n_simulations == 1:
         shots_vec = simulate(rng, phi, m, N, n_simulations)
         hits = np.sum(shots_vec)

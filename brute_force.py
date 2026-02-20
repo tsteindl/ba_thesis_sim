@@ -3,7 +3,7 @@ from sim import simulate_errors
 
 
 def find_phi_brute_force(rng, phi, phi_max, phi_min, m):
-    N_min = np.pi//(2*phi_max)
+    N_min = max(np.pi//(2*phi_max), 1)
 
     phi_hat = simulate_errors(rng, phi, m, N_min)
     budget_used = m * N_min

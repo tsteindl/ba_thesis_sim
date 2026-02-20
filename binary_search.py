@@ -4,7 +4,7 @@ from scipy.stats import norm
 
 
 def find_phi_binary_search(rng, phi, phi_max, phi_min, m_exploration=400, m_exploitation=1_000, safeguard=1, conf=0.95):
-    N_min = np.pi//(2*phi_max)
+    N_min = max(np.pi//(2*phi_max), 1)
     N_max = np.pi//(2*phi_min)
     N = max(1, N_min)
     
@@ -45,7 +45,7 @@ def find_phi_binary_search(rng, phi, phi_max, phi_min, m_exploration=400, m_expl
 
 
 def find_phi_binary_search_anneal_m(rng, phi, phi_max, phi_min, m_exploration=400, m_exploitation=1_000, safeguard=1, conf=0.95, max_b_steps_sub=3, delta = 5, annealing_factor=4):
-    N_min = np.pi//(2*phi_max)
+    N_min = max(np.pi//(2*phi_max), 1)
     N_max = np.pi//(2*phi_min)
     N = N_min
     
