@@ -9,3 +9,13 @@ def find_phi_brute_force(rng, phi, phi_max, phi_min, m):
     budget_used = m * N_min
     
     return phi_hat, budget_used
+
+
+def find_phi_fixed_budget_brute_force(rng, phi, phi_max, phi_min, budget):
+    N_min = max(np.pi//(2*phi_max), 1)
+
+    m = int(budget/N_min)
+    phi_hat = simulate_errors(rng, phi, m, N_min)
+    budget_used = m * N_min
+    
+    return phi_hat, budget_used
