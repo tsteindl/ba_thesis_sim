@@ -103,3 +103,64 @@ def find_phi_fixed_budget_binary_search(rng, phi, phi_max, phi_min, m_exploratio
         phi_hat_final = phi_hat_list[-1]
 
     return phi_hat_final, budget_used
+
+
+def find_phi_fixed_budget_binary_search_delayed(rng, phi, phi_max, phi_min, m_exploration, budget, lookback_window=5, safeguard=1):
+    N_min = max(int(np.pi // (2 * phi_max)), 1)
+    N_max = max(int(np.pi // (2 * phi_min)), 1)
+    N = max(1, N_min)
+
+    phi_hat_list = []
+    N_history = []
+    budget_used = 0
+
+    def probe(N):
+        nonlocal budget_used
+        phi_hat = simulate_errors(rng, phi, m_exploration, N)
+        budget_used += N * m_exploration
+        phi_hat_list.append(phi_hat)
+        N_history.append(N)
+        return phi_hat
+
+    def overshot():
+        if len(phi_hat_list) < lookback_window + 1:
+            return False
+        means = [np.mean(phi_hat_list[:k+1]) for k in range(len(phi_hat_list))]
+        recent = means[-(lookback_window + 1):]
+        return all(recent[i] > recent[i-1] for i in range(1, len(recent)))
+
+    lb = N_min
+    ub = N_max
+
+    probe(N)
+    N += (ub - N) // 2
+
+    done = False
+    while not done:
+        probe(N)
+        temp_N = N
+
+        if overshot():
+            # rewind: the first bad N was lookback_window steps ago
+            ub = N_history[-lookback_window]
+            # last confirmed good N is one step before that
+            lb = N_history[-lookback_window - 1] if len(N_history) > lookback_window else N_min
+            N = lb + (ub - lb) // 2
+        else:
+            lb = N
+            N += (ub - N) // 2
+
+        if temp_N == N or N < N_min or N > N_max or budget_used >= budget:
+            done = True
+
+    remaining_budget = budget - budget_used
+    if remaining_budget <= 0:
+        return phi_hat_list[-1], budget_used
+
+    N = max(lb - safeguard, 1)
+
+    m = int(remaining_budget / N)
+    phi_hat = simulate_errors(rng, phi, m, N)
+    budget_used += m * N
+
+    return phi_hat, budget_used

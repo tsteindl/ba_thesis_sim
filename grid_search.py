@@ -343,3 +343,182 @@ def grid_search_algorithm(
             f.write("\n".join(summary_lines))
 
     return grid_results
+
+
+def grid_search_algorithm_single(
+    find_phi_fn,
+    param_grid,
+    *,
+    R=300,
+    eps=1e-3,
+    phi_min=None,
+    phi_max=0.1,
+    success_threshold=0.95,
+    lambda_budget=1e-7,
+    rng=None,
+    verbose=True,
+    algorithm_name="algo"
+):
+    t_start = time.perf_counter()
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    if phi_min is None:
+        phi_min = phi_max / 10
+
+    problem_dir = make_problem_dir(
+        algorithm_name,
+        eps,
+        success_threshold,
+        phi_min,
+        phi_max,
+    )
+    run_dir = make_run_dir(problem_dir)
+
+    param_names = list(param_grid.keys())
+    param_combinations = list(product(*param_grid.values()))
+
+    grid_results = []
+    pbar = tqdm(param_combinations, desc="Grid search (single-threaded)")
+
+    for values in pbar:
+        params = dict(zip(param_names, values))
+        seeds = rng.integers(0, 2**32, size=R)
+
+        trial_results = [
+            _single_trial_safe(find_phi_fn, phi_min, phi_max, eps, params, int(seed))
+            for seed in seeds
+        ]
+
+        errs = np.array([r["err"] for r in trial_results])
+        budgets = np.array([r["budget"] for r in trial_results])
+        successes = np.array([r["success"] for r in trial_results])
+
+        result = {
+            **params,
+            "mean_budget": float(budgets.mean()),
+            "err": float(errs.mean()),
+            "success_rate": float(successes.mean()),
+        }
+        result["loss"] = result["err"] + lambda_budget * result["mean_budget"]
+
+        grid_results.append(result)
+        pbar.set_postfix(loss=f"{result['loss']:.2e}", success=f"{result['success_rate']:.2f}")
+
+    runtime_sec = time.perf_counter() - t_start
+
+    metadata = {
+        "R": R, "eps": eps, "phi_min": phi_min, "phi_max": phi_max,
+        "success_threshold": success_threshold, "lambda_budget": lambda_budget,
+        "n_jobs": 1, "param_grid": param_grid, "runtime_sec": runtime_sec,
+    }
+    with open(os.path.join(run_dir, "metadata.json"), "w") as f:
+        json.dump(json_safe(metadata), f, indent=2)
+    with open(os.path.join(run_dir, "grid_results.json"), "w") as f:
+        json.dump(json_safe(grid_results), f, indent=2)
+
+    candidates = [r for r in grid_results if r["success_rate"] >= success_threshold]
+    best_loss = min(grid_results, key=lambda r: r["loss"])
+    best_candidate = min(candidates, key=lambda r: r["mean_budget"]) if candidates else None
+
+    with open(os.path.join(run_dir, "best_by_loss.json"), "w") as f:
+        json.dump(json_safe(best_loss), f, indent=2)
+
+    if best_candidate:
+        with open(os.path.join(run_dir, "best_by_budget.json"), "w") as f:
+            json.dump(json_safe(best_candidate), f, indent=2)
+
+        best_overall_path = os.path.join(problem_dir, "best_overall.json")
+        if os.path.exists(best_overall_path):
+            with open(best_overall_path, "r") as f:
+                best_overall = json.load(f)
+        else:
+            best_overall = None
+
+        if is_better_config(best_candidate, best_overall, success_threshold):
+            best_overall = {
+                **best_candidate,
+                "_updated_at": datetime.now().isoformat(),
+                "_source_run": os.path.basename(run_dir),
+            }
+            tmp = best_overall_path + ".tmp"
+            with open(tmp, "w") as f:
+                json.dump(json_safe(best_overall), f, indent=2)
+            os.replace(tmp, best_overall_path)
+            print("✓ Updated best_overall.json")
+
+    if verbose:
+        summary_lines = [
+            "=== Grid search summary ===",
+            f"Total runtime          : {runtime_sec/60:.2f} minutes",
+            f"Total configurations   : {len(grid_results)}",
+            f"Candidates ≥ {success_threshold:.2f}: {len(candidates)}",
+            "",
+            "Best by loss:",
+            str(best_loss),
+        ]
+        if best_candidate:
+            summary_lines += ["", "Best by budget (success-constrained):", str(best_candidate)]
+        else:
+            summary_lines += ["", "No configuration met success threshold."]
+
+        print("\n".join(summary_lines))
+        with open(os.path.join(run_dir, "summary.txt"), "w") as f:
+            f.write("\n".join(summary_lines))
+
+    return grid_results
+
+
+
+def evaluate_algorithm_single(
+    find_phi_fn,
+    *,
+    params,
+    R=1000,
+    phi_min=None,
+    phi_max=0.1,
+    eps=None,
+    rng=None,
+    log_dir=None,
+):
+    t_start = time.perf_counter()
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    if phi_min is None:
+        phi_min = phi_max / 10
+
+    seeds = rng.integers(0, 2**32, size=R)
+
+    results = []
+    for seed in tqdm(seeds, total=R, desc="Evaluating"):
+        result = _single_trial(find_phi_fn, phi_min, phi_max, eps, params, int(seed))
+        results.append(result)
+
+    errs = np.array([r["err"] for r in results])
+    budgets = np.array([r["budget"] for r in results])
+
+    success_rate = np.mean(errs < eps) if eps is not None else None
+    mean_budget = np.mean(budgets)
+
+    runtime_sec = time.perf_counter() - t_start
+
+    print(f"Total runtime          : {runtime_sec/60:.2f} minutes")
+    print("Evaluation summary")
+    print("-" * 60)
+    if eps is not None:
+        print(f"Success criterion      : |φ̂ − φ| ≤ {eps:.1e}")
+        print(f"Success rate           : {success_rate:.3f} ({success_rate*100:.1f}%)")
+    print(f"Mean absolute error    : {errs.mean():.3e}")
+    print(f"Median absolute error  : {np.median(errs):.3e}")
+    print(f"Mean budget            : {mean_budget:,.0f}")
+    print(f"Median budget          : {np.median(budgets):,.0f}")
+    print("-" * 60)
+
+    if log_dir is not None:
+        with open(os.path.join(log_dir, "evaluation_results.json"), "w") as f:
+            json.dump(json_safe(results), f, indent=2)
+
+    return results

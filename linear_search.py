@@ -5,7 +5,7 @@ def find_phi_linear_search(rng, phi, phi_max, phi_min, m_exploration=10, m_explo
     N_min = max(np.pi//(2*phi_max), 1)
     N_max = np.pi//(2*phi_min)
     N = max(1, N_min)
-    
+
     phi_hat_list = []
     counter = 0
 
@@ -49,6 +49,9 @@ def find_phi_fixed_budget_linear_search(rng, phi, phi_max, phi_min, m_exploratio
     N_min = max(np.pi//(2*phi_max), 1)
     N_max = max(np.pi//(2*phi_min), 1)
     N = max(1, N_min)
+     
+    if m_exploration * N > budget:
+        return np.inf, budget
     
     phi_hat_list = []
     counter = 0
@@ -79,7 +82,8 @@ def find_phi_fixed_budget_linear_search(rng, phi, phi_max, phi_min, m_exploratio
 
     remaining_budget = budget - budget_used
     if remaining_budget <= 0:
-        return phi_hat_list[-lookback_window], budget_used
+        idx = max(0, len(phi_hat_list) - lookback_window)
+        return phi_hat_list[idx], budget_used
 
     N = max(1, N - safeguard) # to avoid overshooting
     
