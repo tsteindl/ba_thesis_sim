@@ -1,0 +1,11 @@
+{
+  "m_exploration": 2442,
+  "lookback_window": 2,
+  "safeguard": 2,
+  "budget": 10000,
+  "inc": 1,
+  "mean_budget": 21978.0,
+  "err": 0.001885486076595737,
+  "success_rate": 0.343,
+  "loss": 0.001885486076595737
+}

@@ -1,0 +1,1352 @@
+[
+  {
+    "m_exploration": 10,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6585.407,
+    "err": 0.029610638916083447,
+    "success_rate": 0.201,
+    "loss": 0.029610638916083447
+  },
+  {
+    "m_exploration": 10,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6545.804,
+    "err": 0.03278821683253548,
+    "success_rate": 0.196,
+    "loss": 0.03278821683253548
+  },
+  {
+    "m_exploration": 10,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6735.376,
+    "err": 0.030047598187670947,
+    "success_rate": 0.21,
+    "loss": 0.030047598187670947
+  },
+  {
+    "m_exploration": 11,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6686.381,
+    "err": 0.02903696063478075,
+    "success_rate": 0.195,
+    "loss": 0.02903696063478075
+  },
+  {
+    "m_exploration": 11,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6885.456,
+    "err": 0.02973105373962291,
+    "success_rate": 0.201,
+    "loss": 0.02973105373962291
+  },
+  {
+    "m_exploration": 11,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6875.466,
+    "err": 0.030726591564461926,
+    "success_rate": 0.214,
+    "loss": 0.030726591564461926
+  },
+  {
+    "m_exploration": 13,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6447.308,
+    "err": 0.025210916685209004,
+    "success_rate": 0.194,
+    "loss": 0.025210916685209004
+  },
+  {
+    "m_exploration": 13,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6617.686,
+    "err": 0.026482556730473655,
+    "success_rate": 0.213,
+    "loss": 0.026482556730473655
+  },
+  {
+    "m_exploration": 13,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6397.942,
+    "err": 0.031497325295516194,
+    "success_rate": 0.204,
+    "loss": 0.031497325295516194
+  },
+  {
+    "m_exploration": 15,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6797.682,
+    "err": 0.0219526371677645,
+    "success_rate": 0.199,
+    "loss": 0.0219526371677645
+  },
+  {
+    "m_exploration": 15,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6779.287,
+    "err": 0.0250580186223447,
+    "success_rate": 0.193,
+    "loss": 0.0250580186223447
+  },
+  {
+    "m_exploration": 15,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6688.835,
+    "err": 0.027708699130047955,
+    "success_rate": 0.181,
+    "loss": 0.027708699130047955
+  },
+  {
+    "m_exploration": 17,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6421.514,
+    "err": 0.022408017427861183,
+    "success_rate": 0.218,
+    "loss": 0.022408017427861183
+  },
+  {
+    "m_exploration": 17,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6679.871,
+    "err": 0.02424746686051123,
+    "success_rate": 0.205,
+    "loss": 0.02424746686051123
+  },
+  {
+    "m_exploration": 17,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6431.722,
+    "err": 0.02629884786941003,
+    "success_rate": 0.202,
+    "loss": 0.02629884786941003
+  },
+  {
+    "m_exploration": 20,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6742.69,
+    "err": 0.019021415137370497,
+    "success_rate": 0.209,
+    "loss": 0.019021415137370497
+  },
+  {
+    "m_exploration": 20,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6831.865,
+    "err": 0.020440546658941974,
+    "success_rate": 0.217,
+    "loss": 0.020440546658941974
+  },
+  {
+    "m_exploration": 20,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6733.12,
+    "err": 0.022967532219457874,
+    "success_rate": 0.205,
+    "loss": 0.022967532219457874
+  },
+  {
+    "m_exploration": 23,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6882.54,
+    "err": 0.01816920951101467,
+    "success_rate": 0.233,
+    "loss": 0.01816920951101467
+  },
+  {
+    "m_exploration": 23,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6465.28,
+    "err": 0.021018038136315302,
+    "success_rate": 0.198,
+    "loss": 0.021018038136315302
+  },
+  {
+    "m_exploration": 23,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6693.625,
+    "err": 0.020677913735783045,
+    "success_rate": 0.228,
+    "loss": 0.020677913735783045
+  },
+  {
+    "m_exploration": 26,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6468.054,
+    "err": 0.017177604123344833,
+    "success_rate": 0.229,
+    "loss": 0.017177604123344833
+  },
+  {
+    "m_exploration": 26,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6706.307,
+    "err": 0.01949421337002515,
+    "success_rate": 0.21,
+    "loss": 0.01949421337002515
+  },
+  {
+    "m_exploration": 26,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6734.987,
+    "err": 0.02083348453496041,
+    "success_rate": 0.213,
+    "loss": 0.02083348453496041
+  },
+  {
+    "m_exploration": 30,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6539.386,
+    "err": 0.01757661598900413,
+    "success_rate": 0.193,
+    "loss": 0.01757661598900413
+  },
+  {
+    "m_exploration": 30,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6340.57,
+    "err": 0.020058967260509448,
+    "success_rate": 0.209,
+    "loss": 0.020058967260509448
+  },
+  {
+    "m_exploration": 30,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6678.77,
+    "err": 0.01898831316012468,
+    "success_rate": 0.221,
+    "loss": 0.01898831316012468
+  },
+  {
+    "m_exploration": 35,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6890.986,
+    "err": 0.014780803513759776,
+    "success_rate": 0.219,
+    "loss": 0.014780803513759776
+  },
+  {
+    "m_exploration": 35,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6820.427,
+    "err": 0.018188447314467192,
+    "success_rate": 0.224,
+    "loss": 0.018188447314467192
+  },
+  {
+    "m_exploration": 35,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6612.893,
+    "err": 0.01945850077957044,
+    "success_rate": 0.212,
+    "loss": 0.01945850077957044
+  },
+  {
+    "m_exploration": 40,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6923.949,
+    "err": 0.013213780354964837,
+    "success_rate": 0.219,
+    "loss": 0.013213780354964837
+  },
+  {
+    "m_exploration": 40,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6446.808,
+    "err": 0.01739918814846148,
+    "success_rate": 0.22,
+    "loss": 0.01739918814846148
+  },
+  {
+    "m_exploration": 40,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6874.217,
+    "err": 0.015274492485947568,
+    "success_rate": 0.229,
+    "loss": 0.015274492485947568
+  },
+  {
+    "m_exploration": 47,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6630.886,
+    "err": 0.013930484950112777,
+    "success_rate": 0.227,
+    "loss": 0.013930484950112777
+  },
+  {
+    "m_exploration": 47,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6482.255,
+    "err": 0.014623487418148695,
+    "success_rate": 0.21,
+    "loss": 0.014623487418148695
+  },
+  {
+    "m_exploration": 47,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6719.616,
+    "err": 0.014438087862601586,
+    "success_rate": 0.207,
+    "loss": 0.014438087862601586
+  },
+  {
+    "m_exploration": 54,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6516.348,
+    "err": 0.012147178053221453,
+    "success_rate": 0.226,
+    "loss": 0.012147178053221453
+  },
+  {
+    "m_exploration": 54,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6367.773,
+    "err": 0.014297658681599134,
+    "success_rate": 0.225,
+    "loss": 0.014297658681599134
+  },
+  {
+    "m_exploration": 54,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6596.161,
+    "err": 0.013403787447241305,
+    "success_rate": 0.231,
+    "loss": 0.013403787447241305
+  },
+  {
+    "m_exploration": 62,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6797.92,
+    "err": 0.011636421497049885,
+    "success_rate": 0.238,
+    "loss": 0.011636421497049885
+  },
+  {
+    "m_exploration": 62,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6611.486,
+    "err": 0.013051474847109681,
+    "success_rate": 0.201,
+    "loss": 0.013051474847109681
+  },
+  {
+    "m_exploration": 62,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6777.734,
+    "err": 0.013122446248520636,
+    "success_rate": 0.229,
+    "loss": 0.013122446248520636
+  },
+  {
+    "m_exploration": 71,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6557.806,
+    "err": 0.01024226462979221,
+    "success_rate": 0.226,
+    "loss": 0.01024226462979221
+  },
+  {
+    "m_exploration": 71,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6823.95,
+    "err": 0.012299562423466201,
+    "success_rate": 0.233,
+    "loss": 0.012299562423466201
+  },
+  {
+    "m_exploration": 71,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6724.328,
+    "err": 0.012514452626473296,
+    "success_rate": 0.243,
+    "loss": 0.012514452626473296
+  },
+  {
+    "m_exploration": 82,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6703.694,
+    "err": 0.0099758723723309,
+    "success_rate": 0.224,
+    "loss": 0.0099758723723309
+  },
+  {
+    "m_exploration": 82,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7047.045,
+    "err": 0.010254479151591469,
+    "success_rate": 0.229,
+    "loss": 0.010254479151591469
+  },
+  {
+    "m_exploration": 82,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6624.236,
+    "err": 0.012149075720007172,
+    "success_rate": 0.244,
+    "loss": 0.012149075720007172
+  },
+  {
+    "m_exploration": 95,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6525.499,
+    "err": 0.009994926899533133,
+    "success_rate": 0.235,
+    "loss": 0.009994926899533133
+  },
+  {
+    "m_exploration": 95,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6839.996,
+    "err": 0.009764336984466031,
+    "success_rate": 0.235,
+    "loss": 0.009764336984466031
+  },
+  {
+    "m_exploration": 95,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6967.103,
+    "err": 0.011134523495698566,
+    "success_rate": 0.226,
+    "loss": 0.011134523495698566
+  },
+  {
+    "m_exploration": 109,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6662.622,
+    "err": 0.008268602996990655,
+    "success_rate": 0.251,
+    "loss": 0.008268602996990655
+  },
+  {
+    "m_exploration": 109,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6740.515,
+    "err": 0.009468622743273052,
+    "success_rate": 0.217,
+    "loss": 0.009468622743273052
+  },
+  {
+    "m_exploration": 109,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6701.574,
+    "err": 0.00977371458828,
+    "success_rate": 0.227,
+    "loss": 0.00977371458828
+  },
+  {
+    "m_exploration": 126,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6518.754,
+    "err": 0.009150572465973696,
+    "success_rate": 0.228,
+    "loss": 0.009150572465973696
+  },
+  {
+    "m_exploration": 126,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6634.658,
+    "err": 0.008748243782731136,
+    "success_rate": 0.26,
+    "loss": 0.008748243782731136
+  },
+  {
+    "m_exploration": 126,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6810.514,
+    "err": 0.008909122161678407,
+    "success_rate": 0.206,
+    "loss": 0.008909122161678407
+  },
+  {
+    "m_exploration": 145,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6754.301,
+    "err": 0.007464792024727959,
+    "success_rate": 0.223,
+    "loss": 0.007464792024727959
+  },
+  {
+    "m_exploration": 145,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6842.301,
+    "err": 0.008205027950905894,
+    "success_rate": 0.233,
+    "loss": 0.008205027950905894
+  },
+  {
+    "m_exploration": 145,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6725.321,
+    "err": 0.009126625380026591,
+    "success_rate": 0.234,
+    "loss": 0.009126625380026591
+  },
+  {
+    "m_exploration": 167,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6799.372,
+    "err": 0.007370090871680965,
+    "success_rate": 0.24,
+    "loss": 0.007370090871680965
+  },
+  {
+    "m_exploration": 167,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6653.463,
+    "err": 0.0075402985595702885,
+    "success_rate": 0.233,
+    "loss": 0.0075402985595702885
+  },
+  {
+    "m_exploration": 167,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6837.044,
+    "err": 0.007922805301910908,
+    "success_rate": 0.23,
+    "loss": 0.007922805301910908
+  },
+  {
+    "m_exploration": 193,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6622.759,
+    "err": 0.006738270162773589,
+    "success_rate": 0.219,
+    "loss": 0.006738270162773589
+  },
+  {
+    "m_exploration": 193,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6393.419,
+    "err": 0.007625397053659876,
+    "success_rate": 0.227,
+    "loss": 0.007625397053659876
+  },
+  {
+    "m_exploration": 193,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6700.236,
+    "err": 0.007724230222367565,
+    "success_rate": 0.226,
+    "loss": 0.007724230222367565
+  },
+  {
+    "m_exploration": 222,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6796.804,
+    "err": 0.006216146107981562,
+    "success_rate": 0.232,
+    "loss": 0.006216146107981562
+  },
+  {
+    "m_exploration": 222,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6844.478,
+    "err": 0.006488286607946693,
+    "success_rate": 0.247,
+    "loss": 0.006488286607946693
+  },
+  {
+    "m_exploration": 222,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6873.424,
+    "err": 0.006993362862774755,
+    "success_rate": 0.253,
+    "loss": 0.006993362862774755
+  },
+  {
+    "m_exploration": 255,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6619.491,
+    "err": 0.006371861925256397,
+    "success_rate": 0.234,
+    "loss": 0.006371861925256397
+  },
+  {
+    "m_exploration": 255,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7054.865,
+    "err": 0.006416663207928219,
+    "success_rate": 0.243,
+    "loss": 0.006416663207928219
+  },
+  {
+    "m_exploration": 255,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6987.927,
+    "err": 0.006561548500789426,
+    "success_rate": 0.227,
+    "loss": 0.006561548500789426
+  },
+  {
+    "m_exploration": 294,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6826.559,
+    "err": 0.005744917459354889,
+    "success_rate": 0.282,
+    "loss": 0.005744917459354889
+  },
+  {
+    "m_exploration": 294,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6562.283,
+    "err": 0.006280246564044262,
+    "success_rate": 0.238,
+    "loss": 0.006280246564044262
+  },
+  {
+    "m_exploration": 294,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6882.294,
+    "err": 0.006269400168540512,
+    "success_rate": 0.247,
+    "loss": 0.006269400168540512
+  },
+  {
+    "m_exploration": 339,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6782.07,
+    "err": 0.005613740440294615,
+    "success_rate": 0.244,
+    "loss": 0.005613740440294615
+  },
+  {
+    "m_exploration": 339,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6938.647,
+    "err": 0.005512160298034679,
+    "success_rate": 0.24,
+    "loss": 0.005512160298034679
+  },
+  {
+    "m_exploration": 339,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6911.092,
+    "err": 0.005935627451554517,
+    "success_rate": 0.242,
+    "loss": 0.005935627451554517
+  },
+  {
+    "m_exploration": 390,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6642.851,
+    "err": 0.005224852101653797,
+    "success_rate": 0.225,
+    "loss": 0.005224852101653797
+  },
+  {
+    "m_exploration": 390,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6909.013,
+    "err": 0.005390141251286403,
+    "success_rate": 0.232,
+    "loss": 0.005390141251286403
+  },
+  {
+    "m_exploration": 390,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6715.095,
+    "err": 0.005817427465830755,
+    "success_rate": 0.214,
+    "loss": 0.005817427465830755
+  },
+  {
+    "m_exploration": 449,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 7013.112,
+    "err": 0.004754965379130801,
+    "success_rate": 0.228,
+    "loss": 0.004754965379130801
+  },
+  {
+    "m_exploration": 449,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6929.964,
+    "err": 0.00496413794431586,
+    "success_rate": 0.236,
+    "loss": 0.00496413794431586
+  },
+  {
+    "m_exploration": 449,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6938.407,
+    "err": 0.0054506922037561665,
+    "success_rate": 0.228,
+    "loss": 0.0054506922037561665
+  },
+  {
+    "m_exploration": 517,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6887.001,
+    "err": 0.004738590220207172,
+    "success_rate": 0.249,
+    "loss": 0.004738590220207172
+  },
+  {
+    "m_exploration": 517,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7245.021,
+    "err": 0.004493902806121528,
+    "success_rate": 0.239,
+    "loss": 0.004493902806121528
+  },
+  {
+    "m_exploration": 517,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6956.842,
+    "err": 0.0051007172400027775,
+    "success_rate": 0.221,
+    "loss": 0.0051007172400027775
+  },
+  {
+    "m_exploration": 596,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 7091.158,
+    "err": 0.004414120721588898,
+    "success_rate": 0.228,
+    "loss": 0.004414120721588898
+  },
+  {
+    "m_exploration": 596,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 6924.068,
+    "err": 0.004674925324855088,
+    "success_rate": 0.242,
+    "loss": 0.004674925324855088
+  },
+  {
+    "m_exploration": 596,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 6835.295,
+    "err": 0.005005107219412026,
+    "success_rate": 0.232,
+    "loss": 0.005005107219412026
+  },
+  {
+    "m_exploration": 686,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 6934.754,
+    "err": 0.004262019015029495,
+    "success_rate": 0.251,
+    "loss": 0.004262019015029495
+  },
+  {
+    "m_exploration": 686,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7098.545,
+    "err": 0.004402435552947151,
+    "success_rate": 0.264,
+    "loss": 0.004402435552947151
+  },
+  {
+    "m_exploration": 686,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 7073.195,
+    "err": 0.004604670056449225,
+    "success_rate": 0.243,
+    "loss": 0.004604670056449225
+  },
+  {
+    "m_exploration": 790,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 7303.262,
+    "err": 0.003944010145230422,
+    "success_rate": 0.25,
+    "loss": 0.003944010145230422
+  },
+  {
+    "m_exploration": 790,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7227.177,
+    "err": 0.0040264290531668205,
+    "success_rate": 0.274,
+    "loss": 0.0040264290531668205
+  },
+  {
+    "m_exploration": 790,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 7243.87,
+    "err": 0.004427583301992619,
+    "success_rate": 0.247,
+    "loss": 0.004427583301992619
+  },
+  {
+    "m_exploration": 910,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 7396.98,
+    "err": 0.0037953996115619964,
+    "success_rate": 0.235,
+    "loss": 0.0037953996115619964
+  },
+  {
+    "m_exploration": 910,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7305.897,
+    "err": 0.003857876079998059,
+    "success_rate": 0.239,
+    "loss": 0.003857876079998059
+  },
+  {
+    "m_exploration": 910,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 7239.338,
+    "err": 0.004019314139347322,
+    "success_rate": 0.228,
+    "loss": 0.004019314139347322
+  },
+  {
+    "m_exploration": 1048,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 7444.651,
+    "err": 0.003390908252790915,
+    "success_rate": 0.267,
+    "loss": 0.003390908252790915
+  },
+  {
+    "m_exploration": 1048,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7459.999,
+    "err": 0.0039372744836459845,
+    "success_rate": 0.232,
+    "loss": 0.0039372744836459845
+  },
+  {
+    "m_exploration": 1048,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 7349.582,
+    "err": 0.003728968623256437,
+    "success_rate": 0.255,
+    "loss": 0.003728968623256437
+  },
+  {
+    "m_exploration": 1206,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 7364.471,
+    "err": 0.0035491220291890197,
+    "success_rate": 0.25,
+    "loss": 0.0035491220291890197
+  },
+  {
+    "m_exploration": 1206,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7530.615,
+    "err": 0.0036062768803150017,
+    "success_rate": 0.217,
+    "loss": 0.0036062768803150017
+  },
+  {
+    "m_exploration": 1206,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 7257.068,
+    "err": 0.003906201596472219,
+    "success_rate": 0.234,
+    "loss": 0.003906201596472219
+  },
+  {
+    "m_exploration": 1389,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 7787.255,
+    "err": 0.003210542115743715,
+    "success_rate": 0.272,
+    "loss": 0.003210542115743715
+  },
+  {
+    "m_exploration": 1389,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7678.641,
+    "err": 0.003377390036023133,
+    "success_rate": 0.251,
+    "loss": 0.003377390036023133
+  },
+  {
+    "m_exploration": 1389,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 7620.847,
+    "err": 0.0035387848731285873,
+    "success_rate": 0.263,
+    "loss": 0.0035387848731285873
+  },
+  {
+    "m_exploration": 1599,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 7712.493,
+    "err": 0.0033130982748718805,
+    "success_rate": 0.238,
+    "loss": 0.0033130982748718805
+  },
+  {
+    "m_exploration": 1599,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7833.468,
+    "err": 0.0033123738446168656,
+    "success_rate": 0.245,
+    "loss": 0.0033123738446168656
+  },
+  {
+    "m_exploration": 1599,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 7690.684,
+    "err": 0.0034768959598892534,
+    "success_rate": 0.238,
+    "loss": 0.0034768959598892534
+  },
+  {
+    "m_exploration": 1842,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 7945.187,
+    "err": 0.0031939963521967624,
+    "success_rate": 0.249,
+    "loss": 0.0031939963521967624
+  },
+  {
+    "m_exploration": 1842,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7893.35,
+    "err": 0.00326523973251329,
+    "success_rate": 0.266,
+    "loss": 0.00326523973251329
+  },
+  {
+    "m_exploration": 1842,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 7792.884,
+    "err": 0.0033873757277771786,
+    "success_rate": 0.249,
+    "loss": 0.0033873757277771786
+  },
+  {
+    "m_exploration": 2120,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 7977.39,
+    "err": 0.003319406916683823,
+    "success_rate": 0.212,
+    "loss": 0.003319406916683823
+  },
+  {
+    "m_exploration": 2120,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 7907.032,
+    "err": 0.003406902870561301,
+    "success_rate": 0.218,
+    "loss": 0.003406902870561301
+  },
+  {
+    "m_exploration": 2120,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 8166.464,
+    "err": 0.0033556869967398505,
+    "success_rate": 0.24,
+    "loss": 0.0033556869967398505
+  },
+  {
+    "m_exploration": 2442,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 8360.552,
+    "err": 0.0031704344658878138,
+    "success_rate": 0.228,
+    "loss": 0.0031704344658878138
+  },
+  {
+    "m_exploration": 2442,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 8380.737,
+    "err": 0.0031874688824587226,
+    "success_rate": 0.234,
+    "loss": 0.0031874688824587226
+  },
+  {
+    "m_exploration": 2442,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 8267.59,
+    "err": 0.0032950117569448584,
+    "success_rate": 0.228,
+    "loss": 0.0032950117569448584
+  },
+  {
+    "m_exploration": 2811,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 8600.72,
+    "err": 0.0031080827202757916,
+    "success_rate": 0.223,
+    "loss": 0.0031080827202757916
+  },
+  {
+    "m_exploration": 2811,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 8460.092,
+    "err": 0.0032795685064063037,
+    "success_rate": 0.221,
+    "loss": 0.0032795685064063037
+  },
+  {
+    "m_exploration": 2811,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 8459.827,
+    "err": 0.0034115913411777075,
+    "success_rate": 0.21,
+    "loss": 0.0034115913411777075
+  },
+  {
+    "m_exploration": 3237,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 8787.753,
+    "err": 0.00327087003306387,
+    "success_rate": 0.213,
+    "loss": 0.00327087003306387
+  },
+  {
+    "m_exploration": 3237,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 8776.989,
+    "err": 0.003352584580568783,
+    "success_rate": 0.211,
+    "loss": 0.003352584580568783
+  },
+  {
+    "m_exploration": 3237,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 8800.481,
+    "err": 0.0032810604160801093,
+    "success_rate": 0.227,
+    "loss": 0.0032810604160801093
+  },
+  {
+    "m_exploration": 3727,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 9154.291,
+    "err": 0.003765354907689593,
+    "success_rate": 0.176,
+    "loss": 0.003765354907689593
+  },
+  {
+    "m_exploration": 3727,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 9133.392,
+    "err": 0.0037179880186492048,
+    "success_rate": 0.2,
+    "loss": 0.0037179880186492048
+  },
+  {
+    "m_exploration": 3727,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 9115.901,
+    "err": 0.003743068514544761,
+    "success_rate": 0.187,
+    "loss": 0.003743068514544761
+  },
+  {
+    "m_exploration": 4291,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 9531.914,
+    "err": 0.004369798843800444,
+    "success_rate": 0.159,
+    "loss": 0.004369798843800444
+  },
+  {
+    "m_exploration": 4291,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 9527.722,
+    "err": 0.004658802180183304,
+    "success_rate": 0.164,
+    "loss": 0.004658802180183304
+  },
+  {
+    "m_exploration": 4291,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 9528.635,
+    "err": 0.004517856197374533,
+    "success_rate": 0.159,
+    "loss": 0.004517856197374533
+  },
+  {
+    "m_exploration": 4941,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 9956.83,
+    "err": 0.014670570053981924,
+    "success_rate": 0.1,
+    "loss": 0.014670570053981924
+  },
+  {
+    "m_exploration": 4941,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 9956.484,
+    "err": NaN,
+    "success_rate": 0.118,
+    "loss": NaN
+  },
+  {
+    "m_exploration": 4941,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 9955.287,
+    "err": NaN,
+    "success_rate": 0.09,
+    "loss": NaN
+  },
+  {
+    "m_exploration": 5689,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 5689,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 5689,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 6551,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 6551,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 6551,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 7543,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 7543,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 7543,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 8685,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 8685,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 8685,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 10000,
+    "safeguard": 0.8,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 10000,
+    "safeguard": 0.9,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 10000,
+    "safeguard": 0.95,
+    "budget": 10000,
+    "mean_budget": 10000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  }
+]
