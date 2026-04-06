@@ -1,0 +1,9 @@
+{
+  "m_exploration": 10000,
+  "safeguard": 0.95,
+  "budget": 10000,
+  "mean_budget": 10000.0,
+  "err": 0.0038358759259827647,
+  "success_rate": 0.167,
+  "loss": 0.0038358759259827647
+}

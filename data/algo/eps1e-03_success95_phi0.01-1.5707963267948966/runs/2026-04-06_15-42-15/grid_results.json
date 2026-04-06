@@ -1,0 +1,1352 @@
+[
+  {
+    "m_exploration": 1000,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 34758.273,
+    "err": 0.008412382353904967,
+    "success_rate": 0.281,
+    "loss": 0.008412382353904967
+  },
+  {
+    "m_exploration": 1000,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 35352.612,
+    "err": 0.009169464527639682,
+    "success_rate": 0.292,
+    "loss": 0.009169464527639682
+  },
+  {
+    "m_exploration": 1000,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 35550.381,
+    "err": 0.008820831431994598,
+    "success_rate": 0.297,
+    "loss": 0.008820831431994598
+  },
+  {
+    "m_exploration": 1206,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 33214.136,
+    "err": 0.008457270781673814,
+    "success_rate": 0.266,
+    "loss": 0.008457270781673814
+  },
+  {
+    "m_exploration": 1206,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 33411.8,
+    "err": 0.008276055508008686,
+    "success_rate": 0.294,
+    "loss": 0.008276055508008686
+  },
+  {
+    "m_exploration": 1206,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 33806.723,
+    "err": 0.00844265812800442,
+    "success_rate": 0.29,
+    "loss": 0.00844265812800442
+  },
+  {
+    "m_exploration": 1456,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 32397.867,
+    "err": 0.007671658795094336,
+    "success_rate": 0.286,
+    "loss": 0.007671658795094336
+  },
+  {
+    "m_exploration": 1456,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 32299.351,
+    "err": 0.007397747482767183,
+    "success_rate": 0.278,
+    "loss": 0.007397747482767183
+  },
+  {
+    "m_exploration": 1456,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 34565.309,
+    "err": 0.0077909159593194804,
+    "success_rate": 0.292,
+    "loss": 0.0077909159593194804
+  },
+  {
+    "m_exploration": 1757,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 32407.234,
+    "err": 0.007005013584350423,
+    "success_rate": 0.277,
+    "loss": 0.007005013584350423
+  },
+  {
+    "m_exploration": 1757,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 33094.783,
+    "err": 0.006528435009497046,
+    "success_rate": 0.307,
+    "loss": 0.006528435009497046
+  },
+  {
+    "m_exploration": 1757,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 32112.241,
+    "err": 0.007174845395072751,
+    "success_rate": 0.276,
+    "loss": 0.007174845395072751
+  },
+  {
+    "m_exploration": 2120,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 35594.035,
+    "err": 0.005846545162245537,
+    "success_rate": 0.316,
+    "loss": 0.005846545162245537
+  },
+  {
+    "m_exploration": 2120,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 35299.92,
+    "err": 0.005995845790818588,
+    "success_rate": 0.327,
+    "loss": 0.005995845790818588
+  },
+  {
+    "m_exploration": 2120,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 33734.022,
+    "err": 0.006563507781682272,
+    "success_rate": 0.283,
+    "loss": 0.006563507781682272
+  },
+  {
+    "m_exploration": 2559,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 34421.073,
+    "err": 0.005627379359455104,
+    "success_rate": 0.302,
+    "loss": 0.005627379359455104
+  },
+  {
+    "m_exploration": 2559,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 35785.239,
+    "err": 0.005489087424239905,
+    "success_rate": 0.318,
+    "loss": 0.005489087424239905
+  },
+  {
+    "m_exploration": 2559,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 34518.799,
+    "err": 0.005630493144892082,
+    "success_rate": 0.306,
+    "loss": 0.005630493144892082
+  },
+  {
+    "m_exploration": 3088,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 33905.37,
+    "err": 0.005180037410511348,
+    "success_rate": 0.292,
+    "loss": 0.005180037410511348
+  },
+  {
+    "m_exploration": 3088,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 36230.837,
+    "err": 0.005121822632549063,
+    "success_rate": 0.311,
+    "loss": 0.005121822632549063
+  },
+  {
+    "m_exploration": 3088,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 33905.266,
+    "err": 0.005260237199222339,
+    "success_rate": 0.29,
+    "loss": 0.005260237199222339
+  },
+  {
+    "m_exploration": 3727,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 33666.563,
+    "err": 0.004672018098502904,
+    "success_rate": 0.307,
+    "loss": 0.004672018098502904
+  },
+  {
+    "m_exploration": 3727,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 33666.514,
+    "err": 0.00449728740102179,
+    "success_rate": 0.332,
+    "loss": 0.00449728740102179
+  },
+  {
+    "m_exploration": 3727,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 36362.125,
+    "err": 0.00472311568154869,
+    "success_rate": 0.327,
+    "loss": 0.00472311568154869
+  },
+  {
+    "m_exploration": 4498,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 35439.425,
+    "err": 0.004302746168029447,
+    "success_rate": 0.321,
+    "loss": 0.004302746168029447
+  },
+  {
+    "m_exploration": 4498,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 35343.316,
+    "err": 0.004199201910108451,
+    "success_rate": 0.322,
+    "loss": 0.004199201910108451
+  },
+  {
+    "m_exploration": 4498,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 37922.081,
+    "err": 0.0042121763320369056,
+    "success_rate": 0.314,
+    "loss": 0.0042121763320369056
+  },
+  {
+    "m_exploration": 5428,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 33892.847,
+    "err": 0.004057017121188638,
+    "success_rate": 0.313,
+    "loss": 0.004057017121188638
+  },
+  {
+    "m_exploration": 5428,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 36068.211,
+    "err": 0.003977383477428373,
+    "success_rate": 0.331,
+    "loss": 0.003977383477428373
+  },
+  {
+    "m_exploration": 5428,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 37013.82,
+    "err": 0.004005459925558455,
+    "success_rate": 0.342,
+    "loss": 0.004005459925558455
+  },
+  {
+    "m_exploration": 6551,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 36266.35,
+    "err": 0.003690550621879838,
+    "success_rate": 0.336,
+    "loss": 0.003690550621879838
+  },
+  {
+    "m_exploration": 6551,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 37013.853,
+    "err": 0.0035235485591242712,
+    "success_rate": 0.326,
+    "loss": 0.0035235485591242712
+  },
+  {
+    "m_exploration": 6551,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 36733.256,
+    "err": 0.003595398123662161,
+    "success_rate": 0.345,
+    "loss": 0.003595398123662161
+  },
+  {
+    "m_exploration": 7906,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 41703.013,
+    "err": 0.0030461550859665443,
+    "success_rate": 0.374,
+    "loss": 0.0030461550859665443
+  },
+  {
+    "m_exploration": 7906,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 37375.2,
+    "err": 0.003425432145282196,
+    "success_rate": 0.319,
+    "loss": 0.003425432145282196
+  },
+  {
+    "m_exploration": 7906,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 39031.899,
+    "err": 0.0032605135343308344,
+    "success_rate": 0.345,
+    "loss": 0.0032605135343308344
+  },
+  {
+    "m_exploration": 9540,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 39209.456,
+    "err": 0.0028612708748289176,
+    "success_rate": 0.34,
+    "loss": 0.0028612708748289176
+  },
+  {
+    "m_exploration": 9540,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 38576.354,
+    "err": 0.003056354814314599,
+    "success_rate": 0.357,
+    "loss": 0.003056354814314599
+  },
+  {
+    "m_exploration": 9540,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 41470.437,
+    "err": 0.0030424080969609097,
+    "success_rate": 0.362,
+    "loss": 0.0030424080969609097
+  },
+  {
+    "m_exploration": 11513,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 40181.136,
+    "err": 0.002775496188720079,
+    "success_rate": 0.368,
+    "loss": 0.002775496188720079
+  },
+  {
+    "m_exploration": 11513,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 39650.071,
+    "err": 0.00295395352409561,
+    "success_rate": 0.345,
+    "loss": 0.00295395352409561
+  },
+  {
+    "m_exploration": 11513,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 40004.167,
+    "err": 0.002694814244193587,
+    "success_rate": 0.368,
+    "loss": 0.002694814244193587
+  },
+  {
+    "m_exploration": 13894,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 42049.361,
+    "err": 0.002634438220979663,
+    "success_rate": 0.352,
+    "loss": 0.002634438220979663
+  },
+  {
+    "m_exploration": 13894,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 42737.829,
+    "err": 0.0025259539213864364,
+    "success_rate": 0.369,
+    "loss": 0.0025259539213864364
+  },
+  {
+    "m_exploration": 13894,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 43685.059,
+    "err": 0.002445459060089362,
+    "success_rate": 0.384,
+    "loss": 0.002445459060089362
+  },
+  {
+    "m_exploration": 16768,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 44733.051,
+    "err": 0.0021639036611454257,
+    "success_rate": 0.397,
+    "loss": 0.0021639036611454257
+  },
+  {
+    "m_exploration": 16768,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 45814.88,
+    "err": 0.002311833551616242,
+    "success_rate": 0.395,
+    "loss": 0.002311833551616242
+  },
+  {
+    "m_exploration": 16768,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 44067.309,
+    "err": 0.0022578178492268742,
+    "success_rate": 0.394,
+    "loss": 0.0022578178492268742
+  },
+  {
+    "m_exploration": 20235,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 47433.596,
+    "err": 0.0019915717514722175,
+    "success_rate": 0.423,
+    "loss": 0.0019915717514722175
+  },
+  {
+    "m_exploration": 20235,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 46954.874,
+    "err": 0.002151505437982717,
+    "success_rate": 0.411,
+    "loss": 0.002151505437982717
+  },
+  {
+    "m_exploration": 20235,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 46236.969,
+    "err": 0.002309574528856241,
+    "success_rate": 0.383,
+    "loss": 0.002309574528856241
+  },
+  {
+    "m_exploration": 24420,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 49511.333,
+    "err": 0.0020312244052469487,
+    "success_rate": 0.392,
+    "loss": 0.0020312244052469487
+  },
+  {
+    "m_exploration": 24420,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 48075.241,
+    "err": 0.0019748044956626135,
+    "success_rate": 0.391,
+    "loss": 0.0019748044956626135
+  },
+  {
+    "m_exploration": 24420,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 51097.972,
+    "err": 0.0018078262112905755,
+    "success_rate": 0.456,
+    "loss": 0.0018078262112905755
+  },
+  {
+    "m_exploration": 29470,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 52038.529,
+    "err": 0.001763716108928345,
+    "success_rate": 0.422,
+    "loss": 0.001763716108928345
+  },
+  {
+    "m_exploration": 29470,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 52814.287,
+    "err": 0.001904365669905443,
+    "success_rate": 0.414,
+    "loss": 0.001904365669905443
+  },
+  {
+    "m_exploration": 29470,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 52461.528,
+    "err": 0.0017222995431335185,
+    "success_rate": 0.435,
+    "loss": 0.0017222995431335185
+  },
+  {
+    "m_exploration": 35564,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 57793.11,
+    "err": 0.0015628856733484265,
+    "success_rate": 0.469,
+    "loss": 0.0015628856733484265
+  },
+  {
+    "m_exploration": 35564,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 57406.455,
+    "err": 0.0017095566285053132,
+    "success_rate": 0.432,
+    "loss": 0.0017095566285053132
+  },
+  {
+    "m_exploration": 35564,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 56310.703,
+    "err": 0.0017153269938867796,
+    "success_rate": 0.449,
+    "loss": 0.0017153269938867796
+  },
+  {
+    "m_exploration": 42919,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 62153.672,
+    "err": 0.0015046063918403008,
+    "success_rate": 0.449,
+    "loss": 0.0015046063918403008
+  },
+  {
+    "m_exploration": 42919,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 61183.754,
+    "err": 0.0015713365815115073,
+    "success_rate": 0.435,
+    "loss": 0.0015713365815115073
+  },
+  {
+    "m_exploration": 42919,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 60727.137,
+    "err": 0.001619203967563197,
+    "success_rate": 0.436,
+    "loss": 0.001619203967563197
+  },
+  {
+    "m_exploration": 51794,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 66929.602,
+    "err": 0.0014745728735603254,
+    "success_rate": 0.427,
+    "loss": 0.0014745728735603254
+  },
+  {
+    "m_exploration": 51794,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 67893.371,
+    "err": 0.0014928805254365832,
+    "success_rate": 0.441,
+    "loss": 0.0014928805254365832
+  },
+  {
+    "m_exploration": 51794,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 66784.717,
+    "err": 0.0014474016177197329,
+    "success_rate": 0.465,
+    "loss": 0.0014474016177197329
+  },
+  {
+    "m_exploration": 62505,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 73902.271,
+    "err": 0.0014144000735030562,
+    "success_rate": 0.458,
+    "loss": 0.0014144000735030562
+  },
+  {
+    "m_exploration": 62505,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 75139.551,
+    "err": 0.001430202090044641,
+    "success_rate": 0.438,
+    "loss": 0.001430202090044641
+  },
+  {
+    "m_exploration": 62505,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 74727.04,
+    "err": 0.0014529959168481461,
+    "success_rate": 0.461,
+    "loss": 0.0014529959168481461
+  },
+  {
+    "m_exploration": 75431,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 82996.998,
+    "err": 0.0014377864509902407,
+    "success_rate": 0.435,
+    "loss": 0.0014377864509902407
+  },
+  {
+    "m_exploration": 75431,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 83905.325,
+    "err": 0.001379526419906433,
+    "success_rate": 0.476,
+    "loss": 0.001379526419906433
+  },
+  {
+    "m_exploration": 75431,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 83021.006,
+    "err": 0.0013805665333879917,
+    "success_rate": 0.428,
+    "loss": 0.0013805665333879917
+  },
+  {
+    "m_exploration": 91029,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 93916.397,
+    "err": 0.0015011319510152923,
+    "success_rate": 0.416,
+    "loss": 0.0015011319510152923
+  },
+  {
+    "m_exploration": 91029,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 93862.178,
+    "err": 0.00146203860769391,
+    "success_rate": 0.456,
+    "loss": 0.00146203860769391
+  },
+  {
+    "m_exploration": 91029,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 93925.063,
+    "err": 0.0015539994971563696,
+    "success_rate": 0.421,
+    "loss": 0.0015539994971563696
+  },
+  {
+    "m_exploration": 109854,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 109854,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 109854,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 132571,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 132571,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 132571,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 159985,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 159985,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 159985,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 193069,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 193069,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 193069,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 232995,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 232995,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 232995,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 281176,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 281176,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 281176,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 339322,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 339322,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 339322,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 409491,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 409491,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 409491,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 494171,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 494171,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 494171,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 596362,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 596362,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 596362,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 719685,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 719685,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 719685,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 868511,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 868511,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 868511,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1048113,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1048113,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1048113,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1264855,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1264855,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1264855,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1526417,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1526417,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1526417,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1842069,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1842069,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 1842069,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 2222996,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 2222996,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 2222996,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 2682695,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 2682695,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 2682695,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 3237457,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 3237457,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 3237457,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 3906939,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 3906939,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 3906939,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 4714866,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 4714866,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 4714866,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 5689866,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 5689866,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 5689866,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 6866488,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 6866488,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 6866488,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 8286427,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 8286427,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 8286427,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 10000000,
+    "safeguard": 0.8,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 10000000,
+    "safeguard": 0.9,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  },
+  {
+    "m_exploration": 10000000,
+    "safeguard": 0.95,
+    "budget": 100000,
+    "mean_budget": 100000.0,
+    "err": Infinity,
+    "success_rate": 0.0,
+    "loss": Infinity
+  }
+]

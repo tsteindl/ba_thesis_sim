@@ -49,6 +49,9 @@ def find_phi_fixed_budget_binary_search(rng, phi, phi_max, phi_min, m_exploratio
     N_max = max(np.pi//(2*phi_min), 1)
     N = max(1, N_min)
     
+    if m_exploration * N > budget:
+        return np.inf, budget
+    
     phi_hat = simulate_errors(rng, phi, m_exploration, N)
     budget_used = m_exploration * N
     
@@ -166,6 +169,9 @@ def find_phi_fixed_budget_binary_search_anneal_m(rng, phi, phi_max, phi_min, m_e
     
     max_b_steps = np.ceil(np.log2(N_max - N_min)) - max_b_steps_sub
     
+    if m_exploration * N > budget:
+        return np.inf, budget
+    
     phi_hat = simulate_errors(rng, phi, m_exploration, N)
     budget_used = m_exploration * N
     
@@ -224,4 +230,116 @@ def find_phi_fixed_budget_binary_search_anneal_m(rng, phi, phi_max, phi_min, m_e
     phi_hat = simulate_errors(rng, phi, m, N)
     budget_used += m * N
     
+    return phi_hat, budget_used
+
+def find_phi_binary_search_delayed(rng, phi, phi_max, phi_min, m_exploration, m_exploitation,
+                                                 m_reference=100, lookback_window=1, safeguard=1, conf=0.95):
+    N_min = max(int(np.pi // (2 * phi_max)), 1)
+    N_max = max(int(np.pi // (2 * phi_min)), 1)
+
+    phi_hat_list = []
+    N_history = []
+    budget_used = 0
+
+    lb = N_min
+    ub = N_max
+    
+    # high-m reference probe at N_min
+    phi_ref = simulate_errors(rng, phi, m_reference, N_min)
+    budget_used += N_min * m_reference
+    phi_hat_list.append(phi_ref)
+    N_history.append(N_min)
+    phi_1 = norm.ppf(1 - conf, phi_ref, np.sqrt(1 / (4 * m_reference * N_min**2)))
+
+    N = N_min + (ub - N_min) // 2
+
+    done = False
+    while not done:
+        phi_hat = simulate_errors(rng, phi, m_exploration, N)
+        budget_used += N * m_exploration
+        phi_hat_list.append(phi_hat)
+        N_history.append(N)
+        temp_N = N
+
+        recent = phi_hat_list[-lookback_window:]
+        is_overshot = (len(phi_hat_list) >= lookback_window + 1 and
+                       all(r < phi_1 for r in recent))
+
+        if is_overshot:
+            ub = N_history[-lookback_window]
+            N = lb + (ub - lb) // 2
+        else:
+            lb = N
+            N += (ub - N) // 2
+
+        if ub < lb or temp_N == N or N < N_min or N > N_max:
+            done = True
+
+    N = max(lb - safeguard, 1)
+
+    phi_hat = simulate_errors(rng, phi, m_exploitation, N)
+    budget_used += m_exploitation * N
+
+    return phi_hat, budget_used
+
+
+def find_phi_fixed_budget_binary_search_delayed(rng, phi, phi_max, phi_min, m_exploration, budget,
+                                                 m_reference=100, lookback_window=1, safeguard=1, conf=0.95):
+    N_min = max(int(np.pi // (2 * phi_max)), 1)
+    N_max = max(int(np.pi // (2 * phi_min)), 1)
+
+    phi_hat_list = []
+    N_history = []
+    budget_used = 0
+
+    lb = N_min
+    ub = N_max
+    
+         
+    if m_reference * N_min > budget:
+        return np.inf, budget
+
+    # high-m reference probe at N_min
+    phi_ref = simulate_errors(rng, phi, m_reference, N_min)
+    budget_used += N_min * m_reference
+    phi_hat_list.append(phi_ref)
+    N_history.append(N_min)
+    phi_1 = norm.ppf(1 - conf, phi_ref, np.sqrt(1 / (4 * m_reference * N_min**2)))
+
+    N = N_min + (ub - N_min) // 2
+
+    done = False
+    while not done:
+        phi_hat = simulate_errors(rng, phi, m_exploration, N)
+        budget_used += N * m_exploration
+        phi_hat_list.append(phi_hat)
+        N_history.append(N)
+        temp_N = N
+
+        recent = phi_hat_list[-lookback_window:]
+        is_overshot = (len(phi_hat_list) >= lookback_window + 1 and
+                       all(r < phi_1 for r in recent))
+
+        if is_overshot:
+            ub = N_history[-lookback_window]
+            N = lb + (ub - lb) // 2
+        else:
+            lb = N
+            N += (ub - N) // 2
+
+        if ub < lb or temp_N == N or N < N_min or N > N_max or budget_used >= budget:
+            done = True
+
+    remaining_budget = budget - budget_used
+    if remaining_budget <= 0:
+        return phi_hat_list[-1], budget_used
+
+    N = max(lb - safeguard, 1)
+    m = int(remaining_budget / N)
+    if m <= 0:
+        return phi_hat_list[-1], budget_used
+
+    phi_hat = simulate_errors(rng, phi, m, N)
+    budget_used += m * N
+
     return phi_hat, budget_used

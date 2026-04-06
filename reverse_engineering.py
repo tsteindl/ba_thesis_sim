@@ -27,6 +27,9 @@ def find_phi_reverse_engineering(rng, phi, phi_max, phi_min, m_exploration=50, m
 def find_phi_fixed_budget_reverse_engineering(rng, phi, phi_max, phi_min, m_exploration, budget, safeguard=0.9):
     N_min = max(np.pi//(2*phi_max), 1)
     
+    if m_exploration * N_min > budget:
+        return np.inf, budget
+    
     phi_hat = 0
 
     while phi_hat == 0:
@@ -36,7 +39,7 @@ def find_phi_fixed_budget_reverse_engineering(rng, phi, phi_max, phi_min, m_expl
     N = int(np.pi//(2*phi_hat)*safeguard)
     
     remaining_budget = budget - budget_used
-    if remaining_budget <= 0:
+    if remaining_budget <= 0 or N <= 1:
         return phi_hat, budget_used
     
     m = int(remaining_budget/N)

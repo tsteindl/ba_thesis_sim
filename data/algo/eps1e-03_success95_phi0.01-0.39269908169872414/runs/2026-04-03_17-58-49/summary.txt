@@ -1,0 +1,9 @@
+=== Grid search summary ===
+Total runtime          : 3.91 minutes
+Total configurations: 600
+Candidates ≥ 0.95: 0
+
+Best by loss:
+{'m_exploration': 126, 'safeguard': 2, 'budget': 100000, 'conf': 0.5, 'mean_budget': 100078.543, 'err': 0.0008139326649690504, 'success_rate': 0.745, 'loss': 0.0008139326649690504}
+
+No configuration met success threshold.
