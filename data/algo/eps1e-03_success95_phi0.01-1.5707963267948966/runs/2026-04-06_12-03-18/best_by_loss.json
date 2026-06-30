@@ -1,12 +1,3 @@
-{
-  "m_exploration": 40,
-  "safeguard": 5,
-  "budget": 10000,
-  "conf": 0.8,
-  "max_b_steps_sub": 3,
-  "delta": 4,
-  "mean_budget": 10284.882,
-  "err": 0.0116520294272271,
-  "success_rate": 0.112,
-  "loss": 0.0116520294272271
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:a8db6349c7a6c1b7a0bc9f43880e80f69d5bd72583c4e548583a02dc00a263b5
+size 227

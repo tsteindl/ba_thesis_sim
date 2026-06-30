@@ -1,12 +1,3 @@
-{
-  "m_exploration": 100,
-  "m_exploitation": 4641,
-  "m_reference": 1000,
-  "lookback_window": 1,
-  "conf": 0.5,
-  "safeguard": 2,
-  "mean_budget": 172211.398,
-  "err": 0.0003363521364320392,
-  "success_rate": 0.956,
-  "loss": 0.017557491936432038
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:3a985032aae3ad556af97b5b3418a1850938811c9f624b18ddff3b29eec7f375
+size 250
