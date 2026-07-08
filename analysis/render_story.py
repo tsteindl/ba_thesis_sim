@@ -165,15 +165,17 @@ def fig_story_small(cube, curves):
                     color="crimson", ha="center", fontsize=10, fontweight="bold",
                     bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.85))
         eps_tag = EPS_TAG[s.split("eps=")[1]]
-        ax.set(xscale="log", ylim=(28, 103), xlabel="budget  $C = N\\cdot m$  (log scale)",
-               title=f"$\\phi\\sim U(0.01, 0.1)$,  ε = {eps_tag}")
+        ax.set(xscale="log", ylim=(28, 103))
+        ax.set_title(f"$\\phi\\sim U(0.01, 0.1)$,  ε = {eps_tag}", fontsize=16)
+        ax.set_xlabel("budget  $C = N\\cdot m$  (log scale)", fontsize=16)
+
         if i == 0:
-            ax.set_ylabel("% of trials converged  ($|\\hat\\phi-\\phi|<\\varepsilon$)")
+            ax.set_ylabel("% of trials converged  ($|\\hat\\phi-\\phi|<\\varepsilon$)", fontsize=16)
         ax.legend(fontsize=8.5, loc="lower right")
     # fig.suptitle("Adaptive estimation reaches the same reliability at lower budget — the advantage opens up "
                 #  "as precision tightens (de-biased, R = 40,000 trials/point; arrow = budget ratio at 90%)", fontsize=10.5)
     fig.suptitle("Budet comparison (log-scaled) between adaptive and baseline strategies for increasing precision $\\epsilon$"
-                 " (R = 40,000 trials/point)", fontsize=16)
+                 " (R = 40,000 trials/point)", fontsize=18)
     # fig.text(0.5, 0.005, "Budget is log-scaled, so the small horizontal shift between curves is a "
             #  "multiplicative factor (the labelled arrow), not a small additive gap.",
             #  ha="center", fontsize=8.5, style="italic", color="0.35")
@@ -284,15 +286,17 @@ def fig_error_small():
             ax.fill_between(d.budget, d.err_p25, d.err_p75, color=COL[a], alpha=0.16, linewidth=0)
         ax.axhline(eps, color="k", ls="--", lw=1.0)
         ax.text(d0.budget.min(), eps * 1.15, "ε (converged below)", fontsize=7.5, va="bottom")
-        ax.set(xscale="log", yscale="log", xlabel="budget  $C = N\\cdot m$",
-               title=f"$\\phi \\sim U(0.01, 0.1)$,  ε = {EPS_TAG[s.split('eps=')[1]]}")
+        ax.set(xscale="log", yscale="log")
+        ax.set_title(f"$\\phi \\sim U(0.01, 0.1)$,  ε = {EPS_TAG[s.split('eps=')[1]]}", fontsize=16)
+        
+        ax.set_xlabel("budget  $C = N\\cdot m$", fontsize=16)
         if i % ncol == 0:
-            ax.set_ylabel("error $|\\hat\\phi-\\phi|$  (median, 25–75%)")
+            ax.set_ylabel("error $|\\hat\\phi-\\phi|$  (median, 25–75%)", fontsize=16)
         ax.legend(fontsize=7.5, loc="upper right")
     for j in range(len(settings), len(axflat)):
         axflat[j].axis("off")
     fig.suptitle("Estimator error and its uncertainty vs budget. "
-                 "(band = 25–75% over $\\phi$ draws, R = 40,000 trials/point)", fontsize=16)
+                 "(band = 25–75% over $\\phi$ draws, R = 40,000 trials/point)", fontsize=18)
     fig.tight_layout()
     fig.savefig("results/fig_error_small.png"); plt.close(fig)
     print("wrote results/fig_error_small.png")

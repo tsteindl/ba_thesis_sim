@@ -19,13 +19,11 @@ def set_method(method):
 
 
 def simulate(rng, phi, m, n, n_simulations=1):
-    """Original per-shot sampler: m Bernoulli draws with success prob cos^2(n*phi)."""
     shots_mat = rng.random([n_simulations, m]) < np.cos(n * phi) ** 2
     return shots_mat[0] if n_simulations == 1 else shots_mat
 
 
 def simulate_errors(rng, phi, m, N, n_simulations=1, method=None):
-    """Return the inversion estimate phi_hat from m shots at N phase gates."""
     N = max(N, 1)
     method = method or DEFAULT_METHOD
 

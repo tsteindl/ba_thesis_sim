@@ -37,33 +37,68 @@ def table32(cube):
     return out
 
 
-LTX = {"separable": r"Separable ($N=1$)", "brute": "Brute force", "linear": "Linear search",
-       "binary": "Binary search", "reverse_eng": "Reverse engineering"}
+REF = {"brute": r"A. \ref{alg:brute-force}: Brute force",
+       "linear": r"A. \ref{alg:linear-search}: Linear search",
+       "binary": r"A. \ref{alg:binary-search}: Binary search",
+       "reverse_eng": r"A. \ref{alg:reverse-engineering}: Reverse Engineering"}
+T32_HEAD = [(r"\epsilon=10^{-3}", r"\mathcal{U}(0.01,0.1)"), (r"\epsilon=10^{-4}", r"\mathcal{U}(0.01,0.1)"),
+            (r"\epsilon=10^{-4}", r"\mathcal{U}(0.001,0.01)"), (r"\epsilon=10^{-4}", r"\mathcal{U}(0.001,0.1)")]
 
 
-def latex_31(res):
-    rows = [r"\begin{tabular}{lcc}", r"\toprule", r"Algorithm & paper & this work \\", r"\midrule"]
-    for algo in tables.ALGOS:
-        d = res[("narrow", algo)]
-        rows.append(f"{LTX[algo]} & {d['paper']}\\% & {d.get('unbiased', d.get('debiased')):.1f}\\% \\\\")
-    return "\n".join(rows + [r"\bottomrule", r"\end{tabular}"])
+def _n(x):
+    return f"{x:,.0f}".replace(",", "{,}")
+
+
+def latex_31(res, t32):
+    """tab:summary-low-prec — % converged @10k and budget-to-90%, U(0.01,0.1), eps=1e-3."""
+    bc = res[("narrow", "brute")]["unbiased"]
+    L = [r"\begin{table}[ht]", r"\centering",
+         r"\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for "
+         r"$\phi\sim\mathcal{U}(0.01,0.1)$: average share of simulations that converge "
+         r"($|\phi-\hat\phi|<\epsilon$), and budget needed for $>90\%$ convergence.}",
+         r"\label{tab:summary-low-prec}", r"\begin{tabular}{lcc}", r"\toprule",
+         r"Algorithm",
+         r"& \makecell{Avg. \% converged \\ (budget = 10{,}000) \\ (\texttimes factor vs baseline)}",
+         r"& \makecell{Budget for $>90\%$ \\ convergence \\ (\texttimes factor vs baseline)} \\",
+         r"\midrule", ""]
+    for algo in ["brute", "linear", "binary", "reverse_eng"]:
+        conv = res[("narrow", algo)].get("unbiased", res[("narrow", algo)].get("debiased"))
+        bud, ratio = t32[("eps1e-3 U(0.01,0.1)", algo)]
+        L.append(f"{REF[algo]}\n& {conv:.2f}\\% (\\texttimes {conv / bc:.3f})\n"
+                 f"& {_n(bud)} (\\texttimes {ratio:.2f}) \\\\")
+        L.append("")
+    sc = res[("narrow", "separable")]["unbiased"]
+    sb, sr = t32[("eps1e-3 U(0.01,0.1)", "separable")]
+    L.append(f"Separable protocol ($N=1$)\n& {sc:.1f}\\% (\\texttimes {sc / bc:.3f})\n"
+             f"& {_n(sb)} (\\texttimes {sr:.3f}) \\\\")
+    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    return "\n".join(L)
 
 
 def latex_32(t32):
-    heads = [r"$\varepsilon{=}10^{-3}$, $\mathcal{U}(0.01,0.1)$", r"$\varepsilon{=}10^{-4}$, $\mathcal{U}(0.01,0.1)$",
-             r"$\varepsilon{=}10^{-4}$, $\mathcal{U}(0.001,0.01)$", r"$\varepsilon{=}10^{-4}$, $\mathcal{U}(0.001,0.1)$"]
-    rows = [r"\begin{tabular}{lrrrr}", r"\toprule", "Algorithm & " + " & ".join(heads) + r" \\", r"\midrule"]
+    """tab:summary-all — budget-to-90% across the four eps/prior columns."""
+    heads = ["Algorithm"]
+    for eps, mu in T32_HEAD:
+        heads.append(f"& \\makecell{{Budget\\\\ ($>90\\%$ conv.) \\\\ (\\texttimes factor vs baseline) "
+                     f"\\\\ ${eps}$ \\\\ $\\phi \\sim {mu}$}}")
+    L = [r"\begin{table}[ht]", r"\centering",
+         r"\caption{Budget for $>90\%$ convergence across precisions and priors (\texttimes factor vs the "
+         r"brute-force baseline; $>1$ means less budget needed).}",
+         r"\label{tab:summary-all}", r"\begin{tabular}{l c c c c}", r"\toprule",
+         "\n".join(heads) + r" \\", r"\midrule", ""]
     for algo in ["brute", "linear", "binary", "reverse_eng"]:
         cells = []
         for lbl, _ in T32_COLS:
             v = t32[(lbl, algo)]
-            if v is None:
-                cells.append("--")
-            else:
-                num = f"{v[0]:,.0f}".replace(",", "{,}")
-                cells.append(num if algo == "brute" else num + f"\\,($\\times${v[1]:.2f})")
-        rows.append(f"{LTX[algo]} & " + " & ".join(cells) + r" \\")
-    return "\n".join(rows + [r"\bottomrule", r"\end{tabular}"])
+            cells.append("--" if v is None else f"{_n(v[0])} (\\texttimes {v[1]:.2f})")
+        L.append(f"{REF[algo]}\n& " + "\n& ".join(cells) + r" \\")
+        L.append("")
+    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    return "\n".join(L)
+
+
+LTX = {"brute": "Brute force", "linear": "Linear search", "binary": "Binary search",
+       "reverse_eng": "Reverse engineering"}
 
 
 def latex_33(res):
@@ -216,9 +251,9 @@ def main():
 
     # ---------- paste-ready LaTeX ----------
     w("## LaTeX (paste-ready)\n")
-    w("**Table 3.1**\n```latex\n" + latex_31(res) + "\n```\n")
-    w("**Table 3.2**\n```latex\n" + latex_32(t32) + "\n```\n")
-    w("**Table 3.3**\n```latex\n" + latex_33(res) + "\n```")
+    w("**Table `tab:summary-low-prec` (Table 3.1 + budget)**\n```latex\n" + latex_31(res, t32) + "\n```\n")
+    w("**Table `tab:summary-all` (Table 3.2)**\n```latex\n" + latex_32(t32) + "\n```\n")
+    w("**Table 3.3 (broad distributions)**\n```latex\n" + latex_33(res) + "\n```")
 
     os.makedirs("results", exist_ok=True)
     with open("results/RESULTS.md", "w") as f:

@@ -77,36 +77,88 @@ The advantage climbs from ~1.2× (ε=10⁻³) and **plateaus at ~1.72×** from �
 - **Regenerate:** `python analysis/extensive_sweep.py` (budget sweep) → `python analysis/error_curves.py` → `python analysis/render_story.py` (figures) → `python analysis/make_results.py` (this file).
 ## LaTeX (paste-ready)
 
-**Table 3.1**
+**Table `tab:summary-low-prec` (Table 3.1 + budget)**
 ```latex
+\begin{table}[ht]
+\centering
+\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: average share of simulations that converge ($|\phi-\hat\phi|<\epsilon$), and budget needed for $>90\%$ convergence.}
+\label{tab:summary-low-prec}
 \begin{tabular}{lcc}
 \toprule
-Algorithm & paper & this work \\
+Algorithm
+& \makecell{Avg. \% converged \\ (budget = 10{,}000) \\ (\texttimes factor vs baseline)}
+& \makecell{Budget for $>90\%$ \\ convergence \\ (\texttimes factor vs baseline)} \\
 \midrule
-Separable ($N=1$) & 15.9\% & 15.7\% \\
-Brute force & 56.3\% & 56.2\% \\
-Linear search & 14.0\% & 56.6\% \\
-Binary search & 11.5\% & 47.5\% \\
-Reverse engineering & 61.3\% & 60.3\% \\
+
+A. \ref{alg:brute-force}: Brute force
+& 56.18\% (\texttimes 1.000)
+& 45{,}868 (\texttimes 1.00) \\
+
+A. \ref{alg:linear-search}: Linear search
+& 56.57\% (\texttimes 1.007)
+& 43{,}218 (\texttimes 1.06) \\
+
+A. \ref{alg:binary-search}: Binary search
+& 47.50\% (\texttimes 0.846)
+& 58{,}396 (\texttimes 0.79) \\
+
+A. \ref{alg:reverse-engineering}: Reverse Engineering
+& 60.35\% (\texttimes 1.074)
+& 37{,}197 (\texttimes 1.23) \\
+
+Separable protocol ($N=1$)
+& 15.7\% (\texttimes 0.280)
+& 683{,}132 (\texttimes 0.067) \\
 \bottomrule
 \end{tabular}
+\end{table}
 ```
 
-**Table 3.2**
+**Table `tab:summary-all` (Table 3.2)**
 ```latex
-\begin{tabular}{lrrrr}
+\begin{table}[ht]
+\centering
+\caption{Budget for $>90\%$ convergence across precisions and priors (\texttimes factor vs the brute-force baseline; $>1$ means less budget needed).}
+\label{tab:summary-all}
+\begin{tabular}{l c c c c}
 \toprule
-Algorithm & $\varepsilon{=}10^{-3}$, $\mathcal{U}(0.01,0.1)$ & $\varepsilon{=}10^{-4}$, $\mathcal{U}(0.01,0.1)$ & $\varepsilon{=}10^{-4}$, $\mathcal{U}(0.001,0.01)$ & $\varepsilon{=}10^{-4}$, $\mathcal{U}(0.001,0.1)$ \\
+Algorithm
+& \makecell{Budget\\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-3}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget\\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-4}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget\\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-4}$ \\ $\phi \sim \mathcal{U}(0.001,0.01)$}
+& \makecell{Budget\\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-4}$ \\ $\phi \sim \mathcal{U}(0.001,0.1)$} \\
 \midrule
-Brute force & 45{,}868 & 4{,}504{,}343 & 440{,}367 & 4{,}516{,}936 \\
-Linear search & 43{,}218\,($\times$1.06) & 3{,}135{,}633\,($\times$1.44) & 416{,}087\,($\times$1.06) & 3{,}451{,}483\,($\times$1.31) \\
-Binary search & 58{,}396\,($\times$0.79) & 3{,}436{,}485\,($\times$1.31) & 800{,}957\,($\times$0.55) & 4{,}941{,}085\,($\times$0.91) \\
-Reverse engineering & 37{,}197\,($\times$1.23) & 2{,}890{,}389\,($\times$1.56) & 362{,}887\,($\times$1.21) & 2{,}911{,}267\,($\times$1.55) \\
+
+A. \ref{alg:brute-force}: Brute force
+& 45{,}868 (\texttimes 1.00)
+& 4{,}504{,}343 (\texttimes 1.00)
+& 440{,}367 (\texttimes 1.00)
+& 4{,}516{,}936 (\texttimes 1.00) \\
+
+A. \ref{alg:linear-search}: Linear search
+& 43{,}218 (\texttimes 1.06)
+& 3{,}135{,}633 (\texttimes 1.44)
+& 416{,}087 (\texttimes 1.06)
+& 3{,}451{,}483 (\texttimes 1.31) \\
+
+A. \ref{alg:binary-search}: Binary search
+& 58{,}396 (\texttimes 0.79)
+& 3{,}436{,}485 (\texttimes 1.31)
+& 800{,}957 (\texttimes 0.55)
+& 4{,}941{,}085 (\texttimes 0.91) \\
+
+A. \ref{alg:reverse-engineering}: Reverse Engineering
+& 37{,}197 (\texttimes 1.23)
+& 2{,}890{,}389 (\texttimes 1.56)
+& 362{,}887 (\texttimes 1.21)
+& 2{,}911{,}267 (\texttimes 1.55) \\
+
 \bottomrule
 \end{tabular}
+\end{table}
 ```
 
-**Table 3.3**
+**Table 3.3 (broad distributions)**
 ```latex
 \begin{tabular}{lrrrr}
 \toprule
