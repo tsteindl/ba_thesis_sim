@@ -25,18 +25,46 @@ PAPER_RC = {
 }
 plt.rcParams.update(PAPER_RC)
 
-# consistent per-algorithm identity across every figure/table
-ALGOS = ["brute", "separable", "linear", "binary", "reverse_eng"]
-ADAPT = ["linear", "binary", "reverse_eng"]
+# consistent per-algorithm identity across every figure/table. The statistical-safeguard variants
+# reuse their parent algorithm's hue and marker and are separated by a dashed line + open marker,
+# so identity stays with the algorithm and no new categorical hue is introduced.
+ALGOS = ["brute", "separable", "linear", "binary_risk", "reverse_eng_risk", "oracle_hl"]
+ADAPT = ["linear", "binary_risk", "reverse_eng_risk"]
 NICE = {"brute": "Brute force (baseline)", "separable": "Separable (N=1)",
         "linear": "Linear search", "binary": "Binary search",
-        "reverse_eng": "Reverse engineering", "best_adaptive": "Best adaptive"}
+        "reverse_eng": "Reverse engineering", "best_adaptive": "Best adaptive",
+        "best_adaptive_const": "Best adaptive (tuned safeguard)",
+        "binary_risk": "Binary search", "reverse_eng_risk": "Reverse engineering",
+        "oracle": "Oracle ($N_{opt}$, knows $\\phi$)",
+        "oracle_alias": "Oracle, no safeguard ($N=\\lfloor\\pi/2\\phi\\rfloor$)",
+        "oracle_hl": "Attainable ceiling (best depth, Eq. 3.4 law)"}
 COL = {"brute": "#7f7f7f", "separable": "#8c564b", "linear": "#2ca02c",
-       "binary": "#ff7f0e", "reverse_eng": "#1f77b4"}
-MARK = {"brute": "o", "separable": "v", "linear": "^", "binary": "D", "reverse_eng": "s"}
+       "binary": "#ff7f0e", "reverse_eng": "#1f77b4",
+       "binary_risk": "#ff7f0e", "reverse_eng_risk": "#1f77b4",
+       "oracle": "#000000", "oracle_alias": "#9467bd", "oracle_hl": "#d62728"}
+MARK = {"brute": "o", "separable": "v", "linear": "^", "binary": "D", "reverse_eng": "s",
+        "binary_risk": "D", "reverse_eng_risk": "s", "oracle": "*", "oracle_alias": "P",
+        "oracle_hl": "X"}
+RISK = ()
+# the omniscient ceilings are bounds, not protocols: drawn as a dotted envelope, never as a
+# competitor, so a reader cannot mistake them for something implementable
+CEIL = ("oracle_hl",)
 HEAD = "U(0.01,0.1), eps=1e-04"        # headline operating point
+HEAD_ALGO = "reverse_eng_risk"         # algorithm the budget-ratio arrow in fig_story points at
 OP = 90                                # headline threshold (%)
-EPS_TAG = {"1e-03": "10⁻³", "1e-04": "10⁻⁴", "1e-05": "10⁻⁵",
+
+
+def _style(a, alpha):
+    """Line style for algorithm `a`: hue = identity, dash + open marker = statistical safeguard,
+    dotted + thin = an omniscient ceiling rather than a runnable protocol."""
+    if a in CEIL:
+        return dict(marker=MARK[a], ls=":", color=COL[a], label=NICE[a], alpha=min(alpha, 0.9),
+                    lw=1.3, markersize=5 if a == "oracle_alias" else 7)
+    return dict(marker=MARK[a], ls="--" if a in RISK else "-", color=COL[a], label=NICE[a],
+                alpha=alpha, markerfacecolor="none" if a in RISK else COL[a])
+
+
+EPS_TAG ={"1e-03": "10⁻³", "1e-04": "10⁻⁴", "1e-05": "10⁻⁵",
            "1e-06": "10⁻⁶", "1e-07": "10⁻⁷", "1e-08": "10⁻⁸"}
 ALL_EPS = ["1e-03", "1e-04", "1e-05", "1e-06", "1e-07", "1e-08"]
 
@@ -74,7 +102,7 @@ def table_A(cube, out):
 
 def table_B(cube, out):
     print("\n## Table B — the main lever is precision ($\\phi\\sim U(0.01,0.1)$, reach 90%)\n", file=out)
-    print("| Precision ε | Linear | Binary | Reverse eng. |\n|---|---:|---:|---:|", file=out)
+    print("| Precision ε | " + " | ".join(NICE[a] for a in ADAPT) + " |\n|---|" + "---:|" * len(ADAPT), file=out)
     for tag in _eps_tags_present(cube):
         s = f"U(0.01,0.1), eps={tag}"
         cells = []
@@ -115,12 +143,11 @@ def fig_story(cube, curves):
         for a in ALGOS:
             x, y = _curve(curves, s, a)
             if len(x):
-                ax.plot(x, y, MARK[a] + "-", color=COL[a], label=NICE[a],
-                        alpha=0.95 if a in ("brute", "reverse_eng") else 0.55)
+                ax.plot(x, y, **_style(a, 0.95 if a in ("brute", "reverse_eng_risk") else 0.55))
         ax.axhline(OP, color="k", ls=":", lw=0.8)
         # horizontal budget-ratio arrow at the 90% line: reverse-eng crossing <-> brute crossing
         bb = cube[(cube.setting == s) & (cube.algo == "brute") & (cube.threshold_pct == OP)].budget_to_reach
-        ba = cube[(cube.setting == s) & (cube.algo == "reverse_eng") & (cube.threshold_pct == OP)].budget_to_reach
+        ba = cube[(cube.setting == s) & (cube.algo == HEAD_ALGO) & (cube.threshold_pct == OP)].budget_to_reach
         if len(bb) and len(ba) and bb.notna().all() and ba.notna().all():
             b0, a0 = float(bb.iloc[0]), float(ba.iloc[0])
             ax.annotate("", xy=(a0, OP), xytext=(b0, OP),
@@ -151,12 +178,11 @@ def fig_story_small(cube, curves):
         for a in ALGOS:
             x, y = _curve(curves, s, a)
             if len(x):
-                ax.plot(x, y, MARK[a] + "-", color=COL[a], label=NICE[a],
-                        alpha=0.95 if a in ("brute", "reverse_eng") else 0.55)
+                ax.plot(x, y, **_style(a, 0.95 if a in ("brute", "reverse_eng_risk") else 0.55))
         ax.axhline(OP, color="k", ls=":", lw=0.8)
         # horizontal budget-ratio arrow at the 90% line: reverse-eng crossing <-> brute crossing
         bb = cube[(cube.setting == s) & (cube.algo == "brute") & (cube.threshold_pct == OP)].budget_to_reach
-        ba = cube[(cube.setting == s) & (cube.algo == "reverse_eng") & (cube.threshold_pct == OP)].budget_to_reach
+        ba = cube[(cube.setting == s) & (cube.algo == HEAD_ALGO) & (cube.threshold_pct == OP)].budget_to_reach
         if len(bb) and len(ba) and bb.notna().all() and ba.notna().all():
             b0, a0 = float(bb.iloc[0]), float(ba.iloc[0])
             ax.annotate("", xy=(a0, OP), xytext=(b0, OP),
@@ -191,12 +217,15 @@ def fig_pareto(curves, setting=HEAD):
     for a in ALGOS:
         x, y = _curve(curves, setting, a)
         if len(x):
-            ax.plot(x, y, MARK[a] + "-", color=COL[a], label=NICE[a], alpha=0.85)
+            ax.plot(x, y, **_style(a, 0.85))
             interp[a] = np.interp(np.log(grid), np.log(x), y, left=y[0], right=y[-1])
-    # combined frontier = best convergence achievable at each budget, and who owns it
-    stack = np.vstack([interp[a] for a in ALGOS])
+    # combined frontier = best convergence achievable at each budget, and who owns it. The
+    # omniscient ceilings are plotted but excluded here: they would own the frontier everywhere and
+    # the strip is about which *implementable* protocol to choose.
+    present = [a for a in ALGOS if a in interp and a not in CEIL]
+    stack = np.vstack([interp[a] for a in present])
     front = stack.max(0)
-    owner = np.array(ALGOS)[stack.argmax(0)]
+    owner = np.array(present)[stack.argmax(0)]
     ax.plot(grid, front, "k--", lw=1.4, alpha=0.7, label="Pareto frontier (best)")
     ax.set(xscale="log", ylim=(28, 103), ylabel="% converged",
            title=f"Budget–convergence Pareto frontier   ({setting.replace('eps=1e-04','ε=10⁻⁴')}, R=40,000/point)")
@@ -239,8 +268,7 @@ def fig_error():
             d = d0[d0.algo == a].sort_values("budget")
             if not len(d):
                 continue
-            ax.plot(d.budget, d.err_p50, MARK[a] + "-", color=COL[a], label=NICE[a],
-                    alpha=0.95 if a in ("brute", "reverse_eng") else 0.6)
+            ax.plot(d.budget, d.err_p50, **_style(a, 0.95 if a in ("brute", "reverse_eng_risk") else 0.6))
             ax.fill_between(d.budget, d.err_p25, d.err_p75, color=COL[a], alpha=0.16, linewidth=0)
         ax.axhline(eps, color="k", ls="--", lw=1.0)
         ax.text(d0.budget.min(), eps * 1.15, "ε (converged below)", fontsize=7.5, va="bottom")
@@ -281,8 +309,7 @@ def fig_error_small():
             d = d0[d0.algo == a].sort_values("budget")
             if not len(d):
                 continue
-            ax.plot(d.budget, d.err_p50, MARK[a] + "-", color=COL[a], label=NICE[a],
-                    alpha=0.95 if a in ("brute", "reverse_eng") else 0.6)
+            ax.plot(d.budget, d.err_p50, **_style(a, 0.95 if a in ("brute", "reverse_eng_risk") else 0.6))
             ax.fill_between(d.budget, d.err_p25, d.err_p75, color=COL[a], alpha=0.16, linewidth=0)
         ax.axhline(eps, color="k", ls="--", lw=1.0)
         ax.text(d0.budget.min(), eps * 1.15, "ε (converged below)", fontsize=7.5, va="bottom")
@@ -307,12 +334,12 @@ def fig_precision(cube):
     tags = _eps_tags_present(cube)
     x = [int(t.split("e-")[1]) for t in tags]  # |exponent| so precision increases left -> right
     fig, ax = plt.subplots(figsize=(5.6, 4.2))
-    for a in ADAPT:
+    for a in ADAPT + list(CEIL):     # the ceilings turn "the advantage grows" into "grows towards X"
         y = []
         for tag in tags:
             row = cube[(cube.setting == f"U(0.01,0.1), eps={tag}") & (cube.algo == a) & (cube.threshold_pct == OP)]
             y.append(row.ratio_vs_brute.iloc[0] if len(row) and row.ratio_vs_brute.notna().all() else np.nan)
-        ax.plot(x, y, MARK[a] + "-", color=COL[a], label=NICE[a])
+        ax.plot(x, y, **_style(a, 0.95))
     ax.axhline(1.0, color="k", ls=":", lw=0.9)
     ax.text(x[0], 1.005, "brute-force parity", fontsize=8, color="k", va="bottom")
     ax.set(xticks=x, xticklabels=[EPS_TAG[t] for t in tags], xlabel="target precision ε  (→ finer)",

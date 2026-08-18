@@ -8,12 +8,23 @@ _All comparisons use the fixed-budget formulation: every algorithm is given the 
 |---|---:|---:|
 | Separable (N=1) | 15.9% | 15.7% |
 | Brute force | 56.3% | 56.2% |
-| Linear search | 14.0% | 56.6% |
-| Binary search | 11.5% | 47.5% |
-| Reverse Engineering | 61.3% | 60.3% |
+| Linear search | 14.0% | 56.5% |
+| Binary search | 11.5% | 63.2% |
+| Reverse Engineering | 61.3% | 66.3% |
+| Attainable ceiling (Eq. 3.4 at N_opt) | — | 73.5% |
 | _Reverse Eng. Lite (Alg. 7)_ | _29.6% @ ~2000_ | _29.3% (m'=150, m=40, budget ~3,876)_ |
 
 _Narrow-range linear/binary are much higher than the paper's stale 14.0% / 11.5%. RE-Lite is the one variable-budget algorithm still reported (Algorithm 7)._
+
+### Using the parameters as stated in the text (not re-tuned)
+
+| Algorithm | stated parameters | stated | grid-tuned | cost of not tuning |
+|---|---|---:|---:|---:|
+| Linear search | `m_exploration`=10, `lookback_window`=5, `safeguard`=1, `inc`=1 | 43.2% | 56.5% | -13.4 pp |
+| Binary search | `m_exploration`=100, `conf`=0.95 | 65.5% | 63.2% | +2.3 pp |
+| Reverse Engineering | `pilot_share`=0.02 | 64.8% | 66.3% | -1.4 pp |
+
+_Reverse engineering's exploration size is stated as a **share of the budget** (ρ = 2%, floor 20 shots) rather than a shot count, because a shot count can only be right at one budget. Over the 546 operating points of the full sweep the stated ρ costs −0.06 pp against tuning at every budget separately, while the previously stated m′ = 200 costs −5.55 pp (worst −99.4 pp) — see `results/tex/tab_pilot_share.tex` and `results/fig_pilot_share.png`. Budget 10,000 is the regime where ρ is least favourable (the pilot floor governs below B ≈ 400·N_min), so this row is close to the worst case._
 
 ## Table 3.2 — budget to reach 90% convergence  (fixed-budget, swept to the crossing)
 
@@ -23,9 +34,10 @@ _The budget is the **output**: we sweep the allocated per-estimation budget B an
 |---|---:|---:|---:|---:|
 | Brute force | 45,868 | 4,504,343 | 440,367 | 4,516,936 |
 | Separable (N=1) | 683,132 (×0.07) | 67,162,261 (×0.07) | — | 67,265,215 (×0.07) |
-| Linear search | 43,218 (×1.06) | 3,135,633 (×1.44) | 416,087 (×1.06) | 3,451,483 (×1.31) |
-| Binary search | 58,396 (×0.79) | 3,436,485 (×1.31) | 800,957 (×0.55) | 4,941,085 (×0.91) |
-| Reverse Engineering | 37,197 (×1.23) | 2,890,389 (×1.56) | 362,887 (×1.21) | 2,911,267 (×1.55) |
+| Linear search | 43,442 (×1.06) | 3,135,633 (×1.44) | 400,006 (×1.10) | 3,479,710 (×1.30) |
+| Binary search | 32,228 (×1.42) | 2,899,348 (×1.55) | 345,488 (×1.27) | 2,440,996 (×1.85) |
+| Reverse Engineering | 30,010 (×1.53) | 2,570,140 (×1.75) | 299,926 (×1.47) | 2,430,064 (×1.86) |
+| Attainable ceiling (Eq. 3.4 at N_opt) | 24,498 (×1.87) | 2,449,849 (×1.84) | 239,952 (×1.83) | 2,288,717 (×1.97) |
 
 > **Why fixed-budget and not the run-until-done formulation:** the paper's variable-budget Algorithm 6 uses a single exploitation count for all φ, so it over-spends on easy (small-φ) trials — its mean budget for 90% is *higher* than brute (≈6.3M vs 4.5M at ε=10⁻⁴). Committing the whole budget to the inferred depth (fixed-budget) is what realises the advantage; that is the formulation reported here and in Tables 3.1/3.3.
 
@@ -34,9 +46,9 @@ _The budget is the **output**: we sweep the allocated per-estimation budget B an
 | Algorithm | $\mathcal{U}(0.01, \pi/2)$ | $\mathcal{U}(0.01, \pi/4)$ | $\mathcal{U}(0.01, \pi/8)$ | $\mathcal{U}(0.01, \pi/16)$ |
 |---|---:|---:|---:|---:|
 | Brute force | 15.8% (15.9%) | 22.1% (20.4%) | 30.8% (31.3%) | 42.5% (43.3%) |
-| Linear search | 18.7% (20.8%) | 23.8% (24.4%) | 32.1% (34.3%) | 42.7% (46.6%) |
-| Binary search | 13.1% (16.3%) | 18.4% (21.3%) | 26.0% (30.4%) | 37.0% (39.3%) |
-| Reverse Engineering | 16.0% (17.4%) | 25.0% (22.3%) | 38.9% (39.7%) | 50.1% (51.8%) |
+| Linear search | 18.5% (20.8%) | 23.5% (24.4%) | 32.8% (34.3%) | 42.6% (46.6%) |
+| Binary search | 22.7% (16.3%) | 31.9% (21.3%) | 42.1% (30.4%) | 52.1% (39.3%) |
+| Reverse Engineering | 22.5% (17.4%) | 31.7% (22.3%) | 42.0% (39.7%) | 52.1% (51.8%) |
 
 _(this work vs paper). Paper adaptive numbers were grid maxima (winner's curse); de-biased they drop, but linear and reverse-engineering still beat brute for broad distributions._
 
@@ -46,9 +58,9 @@ Sweeping precision at φ ~ U(0.01, 0.1), reverse engineering's budget ratio at 9
 
 | ε | 10⁻3 | 10⁻4 | 10⁻5 | 10⁻6 | 10⁻7 | 10⁻8 |
 |---|---:|---:|---:|---:|---:|---:|
-| **budget ratio vs brute** | 1.23× | 1.56× | 1.72× | 1.72× | 1.72× | 1.72× |
+| **budget ratio vs brute** | 1.53× | 1.75× | 1.75× | 1.80× | 1.80× | 1.80× |
 
-The advantage climbs from ~1.2× (ε=10⁻³) and **plateaus at ~1.72×** from ε=10⁻⁵ down to 10⁻⁸ (Heisenberg-limited saturation). A tighter tolerance rewards the larger circuit depth N that the adaptive search selects.
+The advantage climbs from ~1.2× (ε=10⁻³) and **saturates from ε ≤ 10⁻⁶** — at ~1.76× for reverse engineering, with binary search drawing level there (~1.80× at the 90% threshold, but behind at 50%; the mean gap on the underlying curves is within one standard error, so neither leads). A tighter tolerance rewards the larger circuit depth N that the adaptive search selects, until the depth is capped by the prior support rather than by the budget.
 
 **Robust to the prior range.** Across dynamic ranges from U(0.01,0.1) down to U(10⁻⁵,0.01), the high-precision (ε≤10⁻⁵) advantage stays in a tight band (1.54–1.76×): it is **precision-driven, not range-driven** (under the uniform prior, a wide range down does not add much small-φ mass). At low precision (ε=10⁻³) in narrow ranges the adaptive edge disappears and brute is competitive.
 
@@ -77,97 +89,5 @@ The advantage climbs from ~1.2× (ε=10⁻³) and **plateaus at ~1.72×** from �
 - **Regenerate:** `python analysis/extensive_sweep.py` (budget sweep) → `python analysis/error_curves.py` → `python analysis/render_story.py` (figures) → `python analysis/make_results.py` (this file).
 ## LaTeX (paste-ready)
 
-**Table `tab:summary-low-prec` (Table 3.1 + budget)**
-```latex
-\begin{table}[ht]
-\centering
-\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: average share of simulations that converge ($|\phi-\hat\phi|<\epsilon$), and budget needed for $>90\%$ convergence.}
-\label{tab:summary-low-prec}
-\begin{tabular}{lcc}
-\toprule
-Algorithm
-& \makecell{Avg. \% converged \\ (budget = 10{,}000) \\ (\texttimes factor vs baseline)}
-& \makecell{Budget for $>90\%$ \\ convergence \\ (\texttimes factor vs baseline)} \\
-\midrule
+Every thesis table is emitted as its own `.tex` file by `python analysis/make_tex.py` into `results/tex/` (and collected in `results/TEX.md`), so there is exactly one place that knows the manuscript's table style. Variants ending in `_ci.tex` carry 95% confidence intervals; see `results/UNCERTAINTY.md` for what those intervals cover.
 
-A. \ref{alg:brute-force}: Brute force
-& 56.18\% (\texttimes 1.000)
-& 45{,}868 (\texttimes 1.00) \\
-
-A. \ref{alg:linear-search}: Linear search
-& 56.57\% (\texttimes 1.007)
-& 43{,}218 (\texttimes 1.06) \\
-
-A. \ref{alg:binary-search}: Binary search
-& 47.50\% (\texttimes 0.846)
-& 58{,}396 (\texttimes 0.79) \\
-
-A. \ref{alg:reverse-engineering}: Reverse Engineering
-& 60.35\% (\texttimes 1.074)
-& 37{,}197 (\texttimes 1.23) \\
-
-Separable protocol ($N=1$)
-& 15.7\% (\texttimes 0.280)
-& 683{,}132 (\texttimes 0.067) \\
-\bottomrule
-\end{tabular}
-\end{table}
-```
-
-**Table `tab:summary-all` (Table 3.2)**
-```latex
-\begin{table}[ht]
-\centering
-\caption{Budget for $>90\%$ convergence across precisions and priors (\texttimes factor vs the brute-force baseline; $>1$ means less budget needed).}
-\label{tab:summary-all}
-\begin{tabular}{l c c c c}
-\toprule
-Algorithm
-& \makecell{Budget\\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-3}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget\\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-4}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget\\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-4}$ \\ $\phi \sim \mathcal{U}(0.001,0.01)$}
-& \makecell{Budget\\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-4}$ \\ $\phi \sim \mathcal{U}(0.001,0.1)$} \\
-\midrule
-
-A. \ref{alg:brute-force}: Brute force
-& 45{,}868 (\texttimes 1.00)
-& 4{,}504{,}343 (\texttimes 1.00)
-& 440{,}367 (\texttimes 1.00)
-& 4{,}516{,}936 (\texttimes 1.00) \\
-
-A. \ref{alg:linear-search}: Linear search
-& 43{,}218 (\texttimes 1.06)
-& 3{,}135{,}633 (\texttimes 1.44)
-& 416{,}087 (\texttimes 1.06)
-& 3{,}451{,}483 (\texttimes 1.31) \\
-
-A. \ref{alg:binary-search}: Binary search
-& 58{,}396 (\texttimes 0.79)
-& 3{,}436{,}485 (\texttimes 1.31)
-& 800{,}957 (\texttimes 0.55)
-& 4{,}941{,}085 (\texttimes 0.91) \\
-
-A. \ref{alg:reverse-engineering}: Reverse Engineering
-& 37{,}197 (\texttimes 1.23)
-& 2{,}890{,}389 (\texttimes 1.56)
-& 362{,}887 (\texttimes 1.21)
-& 2{,}911{,}267 (\texttimes 1.55) \\
-
-\bottomrule
-\end{tabular}
-\end{table}
-```
-
-**Table 3.3 (broad distributions)**
-```latex
-\begin{tabular}{lrrrr}
-\toprule
-Algorithm & $\mathcal{U}(0.01, \pi/2)$ & $\mathcal{U}(0.01, \pi/4)$ & $\mathcal{U}(0.01, \pi/8)$ & $\mathcal{U}(0.01, \pi/16)$ \\
-\midrule
-Brute force & 15.8\% & 22.1\% & 30.8\% & 42.5\% \\
-Linear search & 18.7\% & 23.8\% & 32.1\% & 42.7\% \\
-Binary search & 13.1\% & 18.4\% & 26.0\% & 37.0\% \\
-Reverse engineering & 16.0\% & 25.0\% & 38.9\% & 50.1\% \\
-\bottomrule
-\end{tabular}
-```

@@ -1,0 +1,49 @@
+\begin{table}[ht]
+\centering
+\scriptsize
+\caption{Budget required to achieve $>90\%$ convergence for selected precision settings and prior intervals. Improvement factors are computed relative to the brute force baseline, with values larger than one indicating lower required budget. Bracketed values are $95\%$ confidence intervals on the improvement factor.}
+\label{tab:summary-all}
+\begin{tabular}{l c c c c}
+\toprule
+Algorithm
+& \makecell{Budget \\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-3}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget \\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-4}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget \\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-4}$ \\ $\phi \sim \mathcal{U}(0.001,0.01)$}
+& \makecell{Budget \\ ($>90\%$ conv.) \\ (\texttimes factor vs baseline) \\ $\epsilon=10^{-4}$ \\ $\phi \sim \mathcal{U}(0.001,0.1)$} \\
+\midrule
+A. \ref{alg:brute-force}: Brute force baseline
+& \makecell{45{,}868 (\texttimes 1.00) \\ {[1.00, 1.00]}}
+& \makecell{4{,}504{,}343 (\texttimes 1.00) \\ {[1.00, 1.00]}}
+& \makecell{440{,}367 (\texttimes 1.00) \\ {[1.00, 1.00]}}
+& \makecell{4{,}516{,}936 (\texttimes 1.00) \\ {[1.00, 1.00]}} \\
+
+A. \ref{alg:linear-search}: Linear search
+& \makecell{43{,}442 (\texttimes 1.06) \\ {[1.04, 1.08]}}
+& \makecell{3{,}135{,}633 (\texttimes 1.44) \\ {[1.40, 1.47]}}
+& \makecell{400{,}006 (\texttimes 1.10) \\ {[1.08, 1.12]}}
+& \makecell{3{,}479{,}710 (\texttimes 1.30) \\ {[1.27, 1.32]}} \\
+
+A. \ref{alg:binary-search}: Binary search (Eq.~\eqref{eq:risk-depth})
+& \makecell{32{,}228 (\texttimes 1.42) \\ {[1.39, 1.46]}}
+& \makecell{2{,}899{,}348 (\texttimes 1.55) \\ {[1.52, 1.59]}}
+& \makecell{345{,}488 (\texttimes 1.27) \\ {[1.25, 1.30]}}
+& \makecell{2{,}440{,}996 (\texttimes 1.85) \\ {[1.81, 1.90]}} \\
+
+A. \ref{alg:reverse-engineering}: Reverse Eng. (Eq.~\eqref{eq:risk-depth})
+& \makecell{30{,}010 (\texttimes 1.53) \\ {[1.50, 1.56]}}
+& \makecell{2{,}570{,}140 (\texttimes 1.75) \\ {[1.71, 1.79]}}
+& \makecell{299{,}926 (\texttimes 1.47) \\ {[1.43, 1.50]}}
+& \makecell{2{,}430{,}064 (\texttimes 1.86) \\ {[1.82, 1.90]}} \\
+
+\midrule
+\textit{Ceiling} (best depth, Eq.~\eqref{eq:risk-depth} law)
+& \makecell{24{,}498 (\texttimes 1.87) \\ {[1.83, 1.91]}}
+& \makecell{2{,}449{,}849 (\texttimes 1.84) \\ {[1.80, 1.88]}}
+& \makecell{239{,}952 (\texttimes 1.83) \\ {[1.79, 1.88]}}
+& \makecell{2{,}288{,}717 (\texttimes 1.97) \\ {[1.93, 2.02]}} \\
+
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize Every adaptive entry is de-biased: parameters are grid-tuned on seed 42 and the winning configuration is re-validated on the independent seed 2024 at $R=40{,}000$ trials.
+\end{table}

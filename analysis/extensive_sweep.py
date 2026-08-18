@@ -6,7 +6,7 @@ convergence-vs-budget curve and locate where it reaches p* in {50,80,90,95}%. Re
 ratio B_brute(p*)/B_algo(p*). Brute and separable are parameter-free.
 
 Writes results/story_{curves,cube,winners}.csv.
-    python analysis/extensive_sweep.py [--quick | --fine | --max]
+    python analysis/extensive_sweep.py [--quick | --fine | --max] [--resume]
 """
 import csv
 import os
@@ -16,6 +16,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from qmetrology import experiments as E
+from qmetrology.uncertainty import crossing
 from qmetrology.algorithms import (
     find_phi_fixed_budget_brute_force as BF,
     find_phi_fixed_budget_separable as SEP,
@@ -23,9 +24,12 @@ from qmetrology.algorithms import (
     find_phi_fixed_budget_binary_search as BIN,
     find_phi_fixed_budget_binary_search_anneal_m as BINA,
     find_phi_fixed_budget_reverse_engineering as RE,
+    find_phi_fixed_budget_binary_search_risk as BIN_R,
+    find_phi_fixed_budget_reverse_engineering_risk as RE_R,
 )
 
 QUICK = "--quick" in sys.argv
+RESUME = "--resume" in sys.argv   # skip scenarios already in results/story_cube.csv and append
 MAX = "--max" in sys.argv                                   # maxed grids + fineness + eps to 1e-8 + wild ranges
 FINE = MAX or ("--fine" in sys.argv) or ("--heavy" in sys.argv)  # FINER grids (same R), finer budgets, +eps=1e-6
 SEED_TUNE, SEED_TEST = 42, 2024
@@ -97,7 +101,12 @@ def grids(pmax, eps):
     conf = [0.5, 0.65, 0.8, 0.9, 0.95] if MAX else [0.5, 0.8, 0.9]
     binv = [(BIN, {"m_exploration": m_b, "safeguard": [0, 1, 2], "conf": conf}),
             (BINA, {"m_exploration": m_b, "safeguard": [1, 2] if MAX else [1], "conf": [0.8]})]
-    return {"linear": [(LIN, lin)], "reverse_eng": [(RE, re)], "binary": binv}
+    # statistical safeguard (qmetrology/safeguard.py): no safeguard axis to tune, only the
+    # exploration size (and, for binary, the overshoot confidence).
+    re_r = {"m_exploration": np.unique(np.geomspace(20, m_hi, nr).astype(int)), "eps_target": [eps]}
+    bin_r = {"m_exploration": m_b, "conf": conf, "eps_target": [eps]}
+    return {"linear": [(LIN, lin)], "reverse_eng": [(RE, re)], "binary": binv,
+            "reverse_eng_risk": [(RE_R, re_r)], "binary_risk": [(BIN_R, bin_r)]}
 
 
 def tune_winner(variants, budget, pmin, pmax, eps):
@@ -114,20 +123,6 @@ def tune_validate(variants, budget, pmin, pmax, eps):
     """Tune on seed 42, then evaluate the winning config on seed 2024; return its success rate."""
     fn, cfg = tune_winner(variants, budget, pmin, pmax, eps)
     return E.success_rate(fn, cfg, R_TEST, pmin, pmax, eps, SEED_TEST)
-
-
-def crossing(budgets, rates, T):
-    """Log-interpolated budget at which the curve first reaches rate T (nan if uncrossed)."""
-    b, r = np.asarray(budgets, float), np.asarray(rates, float)
-    if T <= r[0] or T > r[-1]:
-        return float("nan")
-    for i in range(1, len(r)):
-        if r[i] >= T:
-            if r[i] == r[i - 1]:
-                return float(b[i])
-            f = (T - r[i - 1]) / (r[i] - r[i - 1])
-            return float(np.exp(np.log(b[i - 1]) + f * (np.log(b[i]) - np.log(b[i - 1]))))
-    return float("nan")
 
 
 def _clean(cfg):
@@ -148,37 +143,50 @@ def run_scenario(pmin, pmax, eps):
     budgets = budget_grid(pmax, eps)
     G = grids(pmax, eps)
     print(f"\n=== {name}   N_min={n_min(pmax)}  budgets {budgets[0]:,}..{budgets[-1]:,} ({len(budgets)}) ===", flush=True)
-    curves, winners = {}, {}
-    # parameter-free baselines
+    curves, winners, spends = {}, {}, {}
+    # parameter-free baselines and the two omniscient ceilings (nothing to tune in either)
     curves["brute"] = np.array([E.success_rate(BF, {"budget": int(b)}, R_TEST, pmin, pmax, eps, SEED_TEST) for b in budgets])
     curves["separable"] = np.array([E.success_rate(SEP, {"budget": int(b)}, R_TEST, pmin, pmax, eps, SEED_TEST) for b in budgets])
     # tuned adaptive algorithms — keep the winning (fn, cfg) per budget so error_curves needn't re-tune
     for algo, variants in G.items():
-        rates, wins = [], []
+        rates, wins, sp = [], [], []
         for b in budgets:
             fn, cfg = tune_winner(variants, b, pmin, pmax, eps)
-            rates.append(E.success_rate(fn, cfg, R_TEST, pmin, pmax, eps, SEED_TEST))
+            # record the mean spend as well: the exploration phases are budget-capped, and
+            # results/budget_audit.csv is what demonstrates it point by point
+            rate, mean_spend = E.rate_and_budget(fn, cfg, R_TEST, pmin, pmax, eps, SEED_TEST)
+            rates.append(rate)
+            sp.append(mean_spend / float(b))
             wins.append((int(b), fn.__name__, _clean(cfg)))
         curves[algo] = np.array(rates)
         winners[algo] = wins
-        print(f"   {algo:12s} max={curves[algo].max():.3f}", flush=True)
-    return name, pmin, pmax, eps, budgets, curves, winners
+        spends[algo] = np.array(sp)
+        print(f"   {algo:12s} max={curves[algo].max():.3f}  worst spend={spends[algo].max():.3f}x", flush=True)
+    return name, pmin, pmax, eps, budgets, curves, winners, spends
 
 
-ORDER = ["brute", "separable", "linear", "binary", "reverse_eng"]
-ADAPT = ["linear", "binary", "reverse_eng"]
+# The only ceiling reported is the analytic Heisenberg one (oracle_hl), appended after the
+# sweep by analysis/oracle_curves.py --hl-only. The exact oracle and the no-safeguard oracle
+# are dropped: near the aliasing edge the readout is deterministic, so they "converge" from
+# the choice of N rather than from the data (qmetrology/oracle.py, degeneracy_share).
+ORACLES = []
+ORDER = (["brute", "separable", "linear", "binary", "reverse_eng", "binary_risk", "reverse_eng_risk"]
+         + ORACLES)
+ADAPT_CONST = ["linear", "binary", "reverse_eng"]           # grid-tuned safeguard (as published)
+ADAPT = ADAPT_CONST + ["binary_risk", "reverse_eng_risk"]   # + statistical safeguard
 
 
-def _scenario_rows(name, pmin, pmax, eps, budgets, curves, winners):
+def _scenario_rows(name, pmin, pmax, eps, budgets, curves, winners, spends):
     import json
-    crow, xrow, wrow = [], [], []
+    crow, xrow, wrow, arow = [], [], [], []
     for algo in ORDER:
         for b, r in zip(budgets, curves[algo]):
             crow.append([name, pmin, pmax, eps, algo, int(b), round(float(r), 5)])
-    best_adapt = np.max([curves[a] for a in ADAPT], axis=0)
+    extra = {"best_adaptive": np.max([curves[a] for a in ADAPT], axis=0),
+             "best_adaptive_const": np.max([curves[a] for a in ADAPT_CONST], axis=0)}
     bc = {T: crossing(budgets, curves["brute"], T) for T in THRESHOLDS}
-    for algo in ORDER + ["best_adaptive"]:
-        rates = best_adapt if algo == "best_adaptive" else curves[algo]
+    for algo in ORDER + list(extra):
+        rates = extra.get(algo, curves.get(algo))
         for T in THRESHOLDS:
             ac = crossing(budgets, rates, T)
             ratio = (bc[T] / ac) if (np.isfinite(bc[T]) and np.isfinite(ac)) else float("nan")
@@ -188,7 +196,18 @@ def _scenario_rows(name, pmin, pmax, eps, budgets, curves, winners):
     for algo, wins in winners.items():
         for b, fnname, cfg in wins:
             wrow.append([name, pmin, pmax, eps, algo, b, fnname, json.dumps(cfg)])
-    return crow, xrow, wrow
+    for algo, sp in spends.items():
+        for b, s, r in zip(budgets, sp, curves[algo]):
+            arow.append([name, algo, int(b), round(float(s), 4), round(float(r), 5)])
+    return crow, xrow, wrow, arow
+
+
+def _done_settings(path="results/story_cube.csv"):
+    """Scenario labels already written — used by --resume to pick up after an interrupted run."""
+    if not os.path.exists(path):
+        return set()
+    with open(path, newline="") as f:
+        return {row["setting"] for row in csv.DictReader(f) if row.get("setting")}
 
 
 def main():
@@ -198,24 +217,35 @@ def main():
         "results/story_curves.csv": ["setting", "phi_min", "phi_max", "eps", "algo", "budget", "rate"],
         "results/story_cube.csv": ["setting", "phi_min", "phi_max", "eps", "algo", "threshold_pct", "budget_to_reach", "ratio_vs_brute"],
         "results/story_winners.csv": ["setting", "phi_min", "phi_max", "eps", "algo", "budget", "fn", "params"],
+        "results/budget_audit.csv": ["setting", "algo", "budget", "ratio", "rate"],
     }
-    for path, header in files.items():
-        with open(path, "w", newline="") as f:
-            csv.writer(f).writerow(header)
+    scenarios = list(SCENARIOS)
+    if RESUME:
+        done = _done_settings()
+        scenarios = [s for s in scenarios if label(*s) not in done]
+        print(f"--resume: {len(done)} scenario(s) already in results/story_cube.csv, "
+              f"{len(scenarios)} left to run", flush=True)
+        if not scenarios:
+            print("nothing to do."); return
+    else:
+        for path, header in files.items():
+            with open(path, "w", newline="") as f:
+                csv.writer(f).writerow(header)
 
-    for i, (pmin, pmax, eps) in enumerate(SCENARIOS, 1):
+    for i, (pmin, pmax, eps) in enumerate(scenarios, 1):
         try:
             res = run_scenario(pmin, pmax, eps)
-            crow, xrow, wrow = _scenario_rows(*res)
+            crow, xrow, wrow, arow = _scenario_rows(*res)
             for path, rows in [("results/story_curves.csv", crow),
                                ("results/story_cube.csv", xrow),
-                               ("results/story_winners.csv", wrow)]:
+                               ("results/story_winners.csv", wrow),
+                               ("results/budget_audit.csv", arow)]:
                 with open(path, "a", newline="") as f:
                     csv.writer(f).writerows(rows)
-            print(f"   [{i}/{len(SCENARIOS)}] written.", flush=True)
+            print(f"   [{i}/{len(scenarios)}] written.", flush=True)
         except Exception as ex:  # never let one scenario kill the whole unattended run
             print(f"   !! scenario {label(pmin, pmax, eps)} FAILED: {type(ex).__name__}: {ex}", flush=True)
-    print("\ndone — wrote results/story_curves.csv, story_cube.csv, story_winners.csv")
+    print("\ndone — wrote results/story_curves.csv, story_cube.csv, story_winners.csv, budget_audit.csv")
 
 
 if __name__ == "__main__":

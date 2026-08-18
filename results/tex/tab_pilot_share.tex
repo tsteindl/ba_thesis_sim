@@ -1,0 +1,61 @@
+\begin{table}[ht]
+\centering
+\small
+\caption{Cost of fixing reverse engineering's exploration size instead of grid-tuning it at every budget. Regret is the loss in convergence (percentage points) against the per-budget tuned configuration, over all $546$ live operating points of the $23$-scenario sweep. A budget share $\rho$ transfers; a shot count $m'$ does not, because the exploration size must grow with the budget.}
+\label{tab:pilot-share}
+\begin{tabular}{lccccc}
+\toprule
+Fixed default
+& \makecell{mean \\ regret (pp)}
+& \makecell{median \\ (pp)}
+& \makecell{5th pct. \\ (pp)}
+& \makecell{worst \\ (pp)}
+& \makecell{share of points \\ $>1$ pp worse} \\
+\midrule
+\textbf{$\rho=0.02$} $\;\leftarrow$
+& \textbf{0.01}
+& \textbf{-0.00}
+& \textbf{-0.71}
+& \textbf{-1.75}
+& \textbf{1.8\%} \\
+$\rho=0.01$
+& -0.08
+& 0.02
+& -1.29
+& -2.51
+& 9.9\% \\
+$\rho=0.05$
+& -0.24
+& -0.20
+& -0.85
+& -1.03
+& 0.2\% \\
+$\rho=0.005$
+& -0.27
+& 0.02
+& -2.17
+& -3.77
+& 18.7\% \\
+$\rho=0.002$
+& -0.59
+& -0.00
+& -3.67
+& -5.98
+& 23.8\% \\
+$m'=45$ (best fixed $m'$)
+& -4.18
+& -3.33
+& -7.14
+& -81.05
+& 79.3\% \\
+$m'=200$ (published)
+& -5.49
+& -1.38
+& -28.55
+& -99.13
+& 62.1\% \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize Every adaptive entry is de-biased: parameters are grid-tuned on seed 42 and the winning configuration is re-validated on the independent seed 2024 at $R=40{,}000$ trials.
+\end{table}

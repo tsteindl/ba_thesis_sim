@@ -23,7 +23,7 @@ QUICK = "--quick" in sys.argv
 R_TEST = 5000 if QUICK else 40_000
 QS = (0.25, 0.5, 0.75)
 BF, SEP = A.find_phi_fixed_budget_brute_force, A.find_phi_fixed_budget_separable
-ADAPT = ["linear", "binary", "reverse_eng"]
+ADAPT = X.ADAPT   # incl. the statistical-safeguard variants, so fig_error shows them too
 
 
 def error_settings():

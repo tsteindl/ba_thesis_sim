@@ -1,0 +1,22 @@
+\begin{table}[ht]
+\centering
+\caption{Winning parameters for Table \ref{tab:summary-low-prec}, fixed budget $10{,}000$ ($\epsilon=10^{-3}$, $\mathcal{U}(0.01,0.1)$). Reverse engineering's exploration size is quoted in the text as a share of the budget (Table~\ref{tab:pilot-share}), so its tuned value is also shown that way.}
+\label{tab:opt-param-first-tab}
+\begin{tabular}{llc}
+\toprule
+Algorithm
+& Optimal parameters
+& \makecell{Pilot cost, \\ \% of budget} \\
+\midrule
+Linear search
+& \makecell{\texttt{m\_exploration=10,} \\ \texttt{lookback\_window=1,} \\ \texttt{safeguard=1,} \\ \texttt{inc=5}}
+& -- \\
+Binary search
+& \makecell{\texttt{m\_exploration=109,} \\ \texttt{conf=0.5}}
+& -- \\
+Reverse engineering
+& \makecell{\texttt{m\_exploration=71}}
+& 10.7\% \\
+\bottomrule
+\end{tabular}
+\end{table}

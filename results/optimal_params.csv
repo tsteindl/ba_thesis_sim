@@ -1,0 +1,4 @@
+algorithm,budget,eps,phi_min,phi_max,params
+linear,10000,0.001,0.01,0.1,"{""m_exploration"": 10, ""lookback_window"": 1, ""safeguard"": 1, ""inc"": 5}"
+binary_risk,10000,0.001,0.01,0.1,"{""m_exploration"": 109, ""conf"": 0.5, ""eps_target"": 0.001}"
+reverse_eng_risk,10000,0.001,0.01,0.1,"{""m_exploration"": 71, ""eps_target"": 0.001}"

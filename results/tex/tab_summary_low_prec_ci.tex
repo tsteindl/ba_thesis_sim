@@ -1,0 +1,40 @@
+\begin{table}[ht]
+\centering
+\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$. The table reports both the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors are computed relative to the brute force baseline. The two \textit{oracle} rows are not implementable protocols but upper bounds: they select the exploitation depth knowing the true $\phi$. Bracketed values are $95\%$ confidence intervals on the improvement factor (parametric bootstrap of the convergence curve; see Appendix).}
+\label{tab:summary-low-prec}
+\begin{tabular}{lcc}
+\toprule
+Algorithm
+& \makecell{Avg. \% converged \\ (budget = 10{,}000) \\ (\texttimes factor vs baseline)}
+& \makecell{Budget for $>90\%$ \\ convergence \\ (\texttimes factor vs baseline)} \\
+\midrule
+A. \ref{alg:brute-force}: Brute force baseline
+& 56.18\% (\texttimes 1.000)
+& \makecell{45{,}868 (\texttimes 1.00) \\ {[1.00, 1.00]}} \\
+
+A. \ref{alg:linear-search}: Linear search
+& 56.53\% (\texttimes 1.006)
+& \makecell{43{,}442 (\texttimes 1.06) \\ {[1.04, 1.08]}} \\
+
+A. \ref{alg:binary-search}: Binary search (Eq.~\eqref{eq:risk-depth})
+& 63.20\% (\texttimes 1.125)
+& \makecell{32{,}228 (\texttimes 1.42) \\ {[1.39, 1.46]}} \\
+
+A. \ref{alg:reverse-engineering}: Reverse Eng. (Eq.~\eqref{eq:risk-depth})
+& 66.26\% (\texttimes 1.179)
+& \makecell{30{,}010 (\texttimes 1.53) \\ {[1.50, 1.56]}} \\
+
+Separable protocol ($N=1$)
+& 15.75\% (\texttimes 0.280)
+& \makecell{683{,}132 (\texttimes 0.07) \\ {[0.07, 0.07]}} \\
+
+\midrule
+\textit{Ceiling} (best depth, Eq.~\eqref{eq:risk-depth} law)
+& 73.51\% (\texttimes 1.308)
+& \makecell{24{,}498 (\texttimes 1.87) \\ {[1.83, 1.91]}} \\
+
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize Every adaptive entry is de-biased: parameters are grid-tuned on seed 42 and the winning configuration is re-validated on the independent seed 2024 at $R=40{,}000$ trials.
+\end{table}

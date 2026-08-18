@@ -1,0 +1,137 @@
+\begin{table}[ht]
+\centering
+\scriptsize
+\caption{Monte-Carlo uncertainty of the budgets reported for $90\%$ convergence. Intervals are $95\%$ percentile bootstrap intervals obtained by resampling every point of the convergence-vs-budget curve from $\mathrm{Binomial}(R,\hat p)/R$ with $R=40{,}000$ and re-deriving the crossing. Ratio intervals resample the two curves independently and are therefore conservative: all algorithms share the same seed list, so the trials are paired in $\phi$.}
+\label{tab:uncertainty}
+\begin{tabular}{llrrrr}
+\toprule
+Scenario
+& Algorithm
+& Budget
+& $95\%$ CI
+& Ratio
+& $95\%$ CI \\
+\midrule
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-3}$
+& Brute force
+& 45{,}868
+& {[45{,}207, 46{,}678]}
+& 1.00
+& {[1.00, 1.00]} \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-3}$
+& L-search
+& 43{,}442
+& {[42{,}961, 43{,}968]}
+& 1.06
+& {[1.04, 1.08]} \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-3}$
+& B-search
+& 32{,}228
+& {[31{,}521, 32{,}893]}
+& 1.42
+& {[1.39, 1.46]} \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-3}$
+& Rev Eng
+& 30{,}010
+& {[29{,}618, 30{,}477]}
+& 1.53
+& {[1.50, 1.56]} \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-3}$
+& Ceiling
+& 24{,}498
+& {[24{,}170, 24{,}865]}
+& 1.87
+& {[1.83, 1.91]} \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-4}$
+& Brute force
+& 4{,}504{,}343
+& {[4{,}442{,}423, 4{,}577{,}339]}
+& 1.00
+& {[1.00, 1.00]} \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-4}$
+& L-search
+& 3{,}135{,}633
+& {[3{,}083{,}026, 3{,}200{,}549]}
+& 1.44
+& {[1.40, 1.47]} \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-4}$
+& B-search
+& 2{,}899{,}348
+& {[2{,}857{,}972, 2{,}942{,}088]}
+& 1.55
+& {[1.52, 1.59]} \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-4}$
+& Rev Eng
+& 2{,}570{,}140
+& {[2{,}530{,}523, 2{,}619{,}508]}
+& 1.75
+& {[1.71, 1.79]} \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-4}$
+& Ceiling
+& 2{,}449{,}849
+& {[2{,}416{,}419, 2{,}487{,}046]}
+& 1.84
+& {[1.80, 1.88]} \\
+$\mathcal{U}(0.001,0.01)$, $\epsilon=10^{-4}$
+& Brute force
+& 440{,}367
+& {[433{,}078, 448{,}363]}
+& 1.00
+& {[1.00, 1.00]} \\
+$\mathcal{U}(0.001,0.01)$, $\epsilon=10^{-4}$
+& L-search
+& 400{,}006
+& {[395{,}502, 404{,}406]}
+& 1.10
+& {[1.08, 1.12]} \\
+$\mathcal{U}(0.001,0.01)$, $\epsilon=10^{-4}$
+& B-search
+& 345{,}488
+& {[341{,}588, 350{,}122]}
+& 1.27
+& {[1.25, 1.30]} \\
+$\mathcal{U}(0.001,0.01)$, $\epsilon=10^{-4}$
+& Rev Eng
+& 299{,}926
+& {[295{,}652, 305{,}401]}
+& 1.47
+& {[1.43, 1.50]} \\
+$\mathcal{U}(0.001,0.01)$, $\epsilon=10^{-4}$
+& Ceiling
+& 239{,}952
+& {[236{,}301, 244{,}252]}
+& 1.83
+& {[1.79, 1.88]} \\
+$\mathcal{U}(0.001,0.1)$, $\epsilon=10^{-4}$
+& Brute force
+& 4{,}516{,}936
+& {[4{,}453{,}219, 4{,}596{,}958]}
+& 1.00
+& {[1.00, 1.00]} \\
+$\mathcal{U}(0.001,0.1)$, $\epsilon=10^{-4}$
+& L-search
+& 3{,}479{,}710
+& {[3{,}437{,}492, 3{,}520{,}030]}
+& 1.30
+& {[1.27, 1.32]} \\
+$\mathcal{U}(0.001,0.1)$, $\epsilon=10^{-4}$
+& B-search
+& 2{,}440{,}996
+& {[2{,}402{,}463, 2{,}483{,}082]}
+& 1.85
+& {[1.81, 1.90]} \\
+$\mathcal{U}(0.001,0.1)$, $\epsilon=10^{-4}$
+& Rev Eng
+& 2{,}430{,}064
+& {[2{,}395{,}371, 2{,}466{,}261]}
+& 1.86
+& {[1.82, 1.90]} \\
+$\mathcal{U}(0.001,0.1)$, $\epsilon=10^{-4}$
+& Ceiling
+& 2{,}288{,}717
+& {[2{,}244{,}897, 2{,}326{,}946]}
+& 1.97
+& {[1.93, 2.02]} \\
+\bottomrule
+\end{tabular}
+\end{table}

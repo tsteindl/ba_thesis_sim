@@ -1,0 +1,102 @@
+\begin{table}[ht]
+\centering
+\caption{Best adaptive-vs-baseline budget ratio across convergence thresholds (higher is better). Winner is the algorithm achieving the highest ratio at $90\%$.}
+\label{tab:robustness-across-thresholds}
+\begin{tabular}{lccccl}
+\toprule
+Scenario
+& 50\%
+& 80\%
+& 90\%
+& 95\%
+& Winner \\
+\midrule
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-3}$
+& 1.49\texttimes
+& 1.54\texttimes
+& 1.53\texttimes
+& 1.48\texttimes
+& Reverse engineering \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-4}$
+& 2.04\texttimes
+& 1.85\texttimes
+& 1.75\texttimes
+& 1.64\texttimes
+& Reverse engineering \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-5}$
+& 2.16\texttimes
+& 1.93\texttimes
+& 1.75\texttimes
+& 1.66\texttimes
+& Reverse engineering \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-6}$
+& 2.24\texttimes
+& 1.94\texttimes
+& 1.80\texttimes
+& 1.70\texttimes
+& Binary search \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-7}$
+& 2.24\texttimes
+& 1.94\texttimes
+& 1.80\texttimes
+& 1.70\texttimes
+& Binary search \\
+$\mathcal{U}(0.01,0.1)$, $\epsilon=10^{-8}$
+& 2.24\texttimes
+& 1.94\texttimes
+& 1.80\texttimes
+& 1.69\texttimes
+& Binary search \\
+$\mathcal{U}(0.001,0.01)$, $\epsilon=10^{-3}$
+& 0.49\texttimes
+& 0.61\texttimes
+& 0.72\texttimes
+& 0.81\texttimes
+& Binary search \\
+$\mathcal{U}(0.001,0.01)$, $\epsilon=10^{-4}$
+& 1.44\texttimes
+& 1.47\texttimes
+& 1.47\texttimes
+& 1.41\texttimes
+& Reverse engineering \\
+$\mathcal{U}(0.001,0.01)$, $\epsilon=10^{-5}$
+& 1.96\texttimes
+& 1.81\texttimes
+& 1.69\texttimes
+& 1.58\texttimes
+& Reverse engineering \\
+$\mathcal{U}(0.001,0.01)$, $\epsilon=10^{-6}$
+& 2.13\texttimes
+& 1.89\texttimes
+& 1.74\texttimes
+& 1.66\texttimes
+& Reverse engineering \\
+$\mathcal{U}(0.001,0.01)$, $\epsilon=10^{-7}$
+& 2.14\texttimes
+& 1.88\texttimes
+& 1.74\texttimes
+& 1.66\texttimes
+& Reverse engineering \\
+$\mathcal{U}(0.001,0.01)$, $\epsilon=10^{-8}$
+& 2.14\texttimes
+& 1.88\texttimes
+& 1.74\texttimes
+& 1.66\texttimes
+& Reverse engineering \\
+$\mathcal{U}(0.001,0.1)$, $\epsilon=10^{-4}$
+& 2.42\texttimes
+& 2.03\texttimes
+& 1.87\texttimes
+& 1.71\texttimes
+& Reverse engineering \\
+$\mathcal{U}(0.001,0.1)$, $\epsilon=10^{-6}$
+& 2.75\texttimes
+& 2.13\texttimes
+& 1.92\texttimes
+& 1.80\texttimes
+& Binary search \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize Every adaptive entry is de-biased: parameters are grid-tuned on seed 42 and the winning configuration is re-validated on the independent seed 2024 at $R=40{,}000$ trials.
+\end{table}

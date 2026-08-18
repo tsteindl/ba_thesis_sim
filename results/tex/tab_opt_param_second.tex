@@ -1,0 +1,36 @@
+\begin{table}[ht]
+\centering
+\scriptsize
+\caption{Winning parameters at the $90\%$ convergence budget. The variants using Eq.~\eqref{eq:risk-depth} have no safeguard to tune: the exploitation depth follows from the pilot's own spread.}
+\label{tab:opt-param-second-tab}
+\begin{tabular}{lllll}
+\toprule
+Algorithm
+& $\epsilon=10^{-3}$, $\mathcal{U}(0.01,0.1)$
+& $\epsilon=10^{-4}$, $\mathcal{U}(0.01,0.1)$
+& $\epsilon=10^{-4}$, $\mathcal{U}(0.001,0.01)$
+& $\epsilon=10^{-4}$, $\mathcal{U}(0.001,0.1)$ \\
+\midrule
+L-search
+& \makecell{\texttt{m\_exploration=14,} \\ \texttt{lookback\_window=2,} \\ \texttt{safeguard=2,} \\ \texttt{inc=2} \\ (@budget 43{,}442)}
+& \makecell{\texttt{m\_exploration=97,} \\ \texttt{lookback\_window=5,} \\ \texttt{safeguard=1,} \\ \texttt{inc=1} \\ (@budget 3{,}135{,}633)}
+& \makecell{\texttt{m\_exploration=3,} \\ \texttt{lookback\_window=5,} \\ \texttt{safeguard=5,} \\ \texttt{inc=2} \\ (@budget 400{,}006)}
+& \makecell{\texttt{m\_exploration=166,} \\ \texttt{lookback\_window=5,} \\ \texttt{safeguard=2,} \\ \texttt{inc=2} \\ (@budget 3{,}479{,}710)} \\
+
+\midrule
+B-search
+& \makecell{\texttt{m\_exploration=321,} \\ \texttt{conf=0.5} \\ (@budget 32{,}228)}
+& \makecell{\texttt{m\_exploration=201,} \\ \texttt{conf=0.65} \\ (@budget 2{,}899{,}348)}
+& \makecell{\texttt{m\_exploration=433,} \\ \texttt{conf=0.5} \\ (@budget 345{,}488)}
+& \makecell{\texttt{m\_exploration=6407,} \\ \texttt{conf=0.5} \\ (@budget 2{,}440{,}996)} \\
+
+\midrule
+Rev Eng
+& \makecell{\texttt{m\_exploration=67} \\ (@budget 30{,}010) \\ (3.3\% of budget)}
+& \makecell{\texttt{m\_exploration=2691} \\ (@budget 2{,}570{,}140) \\ (1.6\% of budget)}
+& \makecell{\texttt{m\_exploration=61} \\ (@budget 299{,}926) \\ (3.2\% of budget)}
+& \makecell{\texttt{m\_exploration=1266} \\ (@budget 2{,}430{,}064) \\ (0.8\% of budget)} \\
+
+\bottomrule
+\end{tabular}
+\end{table}

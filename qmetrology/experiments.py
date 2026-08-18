@@ -135,11 +135,6 @@ def grid_full(fn, grid, R, phi_min, phi_max, eps, seed, n_jobs=N_JOBS, phi_dist=
     return [(s / R, b / R, cfg) for (s, b), cfg in zip(out, configs)]
 
 
-def wilson(p, n, z=1.96):
-    """Wilson score 95% CI for a binomial proportion (returns fractions)."""
-    if n == 0:
-        return (float("nan"), float("nan"))
-    denom = 1 + z**2 / n
-    centre = (p + z**2 / (2 * n)) / denom
-    half = z * np.sqrt(p * (1 - p) / n + z**2 / (4 * n**2)) / denom
-    return (centre - half, centre + half)
+# re-exported so callers keep importing it from here; the single definition lives with the rest of
+# the error-bar machinery in qmetrology/uncertainty.py
+from .uncertainty import wilson  # noqa: E402,F401

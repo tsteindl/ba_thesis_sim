@@ -1,0 +1,48 @@
+\begin{table}[ht]
+\centering
+\small
+\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the oracle column bounds how much of it is attainable at all.}
+\label{tab:scaling-with-prec}
+\begin{tabular}{lcccc}
+\toprule
+Precision $\epsilon$
+& \makecell{Linear \\ search}
+& \makecell{Binary \\ search}
+& \makecell{Reverse \\ engineering}
+& \makecell{\textit{Attainable} \\ ceiling} \\
+\midrule
+$10^{-3}$
+& \makecell{1.06\texttimes \\ {[1.04, 1.08]}}
+& \makecell{1.42\texttimes \\ {[1.39, 1.46]}}
+& \makecell{1.53\texttimes \\ {[1.50, 1.56]}}
+& \makecell{1.87\texttimes \\ {[1.83, 1.91]}} \\
+$10^{-4}$
+& \makecell{1.44\texttimes \\ {[1.40, 1.47]}}
+& \makecell{1.55\texttimes \\ {[1.52, 1.59]}}
+& \makecell{1.75\texttimes \\ {[1.71, 1.79]}}
+& \makecell{1.84\texttimes \\ {[1.80, 1.88]}} \\
+$10^{-5}$
+& \makecell{1.46\texttimes \\ {[1.43, 1.49]}}
+& \makecell{1.74\texttimes \\ {[1.70, 1.78]}}
+& \makecell{1.75\texttimes \\ {[1.72, 1.79]}}
+& \makecell{1.83\texttimes \\ {[1.79, 1.87]}} \\
+$10^{-6}$
+& \makecell{1.52\texttimes \\ {[1.49, 1.55]}}
+& \makecell{1.80\texttimes \\ {[1.76, 1.83]}}
+& \makecell{1.76\texttimes \\ {[1.71, 1.80]}}
+& \makecell{1.83\texttimes \\ {[1.79, 1.87]}} \\
+$10^{-7}$
+& \makecell{1.52\texttimes \\ {[1.49, 1.55]}}
+& \makecell{1.80\texttimes \\ {[1.76, 1.84]}}
+& \makecell{1.76\texttimes \\ {[1.71, 1.80]}}
+& \makecell{1.83\texttimes \\ {[1.79, 1.87]}} \\
+$10^{-8}$
+& \makecell{1.52\texttimes \\ {[1.49, 1.56]}}
+& \makecell{1.80\texttimes \\ {[1.76, 1.84]}}
+& \makecell{1.76\texttimes \\ {[1.71, 1.80]}}
+& \makecell{1.83\texttimes \\ {[1.79, 1.87]}} \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize Every adaptive entry is de-biased: parameters are grid-tuned on seed 42 and the winning configuration is re-validated on the independent seed 2024 at $R=40{,}000$ trials.
+\end{table}

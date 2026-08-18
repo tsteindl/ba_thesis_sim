@@ -8,7 +8,6 @@ import csv
 import os
 import sys
 
-import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -23,97 +22,20 @@ T32_COLS = [("eps1e-3 U(0.01,0.1)", "U(0.01,0.1), eps=1e-03"),
             ("eps1e-4 U(0.01,0.1)", "U(0.01,0.1), eps=1e-04"),
             ("eps1e-4 U(0.001,0.01)", "U(0.001,0.01), eps=1e-04"),
             ("eps1e-4 U(0.001,0.1)", "U(0.001,0.1), eps=1e-04")]
-ADAPT = ["linear", "binary", "reverse_eng"]
+ADAPT = ["linear", "binary_risk", "reverse_eng_risk"]
+CEILINGS = ["oracle_hl"]
+ROWS = ["brute", "linear", "binary_risk", "reverse_eng_risk"]
 
 
 def table32(cube):
     """budget-to-90% + ratio per algorithm, per column, from the fixed-budget sweep."""
     out = {}
     for label, setting in T32_COLS:
-        for algo in ["brute", "separable"] + ADAPT:
+        for algo in ["brute", "separable"] + ADAPT + CEILINGS:
             r = cube[(cube.setting == setting) & (cube.algo == algo) & (cube.threshold_pct == 90)]
             out[(label, algo)] = (None if not len(r) or pd.isna(r.budget_to_reach.iloc[0])
                                   else (float(r.budget_to_reach.iloc[0]), r.ratio_vs_brute.iloc[0]))
     return out
-
-
-REF = {"brute": r"A. \ref{alg:brute-force}: Brute force",
-       "linear": r"A. \ref{alg:linear-search}: Linear search",
-       "binary": r"A. \ref{alg:binary-search}: Binary search",
-       "reverse_eng": r"A. \ref{alg:reverse-engineering}: Reverse Engineering"}
-T32_HEAD = [(r"\epsilon=10^{-3}", r"\mathcal{U}(0.01,0.1)"), (r"\epsilon=10^{-4}", r"\mathcal{U}(0.01,0.1)"),
-            (r"\epsilon=10^{-4}", r"\mathcal{U}(0.001,0.01)"), (r"\epsilon=10^{-4}", r"\mathcal{U}(0.001,0.1)")]
-
-
-def _n(x):
-    return f"{x:,.0f}".replace(",", "{,}")
-
-
-def latex_31(res, t32):
-    """tab:summary-low-prec — % converged @10k and budget-to-90%, U(0.01,0.1), eps=1e-3."""
-    bc = res[("narrow", "brute")]["unbiased"]
-    L = [r"\begin{table}[ht]", r"\centering",
-         r"\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for "
-         r"$\phi\sim\mathcal{U}(0.01,0.1)$: average share of simulations that converge "
-         r"($|\phi-\hat\phi|<\epsilon$), and budget needed for $>90\%$ convergence.}",
-         r"\label{tab:summary-low-prec}", r"\begin{tabular}{lcc}", r"\toprule",
-         r"Algorithm",
-         r"& \makecell{Avg. \% converged \\ (budget = 10{,}000) \\ (\texttimes factor vs baseline)}",
-         r"& \makecell{Budget for $>90\%$ \\ convergence \\ (\texttimes factor vs baseline)} \\",
-         r"\midrule", ""]
-    for algo in ["brute", "linear", "binary", "reverse_eng"]:
-        conv = res[("narrow", algo)].get("unbiased", res[("narrow", algo)].get("debiased"))
-        bud, ratio = t32[("eps1e-3 U(0.01,0.1)", algo)]
-        L.append(f"{REF[algo]}\n& {conv:.2f}\\% (\\texttimes {conv / bc:.3f})\n"
-                 f"& {_n(bud)} (\\texttimes {ratio:.2f}) \\\\")
-        L.append("")
-    sc = res[("narrow", "separable")]["unbiased"]
-    sb, sr = t32[("eps1e-3 U(0.01,0.1)", "separable")]
-    L.append(f"Separable protocol ($N=1$)\n& {sc:.1f}\\% (\\texttimes {sc / bc:.3f})\n"
-             f"& {_n(sb)} (\\texttimes {sr:.3f}) \\\\")
-    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    return "\n".join(L)
-
-
-def latex_32(t32):
-    """tab:summary-all — budget-to-90% across the four eps/prior columns."""
-    heads = ["Algorithm"]
-    for eps, mu in T32_HEAD:
-        heads.append(f"& \\makecell{{Budget\\\\ ($>90\\%$ conv.) \\\\ (\\texttimes factor vs baseline) "
-                     f"\\\\ ${eps}$ \\\\ $\\phi \\sim {mu}$}}")
-    L = [r"\begin{table}[ht]", r"\centering",
-         r"\caption{Budget for $>90\%$ convergence across precisions and priors (\texttimes factor vs the "
-         r"brute-force baseline; $>1$ means less budget needed).}",
-         r"\label{tab:summary-all}", r"\begin{tabular}{l c c c c}", r"\toprule",
-         "\n".join(heads) + r" \\", r"\midrule", ""]
-    for algo in ["brute", "linear", "binary", "reverse_eng"]:
-        cells = []
-        for lbl, _ in T32_COLS:
-            v = t32[(lbl, algo)]
-            cells.append("--" if v is None else f"{_n(v[0])} (\\texttimes {v[1]:.2f})")
-        L.append(f"{REF[algo]}\n& " + "\n& ".join(cells) + r" \\")
-        L.append("")
-    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
-    return "\n".join(L)
-
-
-LTX = {"brute": "Brute force", "linear": "Linear search", "binary": "Binary search",
-       "reverse_eng": "Reverse engineering"}
-
-
-def latex_33(res):
-    labels = [lbl for k, _, lbl in C.SETTINGS if k != "narrow"]
-    rows = [r"\begin{tabular}{l" + "r" * len(labels) + "}", r"\toprule",
-            "Algorithm & " + " & ".join(labels) + r" \\", r"\midrule"]
-    for algo in ["brute", "linear", "binary", "reverse_eng"]:
-        cells = []
-        for key, _, _ in C.SETTINGS:
-            if key == "narrow":
-                continue
-            d = res[(key, algo)]
-            cells.append(f"{(d['unbiased'] if algo == 'brute' else d['debiased']):.1f}\\%")
-        rows.append(f"{LTX[algo]} & " + " & ".join(cells) + r" \\")
-    return "\n".join(rows + [r"\bottomrule", r"\end{tabular}"])
 
 
 def re_lite_row():
@@ -129,7 +51,7 @@ def re_lite_row():
 
 def main():
     print("computing fixed-budget Tables 3.1 / 3.3 (~2 min) ...")
-    res = tables.compute(verbose=False)
+    res = tables.compute(verbose=False, algos=tables.ALGOS_ALL)
     cube = pd.read_csv("results/story_cube.csv")
     t32 = table32(cube)
     rl = re_lite_row()
@@ -147,13 +69,33 @@ def main():
     w("## Table 3.1 — % converged at fixed budget 10,000  (ε = 10⁻³, φ ~ U(0.01, 0.1))\n")
     w("| Algorithm | paper | this work |")
     w("|---|---:|---:|")
-    for algo in tables.ALGOS:
+    for algo in tables.ALGOS_ALL:
         d = res[("narrow", algo)]
         val = d.get("unbiased", d.get("debiased"))
-        w(f"| {NICE[algo]} | {d['paper']}% | {val:.1f}% |")
+        pap = "—" if d["paper"] is None else f"{d['paper']}%"
+        w(f"| {NICE[algo]} | {pap} | {val:.1f}% |")
     w(f"| _Reverse Eng. Lite (Alg. 7)_ | _29.6% @ ~2000_ | _{rl[0]:.1f}% (m'={rl[2]}, m={rl[3]}, budget ~{rl[1]:,.0f})_ |")
     w("\n_Narrow-range linear/binary are much higher than the paper's stale 14.0% / 11.5%. RE-Lite is the one "
       "variable-budget algorithm still reported (Algorithm 7)._\n")
+
+    # ---------- what the parameters STATED in the thesis text achieve, vs the tuned optimum ----------
+    canon = [(algo, res[("narrow", algo)]) for algo in tables.ALGOS_ALL
+             if res[("narrow", algo)].get("canon") is not None]
+    if canon:
+        w("### Using the parameters as stated in the text (not re-tuned)\n")
+        w("| Algorithm | stated parameters | stated | grid-tuned | cost of not tuning |")
+        w("|---|---|---:|---:|---:|")
+        for algo, d in canon:
+            p = ", ".join(f"`{k}`={v}" for k, v in C.CANON[algo].items() if k != "eps_target")
+            w(f"| {NICE[algo]} | {p} | {d['canon']:.1f}% | {d['debiased']:.1f}% | "
+              f"{d['canon'] - d['debiased']:+.1f} pp |")
+        w(f"\n_Reverse engineering's exploration size is stated as a **share of the budget** "
+          f"(ρ = {100*C.PILOT_SHARE:g}%, floor {C.PILOT_FLOOR} shots) rather than a shot count, because a shot "
+          f"count can only be right at one budget. Over the 546 operating points of the full sweep the stated "
+          f"ρ costs −0.06 pp against tuning at every budget separately, while the previously stated m′ = 200 "
+          f"costs −5.55 pp (worst −99.4 pp) — see `results/tex/tab_pilot_share.tex` and "
+          f"`results/fig_pilot_share.png`. Budget 10,000 is the regime where ρ is least favourable "
+          f"(the pilot floor governs below B ≈ 400·N_min), so this row is close to the worst case._\n")
 
     # ---------- Table 3.2 ----------
     w("## Table 3.2 — budget to reach 90% convergence  (fixed-budget, swept to the crossing)\n")
@@ -162,7 +104,7 @@ def main():
       "Ratio = brute ÷ algorithm (>1 ⇒ adaptive needs less)._\n")
     w("| Algorithm | " + " | ".join(lbl for lbl, _ in T32_COLS) + " |")
     w("|---|" + "---:|" * len(T32_COLS))
-    for algo in ["brute", "separable"] + ADAPT:
+    for algo in ["brute", "separable"] + ADAPT + CEILINGS:
         cells = []
         for lbl, _ in T32_COLS:
             v = t32[(lbl, algo)]
@@ -182,15 +124,15 @@ def main():
     # ---------- Table 3.3 ----------
     w("## Table 3.3 — broad distributions  (ε = 10⁻³, budget 10,000, % converged)\n")
     w("| Algorithm | " + " | ".join(lbl for k, _, lbl in C.SETTINGS if k != "narrow") + " |")
-    w("|---|" + "---:|" * 4)
-    for algo in ["brute", "linear", "binary", "reverse_eng"]:
+    w("|---|" + "---:|" * (len(C.SETTINGS) - 1))
+    for algo in ROWS:
         cells = []
         for key, _, _ in C.SETTINGS:
             if key == "narrow":
                 continue
             d = res[(key, algo)]
             h = d["unbiased"] if algo == "brute" else d["debiased"]
-            cells.append(f"{h:.1f}% ({d['paper']}%)")
+            cells.append(f"{h:.1f}%" + ("" if d["paper"] is None else f" ({d['paper']}%)"))
         w(f"| {NICE[algo]} | " + " | ".join(cells) + " |")
     w("\n_(this work vs paper). Paper adaptive numbers were grid maxima (winner's curse); de-biased they drop, "
       "but linear and reverse-engineering still beat brute for broad distributions._\n")
@@ -204,9 +146,12 @@ def main():
     w("| ε | " + " | ".join("10⁻" + t[-1] for t, _ in prog if len(_)) + " |")
     w("|---|" + "---:|" * sum(1 for _, s in prog if len(s)))
     w("| **budget ratio vs brute** | " + " | ".join(f"{s.iloc[0]:.2f}×" for _, s in prog if len(s)) + " |")
-    w("\nThe advantage climbs from ~1.2× (ε=10⁻³) and **plateaus at ~1.72×** from ε=10⁻⁵ down to 10⁻⁸ "
-      "(Heisenberg-limited saturation). A tighter tolerance rewards the larger circuit depth N that the "
-      "adaptive search selects.\n")
+    w("\nThe advantage climbs from ~1.2× (ε=10⁻³) and **saturates from ε ≤ 10⁻⁶** — at ~1.76× for "
+      "reverse engineering, with binary search drawing level there (~1.80× at the 90% threshold, "
+      "but behind at 50%; the mean gap on the underlying curves is within one standard error, so "
+      "neither leads). A tighter tolerance "
+      "rewards the larger circuit depth N that the adaptive search selects, until the depth is capped "
+      "by the prior support rather than by the budget.\n")
 
     # robustness across ranges (one line, per the 'wild' scan)
     re90 = cube[(cube.algo == "reverse_eng") & (cube.threshold_pct == 90)].dropna(subset=["ratio_vs_brute"])
@@ -251,9 +196,10 @@ def main():
 
     # ---------- paste-ready LaTeX ----------
     w("## LaTeX (paste-ready)\n")
-    w("**Table `tab:summary-low-prec` (Table 3.1 + budget)**\n```latex\n" + latex_31(res, t32) + "\n```\n")
-    w("**Table `tab:summary-all` (Table 3.2)**\n```latex\n" + latex_32(t32) + "\n```\n")
-    w("**Table 3.3 (broad distributions)**\n```latex\n" + latex_33(res) + "\n```")
+    w("Every thesis table is emitted as its own `.tex` file by `python analysis/make_tex.py` into "
+      "`results/tex/` (and collected in `results/TEX.md`), so there is exactly one place that knows "
+      "the manuscript's table style. Variants ending in `_ci.tex` carry 95% confidence intervals; "
+      "see `results/UNCERTAINTY.md` for what those intervals cover.\n")
 
     os.makedirs("results", exist_ok=True)
     with open("results/RESULTS.md", "w") as f:
@@ -264,13 +210,13 @@ def main():
         wr = csv.writer(f)
         wr.writerow(["table", "setting", "algorithm", "metric", "value"])
         for key, _, _ in C.SETTINGS:
-            for algo in tables.ALGOS:
+            for algo in tables.ALGOS_ALL:
                 if (key, algo) in res:
                     d = res[(key, algo)]
                     wr.writerow(["3.1" if key == "narrow" else "3.3", key, algo,
                                  "pct_converged_10k", round(d.get("unbiased", d.get("debiased")), 2)])
         for lbl, _ in T32_COLS:
-            for algo in ["brute", "separable"] + ADAPT:
+            for algo in ["brute", "separable"] + ADAPT + CEILINGS:
                 v = t32[(lbl, algo)]
                 if v is not None:
                     wr.writerow(["3.2", lbl, algo, "budget_to_90pct", round(v[0])])
