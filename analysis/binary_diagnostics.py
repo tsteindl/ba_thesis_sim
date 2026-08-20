@@ -10,7 +10,10 @@ winning configuration:
     steps_useful   mean number of probes that actually moved the bracket
     explore_share  mean fraction of the budget spent before the exploitation shot
     N_over_Nopt    mean exploitation depth as a fraction of the true aliasing limit
-    p_at_opt       share of trials landing within 5% of N_opt
+    p_exact        share of trials landing exactly at integer N_opt
+    p_within_1     share of trials landing within 1% of N_opt
+    p_at_opt       share of trials landing within 5% of N_opt (legacy column name)
+    p_within_10    share of trials landing within 10% of N_opt
     overshoot      share of trials with N > N_opt (the estimator aliases)
     L_over_Nopt    mean bisection lower bound as a fraction of N_opt (>1 means L itself aliased)
 
@@ -45,7 +48,8 @@ R_TUNE = 300 if QUICK else 1000
 R_TEST = 3000 if QUICK else 15_000
 OUT = "results/binary_diagnostics.csv"
 FIELDS = ["rate", "probes", "p_ge2", "p_ge4", "steps_useful", "explore_share",
-          "N_over_Nopt", "p_at_opt", "overshoot", "L_over_Nopt"]
+          "N_over_Nopt", "p_exact", "p_within_1", "p_at_opt", "p_within_10",
+          "overshoot", "L_over_Nopt"]
 
 
 def _one(seed, pmin, pmax, eps, budget, m, conf):
@@ -60,15 +64,17 @@ def _one(seed, pmin, pmax, eps, budget, m, conf):
     n_opt = max(1, int(np.pi // (2 * phi)))
     if rem <= 0:
         return (0.0, len(probes), float(len(probes) >= 2), float(len(probes) >= 4),
-                0.0, used / budget, 0.0, 0.0, 0.0, max(int(L), 1) / n_opt)
+                0.0, used / budget, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                max(int(L), 1) / n_opt)
     N = risk_optimal_depth(phi_0, pilot_sd(N_0, m), rem, eps, N_max=n_sup, support=(pmin, pmax))
     mm = int(rem / N)
     est = simulate_errors(np.random.default_rng([int(seed) % (2 ** 32), 15485863]), phi, mm, N)
     # a probe is "useful" if it moved the bracket, i.e. every probe after the opening one
+    rel = abs(N - n_opt) / n_opt
     return (float(abs(est - phi) < eps), len(probes), float(len(probes) >= 2),
             float(len(probes) >= 4), float(len(probes) - 1), used / budget,
-            N / n_opt, float(abs(N - n_opt) <= 0.05 * n_opt), float(N > n_opt),
-            max(int(L), 1) / n_opt)
+            N / n_opt, float(N == n_opt), float(rel <= 0.01), float(rel <= 0.05),
+            float(rel <= 0.10), float(N > n_opt), max(int(L), 1) / n_opt)
 
 
 def _task(t):
@@ -121,7 +127,8 @@ def main():
     with open(OUT, "w", newline="") as f:
         csv.writer(f).writerow(["setting", "budget", "m", "conf"] + FIELDS)
     print(f"{'setting':28s} {'budget':>15s} {'m*':>7s} {'rate':>6s} {'probes':>7s} {'>=2':>6s} "
-          f"{'>=4':>6s} {'expl%':>6s} {'N/Nopt':>7s} {'@opt%':>6s} {'over%':>6s} {'L/Nopt':>7s}",
+          f"{'>=4':>6s} {'expl%':>6s} {'N/Nopt':>7s} {'exact':>6s} {'within5':>7s} "
+          f"{'over%':>6s} {'L/Nopt':>7s}",
           flush=True)
     for s in sorted(by):
         bs = sorted(by[s])
@@ -139,7 +146,8 @@ def main():
                                        + [round(v, 4) for v in d])
             print(f"{s[:28]:28s} {B:15,d} {cfg['m_exploration']:7d} {100*d[0]:6.2f} {d[1]:7.2f} "
                   f"{100*d[2]:5.1f}% {100*d[3]:5.1f}% {100*d[5]:5.1f}% {d[6]:7.3f} "
-                  f"{100*d[7]:5.1f}% {100*d[8]:5.1f}% {d[9]:7.3f}", flush=True)
+                  f"{100*d[7]:5.1f}% {100*d[9]:6.1f}% {100*d[11]:5.1f}% {d[12]:7.3f}",
+                  flush=True)
     print(f"\nwrote {OUT}")
 
 
