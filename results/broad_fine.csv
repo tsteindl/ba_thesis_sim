@@ -1,0 +1,55 @@
+phi_max,budget,algo,rate,m,params,m_lo,m_hi,at_min,at_max
+pi/4,3000,binary_deep,0.16645,222,{'conf': 0.5},1,1500,0,0
+pi/4,3000,re_fixed,0.1553,33,{},1,1500,0,0
+pi/4,3000,linear_fixed,0.1202,10,"{'lookback_window': 1, 'safeguard': 1, 'inc': 2}",1,1500,0,0
+pi/4,6762,binary_deep,0.265,285,{'conf': 0.5},1,3381,0,0
+pi/4,6762,re_fixed,0.2581,317,{},1,3381,0,0
+pi/4,6762,linear_fixed,0.19815,23,"{'lookback_window': 1, 'safeguard': 0, 'inc': 5}",1,3381,0,0
+pi/4,15243,binary_deep,0.37645,1090,{'conf': 0.5},1,7621,0,0
+pi/4,15243,re_fixed,0.39395,339,{},1,7621,0,0
+pi/4,15243,linear_fixed,0.29465,73,"{'lookback_window': 1, 'safeguard': 0, 'inc': 1}",1,7621,0,0
+pi/4,34362,binary_deep,0.5446,883,{'conf': 0.5},1,17181,0,0
+pi/4,34362,re_fixed,0.55125,755,{},1,17181,0,0
+pi/4,34362,linear_fixed,0.4418,61,"{'lookback_window': 2, 'safeguard': 0, 'inc': 1}",1,17181,0,0
+pi/4,77459,binary_deep,0.7205,978,{'conf': 0.5},1,38729,0,0
+pi/4,77459,re_fixed,0.72275,782,{},1,38729,0,0
+pi/4,77459,linear_fixed,0.6114,171,"{'lookback_window': 5, 'safeguard': 0, 'inc': 1}",1,38729,0,0
+pi/4,174608,binary_deep,0.86745,2827,{'conf': 0.5},1,87304,0,0
+pi/4,174608,re_fixed,0.8711,1200,{},1,87304,0,0
+pi/4,174608,linear_fixed,0.79665,201,"{'lookback_window': 5, 'safeguard': 0, 'inc': 1}",1,87304,0,0
+pi/4,393597,binary_deep,0.96425,5517,{'conf': 0.5},1,196798,0,0
+pi/4,393597,re_fixed,0.96315,269,{},1,196798,0,0
+pi/4,393597,linear_fixed,0.92855,665,"{'lookback_window': 5, 'safeguard': 0, 'inc': 1}",1,196798,0,0
+pi/4,887240,binary_deep,0.99675,11844,{'conf': 0.5},1,443620,0,0
+pi/4,887240,re_fixed,0.99645,285,{},1,443620,0,0
+pi/4,887240,linear_fixed,0.99245,6920,"{'lookback_window': 1, 'safeguard': 0, 'inc': 1}",1,443620,0,0
+pi/4,2000000,binary_deep,0.9994,50,{'conf': 0.5},1,1000000,0,0
+pi/4,2000000,re_fixed,0.99995,13,{},1,1000000,0,0
+pi/4,2000000,linear_fixed,0.9961,250,"{'lookback_window': 2, 'safeguard': 2, 'inc': 1}",1,1000000,0,0
+pi/2,3000,binary_deep,0.1247,233,{'conf': 0.5},1,3000,0,0
+pi/2,3000,re_fixed,0.121,331,{},1,3000,0,0
+pi/2,3000,linear_fixed,0.1072,4,"{'lookback_window': 1, 'safeguard': 1, 'inc': 2}",1,3000,0,0
+pi/2,6762,binary_deep,0.1852,994,{'conf': 0.5},1,6762,0,0
+pi/2,6762,re_fixed,0.19015,394,{},1,6762,0,0
+pi/2,6762,linear_fixed,0.15415,3,"{'lookback_window': 1, 'safeguard': 2, 'inc': 1}",1,6762,0,0
+pi/2,15243,binary_deep,0.2774,1490,{'conf': 0.5},1,15243,0,0
+pi/2,15243,re_fixed,0.2857,884,{},1,15243,0,0
+pi/2,15243,linear_fixed,0.21885,5,"{'lookback_window': 1, 'safeguard': 2, 'inc': 5}",1,15243,0,0
+pi/2,34362,binary_deep,0.4071,893,{'conf': 0.5},1,34362,0,0
+pi/2,34362,re_fixed,0.41545,709,{},1,34362,0,0
+pi/2,34362,linear_fixed,0.33855,12,"{'lookback_window': 1, 'safeguard': 1, 'inc': 2}",1,34362,0,0
+pi/2,77459,binary_deep,0.56505,1998,{'conf': 0.5},1,77459,0,0
+pi/2,77459,re_fixed,0.5617,709,{},1,77459,0,0
+pi/2,77459,linear_fixed,0.47055,10,"{'lookback_window': 1, 'safeguard': 2, 'inc': 2}",1,77459,0,0
+pi/2,174608,binary_deep,0.72535,3303,{'conf': 0.5},1,174608,0,0
+pi/2,174608,re_fixed,0.72805,861,{},1,174608,0,0
+pi/2,174608,linear_fixed,0.65645,278,"{'lookback_window': 5, 'safeguard': 0, 'inc': 1}",1,174608,0,0
+pi/2,393597,binary_deep,0.874,6192,{'conf': 0.5},1,393597,0,0
+pi/2,393597,re_fixed,0.87225,8605,{},1,393597,0,0
+pi/2,393597,linear_fixed,0.8284,688,"{'lookback_window': 2, 'safeguard': 0, 'inc': 1}",1,393597,0,0
+pi/2,887240,binary_deep,0.9671,13732,{'conf': 0.5},1,887240,0,0
+pi/2,887240,re_fixed,0.9653,1222,{},1,887240,0,0
+pi/2,887240,linear_fixed,0.9494,1872,"{'lookback_window': 2, 'safeguard': 0, 'inc': 1}",1,887240,0,0
+pi/2,2000000,binary_deep,0.99705,28614,{'conf': 0.5},1,2000000,0,0
+pi/2,2000000,re_fixed,0.99695,292,{},1,2000000,0,0
+pi/2,2000000,linear_fixed,0.9958,262,"{'lookback_window': 2, 'safeguard': 2, 'inc': 2}",1,2000000,0,0

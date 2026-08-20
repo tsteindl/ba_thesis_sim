@@ -57,6 +57,39 @@ than a defence:
 That is three sentences and one number, and it turns "we assume normality" into "we verified that
 normality is not the binding constraint".
 
+### 2.1 A1, A5 and A7, verified directly
+
+`analysis/assumption_checks.py` (new). **A1** is simulated over a $(N,m,\varphi)$ grid — 4 depths from
+15 to 15,707, 5 shot counts from 5 to 10,000, 6 positions of $\varphi$ across the aliasing interval,
+R = 20,000 each — and the empirical spread compared with $1/(2N\sqrt m)$:
+
+| regime | n | empirical sd / predicted sd |
+|---|---:|---|
+| $m p_0 \ge 100$ | 36 | median **1.00** (range 0.99–1.06) |
+| $10 \le m p_0 < 100$ | 32 | median **1.01** (0.65–1.18) |
+| $1 \le m p_0 < 10$ | 24 | median 1.18 (0.35–1.27) |
+| $m p_0 < 1$ | 28 | median **0.69** (0.13–1.27) |
+
+**Inside the validity region the law is exact to 0.6 %, and outside it fails in the stated direction.**
+That is a complete verification of A1 *and* of the boundary A7 names — one table, one figure.
+
+**A5** ("overshoot ⇒ the trial fails"): overshoot occurs in 0.50 % of trials on average (median 0.11 %,
+max 5.93 %), and **20.9 % of those converge anyway** — so A5 is conservative, not wrong, exactly as
+derived.
+
+**A7** and the ceiling, over the 69 diagnostic points — this is the result worth a figure:
+
+| share of trials outside A1's validity region | n | mean gap to `oracle_hl` |
+|---|---:|---:|
+| < 5 % (A7 holds) | 46 | **0.67 pp** |
+| 5–50 % | 10 | 3.72 pp |
+| > 50 % (A7 fails) | 13 | **20.59 pp** |
+
+Correlation 0.726. **The safeguard is near-optimal exactly where its stated assumption holds, and the
+distance to the ceiling is explained by where it does not.** That closes the loop between Chapter 3's
+derivation and Chapter 4's numbers, and it is the single most convincing verification result available
+to you.
+
 ## 3. Why binary search collapses into reverse engineering — it is not the safeguard
 
 Instrumented at binary search's **own tuned configuration**, 69 operating points across all 23
@@ -67,6 +100,23 @@ scenarios (`analysis/binary_diagnostics.py`, R = 15,000):
 **The exploration is all-or-nothing.** At 46 % of operating points it takes exactly **1.00 probes** —
 never a single bisection step, in any trial. At the other 54 % it takes a mean of **10.6**. There is
 nothing in between.
+
+It thins out with budget, but does not disappear:
+
+| | scenarios taking 1 probe |
+|---|---:|
+| at the lowest live budget | 15 / 23 |
+| at the middle budget | 9 / 23 |
+| **at the highest live budget** | **8 / 23** |
+
+Those 8 split cleanly into two mechanisms, and both are reportable as text:
+
+- **loose $\varepsilon$ for the prior** ($U(10^{-4},10^{-3})\,\varepsilon{=}10^{-4}$,
+  $U(10^{-3},10^{-2})\,\varepsilon{=}10^{-3}$ and $10^{-4}$, $U(10^{-2},10^{-1})\,\varepsilon{=}10^{-3}$).
+  Here $N^\star/N_{\mathrm{opt}} = 0.66$–$0.78$: the target precision is reached well below the aliasing
+  limit, so the limit never binds and **there is nothing for a bisection to find**.
+- **wide prior** ($U(10^{-4},10^{-2})$, $U(10^{-4},10^{-1})$, $U(10^{-3},10^{-1})$, $U(10^{-5},10^{-2})$).
+  Here the arithmetic midpoint jump is unaffordable at every budget in the live range (§3.1).
 
 Two separate mechanisms produce the 1-probe case, and only the first is fixable:
 
@@ -212,7 +262,75 @@ The 46 % figure is the one an examiner will ask about, and it is much better to 
 the mechanism (§3) than to be asked. Stated well it *is* the result: the exploration is not doing a bad
 job of bisecting, it is correctly declining to bisect.
 
-## 8. Two options
+## 8. The deep pilot, on a large grid (`analysis/binary_deep_study.py`)
+
+The earlier arms were tuned over 12–14 exploration sizes × **3** confidence levels. Since the safeguard
+removed the `s` parameter there is grid budget to spare, so this re-runs the question over
+**20 $m$ × 9 `conf` (0.5 → 0.995) = 180 configurations**, tuned per operating point *and* per arm, on
+23 points spanning every scenario, R_tune = 1000, R_test = 20,000. Three acceptance tests are crossed
+with two pilots; each test gets its own exploration.
+
+### 8.1 The deep pilot is better — consistently, and barely
+
+| comparison | mean | median | SE | wins |
+|---|---:|---:|---:|---:|
+| deepest-accepted vs opening pilot, all 23 points | **+0.11** | +0.00 | 0.07 | 7/23 |
+| the same, restricted to the 12 points where the bisection runs | **+0.21** | +0.18 | 0.12 | 7/12 |
+
+Consistent in sign, marginal in significance (~1.7σ). The coarse grid put it at +0.03 median; the fine
+grid confirms the direction. **Adopt it** — it costs nothing and it makes the pilot the bisection's
+product rather than a probe reverse engineering would have taken anyway.
+
+| | binary search vs reverse engineering |
+|---|---:|
+| deep pilot, all 23 points | **+0.04 pp** (SE 0.42) — level |
+| shipped opening pilot, all 23 points | −0.07 pp (SE 0.45) |
+| deep pilot, where the bisection runs | **−0.57 pp** (SE 0.38, wins 2/12) |
+
+So with proper tuning binary search is **level** with reverse engineering overall, not 1.7 pp behind as
+the coarse grid suggested. Where the bisection actually runs it still trails by ~0.6 pp: the
+exploration cost is real and the sharper pilot does not recover it.
+
+### 8.2 Why the sharper pilot does not pay — the number that explains everything
+
+At the points where the bisection runs it takes **10.3 probes, of which 3.9 are accepted**, and the
+resulting pilot is **2.24× sharper** than reverse engineering's (max 3.00×). And:
+
+> **the deepest accepted probe lies past $N_{\mathrm{opt}}$ in 23.3 % of trials.**
+
+A quarter of the time the pilot is sharp *and on the wrong branch*, and $\sigma = 1/(2N_{\rm acc}\sqrt{m'})$
+does not know it. Precision gained, honesty lost — which is why a 2.24× better pilot buys 0.21 pp. This
+is the cleanest statement of the limit, and it points straight at the further-work item: resolving the
+branch needs the likelihood, not the point estimate.
+
+### 8.3 One-sided vs two-sided vs combined-variance: no difference
+
+The shipped test is **one-sided at $\alpha = 1-\text{conf}$**, using only the new probe's $\sigma$ and
+treating $\hat\varphi_{\rm prev}$ as exact. At `conf = 0.5` the threshold is exactly
+$\hat\varphi_{\rm prev}$ — a coin flip — and the tuner selects `conf = 0.5` at 11 of 23 points (the rest
+spread over 0.7–0.995, so the fine grid was worth running).
+
+| test | vs. shipped one-sided |
+|---|---:|
+| two-sided at the same $\alpha$ (adds an upper rejection region) | **−0.08 pp** (SE 0.10) |
+| one-sided with the honest $\sigma=\sqrt{\sigma_{\rm prev}^2+\sigma_{\rm new}^2}$ | −0.03 pp |
+
+Neither matters. Note that two-sided's *lower* threshold is just the one-sided test at a higher `conf`,
+which the grid already covers, so what is being measured is purely the upper rejection region — and it
+does nothing. **Keep the shipped test and say you tested the alternatives.**
+
+### 8.4 "Keep the overshoot probability very low" — already true, and free
+
+The safeguard's own optimum already aliases in **0.77 % of trials on average (median 0.26 %)**.
+Constraining the tuner to configurations with ≤ 1 % overshoot is **free at 19 of 23 points** (median
+cost 0.00 pp) and **infeasible at 4** — the low-budget, loose-$\varepsilon$ corner
+($U(10^{-4},10^{-3})\ \varepsilon{=}10^{-4}$ at $B=36{,}435$; $U(10^{-4},10^{-2})\ \varepsilon{=}10^{-4}$
+at $B=21{,}875$; $U(10^{-2},10^{-1})\ \varepsilon{=}10^{-3}$ at $B=896$), where the best achievable
+operating point genuinely requires accepting 1.4–4.8 % aliasing and no runnable configuration meets the
+constraint. That is a reportable result in itself: low overshoot is not a knob you have to trade
+against, except in the corner where the assumptions already fail (§2.1).
+
+## 9. Two options
 
 **Option A — change nothing.** Add §1 as a numerical-verification subsection, §2 as three sentences,
 §7 as a diagnostics table, and frame §3 as the finding:
