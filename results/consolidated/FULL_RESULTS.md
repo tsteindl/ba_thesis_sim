@@ -4,16 +4,16 @@ Consolidated performance, algorithm diagnostics and uncertainty for the four alg
 
 | | |
 |---|---|
-| Generated | 2026-08-21 13:27 by `python analysis/consolidated/full_report.py` |
+| Generated | 2026-08-21 21:57 by `python analysis/consolidated/full_report.py` |
 | Sweep command | `python analysis/consolidated/run.py --max --keep-traces` |
 | Sweep mode | `max` |
 | Sweep wall clock | 307 min (5.1 h), 24 cores |
-| Repository commit | `1bfbca3` (working tree dirty) |
+| Repository commit | `67657cd` (working tree dirty) |
 | Scenarios | 10 |
 | Operating points | 221 (144 live, 77 saturated/floored) |
-| Evaluated (point, algorithm) cells | 884 |
+| Evaluated (point, algorithm) cells | 1326 |
 | Held-out trials per cell | R = 50,000 |
-| Total held-out trials | 44,200,000 |
+| Total held-out trials | 66,300,000 |
 
 > **Scope note.** This document is generated from `results/consolidated/*.csv` and nothing else. No thesis file (`../thesis/*.tex`) is read or written anywhere in this pipeline; the LaTeX in `results/consolidated/tex/` is a proposal to paste, never an edit.
 
@@ -169,7 +169,30 @@ A deeper circuit is more precise (the second factor grows as `sqrt(N)`) but more
 
 The maximisation is a three-round geometric refinement followed by an exact integer scan, capped at `N_max = floor(pi/(2 phi_min))` from the prior support.
 
-**Assumption this rests on, stated rather than hidden.** For `binary_deep` the pilot is the deepest probe that *passed* the overshoot test, i.e. it is selected for having read high. Treating it afterwards as an unbiased Gaussian pilot is outside the derivation. This is not assumed away: the detector false-alarm and miss rates (§10) and the `N_guess/N_opt` distribution (§8) measure the consequence directly.
+### 2.6 The two reference rows
+
+Reported in the thesis tables for context, deliberately **not** protocols under comparison, and excluded from the regime rule, the "points won" count and every diagnostic aggregate.
+
+**Separable (`N = 1`).** `m = floor(B/1) = B` — the whole budget as shots at unit depth. Same rule as brute force, which uses `N = N_min` instead. Its sd is `1/(2 sqrt(B))`: no `sqrt(N)` gain at all, which is the point of the row.
+
+**Ceiling.** At fixed budget there is no independent shot count to choose: `m` follows from the depth, and Eq. (3.4) gives
+
+```
+N   = min( floor(pi/(2 phi)), B )        the deepest non-aliasing depth, capped so m >= 1
+m   = floor(B / N)                       whole shots, so N*m <= B, like every other row
+phi_hat = phi + Z / (2 N sqrt(m)),  Z ~ N(0,1)
+```
+
+It is **exact**: nothing is sampled. The convergence probability given `phi` is the closed form above, and the reported rate is that probability averaged over the prior. So this row carries no `R`, no Monte-Carlo error and no interval — the value is the value.
+
+An earlier version of this pipeline instead *simulated* the ceiling, drawing `phi_hat = phi + Z/(2 N sqrt(m))` with `Z ~ N(0,1)`, so that it would flow through the same code path and carry a Wilson interval like every other row. That was dropped: it reports a number that wobbles by about +/- 0.4 pp between seeds in place of one that is exactly 73.4844% at the headline point, and a bound has no sampling error to report in the first place. The uniformity was not worth the noise.
+
+*Why the probability comes from Eq. (3.4) rather than from the binomial readout.* At `N ~ N_opt` the readout probability `p0 = cos^2(N phi)` sits against 0, so every shot returns 0 and the arccos estimator is pinned at `pi/(2N)` **regardless of the data**. An oracle that knows `phi` could then read its own answer back off that constant, to accuracy `~2 phi^2/pi`, using almost no shots; whenever `phi < sqrt(pi eps / 2)` that is already inside tolerance, which is how an exact oracle comes to report a ~400x advantage at `U(0.001,0.01), eps = 1e-4`. Using Eq. (3.4) closes that loophole: the accuracy has to come from the statistics, not from the choice of `N`. Eq. (3.4) is not an extra assumption introduced for this row — it is the law the statistical safeguard and the binary-search overshoot test are both derived from.
+
+*What kind of bound this is.* It bounds what the Chapter-3 family can achieve **under its own asymptotic law**, and it is non-degenerate everywhere. It is deliberately not a strict bound on the exact estimator, precisely because the exact estimator can exploit the boundary-clamping above. Two consequences, both measured rather than assumed:
+
+* Because `m` is an integer, `N_opt` is not always the best admissible depth: at `B = 896, phi = 0.01` the bound `N_opt = 157` affords `m = 5` and spends 785 of 896, while `N = 149` affords `m = 6`, spends 894, and is better (`N sqrt(m)` = 365 vs 351). The row reported here uses `N_opt`, so it is a ceiling *for the depth an omniscient protocol would name*, not the supremum over all admissible depths. `qmetrology.oracle.ceiling_rate` computes the latter (at most 0.27 pp higher, and only where `m` is a handful of shots) if a strict supremum is ever wanted.
+* Over all 221 operating points, the best implementable algorithm exceeds this ceiling at 93 (point-estimate, algorithm, budget) cells — and at **none** of them does the algorithm's 95% Wilson lower bound clear the ceiling. Every exceedance is inside Monte-Carlo noise.
 
 ---
 
@@ -487,7 +510,7 @@ The ratio `B_brute(p*) / B_algo(p*)` resamples both curves **independently**. Be
 
 Monte-Carlo error is not the only thing moving a crossing; the finite budget grid does too. This is probed directly and without assumptions: re-derive each crossing from the two half-density subgrids (`budgets[0::2]` and `budgets[1::2]`) and report the largest relative deviation. Log-linear interpolation error is `O(h^2)` in the grid log-spacing, so the full-density grid carries roughly **a quarter** of the deviation reported.
 
-Measured here: median **2.58%**, 90th percentile 6.74%, max 13.14% over 160 crossings — so the full-grid contribution is of order 0.65% at the median.
+Measured here: median **2.57%**, 90th percentile 6.69%, max 13.14% over 237 crossings — so the full-grid contribution is of order 0.64% at the median.
 
 ### 6.7 Rounding conventions
 
@@ -515,8 +538,10 @@ Convergence rate of the frozen winner on the held-out seed, R = 50,000 per cell.
 | Linear search | 57.6% | 57.1% | 10.4% | 97.9% | 0/144 |
 | Binary search | 61.2% | 61.8% | 12.1% | 98.7% | 63/144 |
 | Reverse engineering | 61.6% | 63.1% | 11.9% | 98.9% | 81/144 |
+| *Separable protocol (N=1)* | 22.0% | 15.7% | 0.0% | 96.2% | -- |
+| *Ceiling (N_opt, Eq. 3.4 law)* | 63.7% | 66.5% | 14.6% | 99.4% | -- |
 
-Means and medians mix scenarios and budgets; they summarise the table, they are not a headline claim. The per-cell rows with Wilson intervals are in `performance_curves.csv`.
+Means and medians mix scenarios and budgets; they summarise the table, they are not a headline claim. The per-cell rows with Wilson intervals are in `performance_curves.csv`. The last two rows are reference points, not protocols under comparison: they cannot win a point and are excluded from every diagnostic aggregate and from the regime rule.
 
 ### 7.2 Budget to reach a target reliability, relative to brute force
 
@@ -583,13 +608,13 @@ The mean ratio, the signed error and the absolute error are all retained deliber
 
 ### 8.1 Exploration cost
 
-Each cell contributes its own within-cell statistic; the table then takes the **median across cells** for all three share columns, so they are directly comparable (a mean of per-cell means and a median of per-cell p90s would not be).
+Each cell contributes its own within-cell statistic. The three *share* columns then take the **median across cells**, so they are directly comparable (a mean of per-cell means against a median of per-cell p90s would not be). The probe columns instead take the **mean across cells**, which — since every cell has the same R — is exactly the pooled mean over all runs, and is the interpretable "probes per trial" number.
 
-| algorithm | expl. share: median | mean | p90 | mean probes | median probes | only one probe | no exploitation phase |
+| algorithm | expl. share: median | mean | p90 | mean probes/trial | median probes | only one probe | no exploitation phase |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Brute force | 0.00% | 0.00% | 0.00% | -- | -- | -- | 0.00% |
-| Linear search | 1.78% | 4.65% | 9.21% | 27.4 | 17.0 | 0.0% | 0.00% |
-| Binary search | 2.70% | 2.83% | 3.09% | 1.0 | 1.0 | 53.5% | 0.00% |
+| Linear search | 1.78% | 4.65% | 9.21% | 23.4 | 17.0 | 0.0% | 0.00% |
+| Binary search | 2.70% | 2.83% | 3.09% | 4.4 | 1.0 | 53.5% | 0.00% |
 | Reverse engineering | 1.33% | 1.37% | 1.33% | 1.0 | 1.0 | 98.6% | 0.04% |
 
 Brute force takes no probes at all, so its probe-shape columns are blank rather than reporting the vacuously true "0 probes is <= 1 probe".
@@ -723,7 +748,7 @@ Both regenerate from `diagnostics_by_point.csv` alone via `python analysis/conso
 
 ## 12. Budget compliance audit
 
-Over **all 884 evaluated cells** and every held-out run in them:
+Over **all 1,326 evaluated cells** and every held-out run in them:
 
 | | |
 |---|---:|

@@ -204,6 +204,96 @@ def heisenberg_rate(budget, eps, phi_min, phi_max, n_grid=20001):
     return float(np.trapezoid(heisenberg_prob(phi, budget, eps), phi) / (phi_max - phi_min))
 
 
+def _depth_factor(budget, n_max):
+    """g(n) = max over 1 <= N <= n of  N * sqrt(floor(budget / N)).
+
+    This is the quantity the ceiling's accuracy depends on: with m = floor(budget/N) integer shots at
+    depth N, Eq. (3.4) gives sd = 1/(2 N sqrt(m)), so P(converge) = 2 Phi(2 eps N sqrt(m)) - 1 and
+    only the product N sqrt(m) matters.
+
+    WHY THE MAXIMUM IS NEEDED. Ignoring the floor, N sqrt(m) = sqrt(N * budget) is increasing in N,
+    so the deepest admissible depth N_opt is trivially best. With integer shots that stops being
+    true: N_opt can waste a large fraction of the budget to the floor when m is small. At
+    budget = 896, phi = 0.01 the aliasing bound is N_opt = 157, which affords m = 5 and spends only
+    785; N = 149 affords m = 6, spends 894, and is strictly better (N sqrt(m) = 365 vs 351). A
+    ceiling evaluated at N_opt alone would therefore not be a ceiling -- an implementable protocol
+    could beat it. Taking the maximum over admissible depths restores the bound.
+
+    Computed as a running maximum over one scan, so the whole table costs O(n_max).
+    """
+    N = np.arange(1, int(n_max) + 1, dtype=float)
+    m = np.floor(float(budget) / N)
+    return np.maximum.accumulate(np.where(m >= 1.0, N * np.sqrt(np.maximum(m, 0.0)), 0.0))
+
+
+def ceiling_prob(phi, budget, eps, n_max=None):
+    """P(converge) for the tightest admissible depth, with INTEGER shots.
+
+    The reported ceiling. Same spirit as `heisenberg_prob` -- perfect knowledge of the depth, but the
+    accuracy must come from the sampling distribution rather than from the deterministic aliasing
+    readout -- and additionally honest about the budget actually spendable: a protocol takes
+    m = floor(budget/N) whole shots, so N*m <= budget, and `heisenberg_prob`'s 1/(4 N budget)
+    silently assumes fractional shots.
+
+    The difference is at most ~0.3 pp, and only at the lowest budgets where m is a handful of shots;
+    `heisenberg_prob` is a valid but slightly loose (optimistic) bound everywhere.
+    """
+    phi = np.asarray(phi, dtype=float)
+    nm = int(n_max if n_max is not None else np.nanmax(
+        np.maximum(np.floor(np.pi / (2.0 * phi)), 1.0)))
+    nm = max(min(nm, int(budget)), 1)
+    g = _depth_factor(budget, nm)
+    n_opt = np.clip(np.maximum(np.floor(np.pi / (2.0 * phi)), 1.0).astype(np.int64), 1, nm)
+    return np.clip(2.0 * ndtr(2.0 * eps * g[n_opt - 1]) - 1.0, 0.0, 1.0)
+
+
+def ceiling_prob_at_nopt(phi, budget, eps):
+    """P(converge) at N = N_opt with whole shots -- the REPORTED ceiling.
+
+        N = min( floor(pi/(2 phi)), budget )     the deepest non-aliasing depth, capped so m >= 1
+        m = floor(budget / N)                    whole shots, so N*m <= budget
+        P = 2 Phi( 2 eps N sqrt(m) ) - 1         Eq. (3.4) at that depth
+
+    Exact: nothing is sampled, so there is no Monte-Carlo error and no interval to report. The
+    convergence probability given phi is known in closed form, and the reported rate is that
+    probability averaged over the prior (`ceiling_rate_at_nopt`).
+
+    This fixes N at N_opt rather than maximising over admissible depths. Because m is an integer,
+    N_opt occasionally wastes budget to the floor and a slightly shallower depth would do better
+    (see `_depth_factor`), so this is the ceiling for *the depth an omniscient protocol would name*,
+    not the supremum over all depths -- `ceiling_rate` gives the latter, at most 0.27 pp higher.
+    Measured against every algorithm at all 221 operating points, no implementable algorithm exceeds
+    this by more than Monte-Carlo noise.
+    """
+    phi = np.asarray(phi, dtype=float)
+    N = np.minimum(np.maximum(np.floor(np.pi / (2.0 * phi)), 1.0), float(budget))
+    m = np.floor(float(budget) / N)
+    return np.clip(2.0 * ndtr(2.0 * eps * N * np.sqrt(np.maximum(m, 0.0))) - 1.0, 0.0, 1.0)
+
+
+def ceiling_rate_at_nopt(budget, eps, phi_min, phi_max, n_grid=20001):
+    """The reported ceiling under phi ~ U(phi_min, phi_max): `ceiling_prob_at_nopt` averaged over
+    the prior. Exact to ~1e-6 relative; no simulation, hence no error bar."""
+    phi = np.linspace(phi_min, phi_max, n_grid)
+    return float(np.trapezoid(ceiling_prob_at_nopt(phi, budget, eps), phi) / (phi_max - phi_min))
+
+
+def ceiling_rate(budget, eps, phi_min, phi_max, n_grid=20001):
+    """Ensemble convergence rate of the ceiling under phi ~ U(phi_min, phi_max).
+
+    Averaged over the prior by QUADRATURE, not by sampling. The averaging is required whatever
+    formula is used for P(converge | phi), because that probability depends on phi through
+    N_opt = floor(pi/(2 phi)); the only alternative is Monte-Carlo integration, which computes the
+    same integral with added sampling error. Being deterministic, this carries no error bar --
+    the trapezoid discretisation is ~1e-6 relative at the default grid, a thousand times below the
+    Monte-Carlo error of any simulated row.
+    """
+    n_max = max(int(np.pi // (2.0 * phi_min)), 1)
+    phi = np.linspace(phi_min, phi_max, n_grid)
+    return float(np.trapezoid(ceiling_prob(phi, budget, eps, n_max=n_max), phi)
+                 / (phi_max - phi_min))
+
+
 def degeneracy_share(eps, phi_min, phi_max):
     """Share of the prior where the exact oracle can answer from the aliasing constant alone.
 

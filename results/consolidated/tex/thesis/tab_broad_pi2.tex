@@ -1,0 +1,139 @@
+\begin{table}[ht]
+\centering
+\small
+\caption{Convergence under a broad uniform prior $\phi\sim\mathcal{U}(0.01,\pi/2)$ at $\epsilon=10^{-3}$: average share of simulations that converge, by budget. The best implementable entry in each row is set in bold; the ceiling is an upper bound, not a competitor. Only budgets in the informative band are listed (see \texttt{operating\_points.csv}).}
+\label{tab:broad-pi2}
+\begin{tabular}{rccccc}
+\toprule
+Budget $C=N\cdot m$
+& Brute force baseline
+& Linear search
+& Binary search
+& Reverse engineering
+& \textit{Attainable Ceiling} \\
+\midrule
+3{,}000
+& 8.8\%
+& 10.4\%
+& \textbf{12.1\%}
+& 11.9\%
+& 14.6\% \\
+4{,}088
+& 10.2\%
+& 12.3\%
+& \textbf{14.5\%}
+& 14.3\%
+& 16.9\% \\
+5{,}572
+& 12.0\%
+& 14.2\%
+& \textbf{17.1\%}
+& 16.8\%
+& 19.6\% \\
+7{,}595
+& 14.1\%
+& 16.6\%
+& \textbf{20.2\%}
+& 19.6\%
+& 22.6\% \\
+10{,}351
+& 16.4\%
+& 19.4\%
+& \textbf{23.4\%}
+& 23.2\%
+& 25.9\% \\
+14{,}108
+& 19.2\%
+& 22.5\%
+& \textbf{27.3\%}
+& 27.2\%
+& 29.7\% \\
+19{,}228
+& 22.2\%
+& 25.7\%
+& 31.9\%
+& \textbf{31.9\%}
+& 33.9\% \\
+26{,}207
+& 25.4\%
+& 29.7\%
+& 36.4\%
+& \textbf{36.4\%}
+& 38.5\% \\
+35{,}718
+& 29.5\%
+& 34.2\%
+& \textbf{41.9\%}
+& 41.8\%
+& 43.5\% \\
+48{,}681
+& 34.2\%
+& 40.4\%
+& \textbf{47.3\%}
+& 47.3\%
+& 48.9\% \\
+66{,}349
+& 39.4\%
+& 46.1\%
+& \textbf{53.3\%}
+& 53.1\%
+& 54.7\% \\
+90{,}429
+& 45.3\%
+& 52.0\%
+& \textbf{59.3\%}
+& 59.2\%
+& 60.7\% \\
+123{,}248
+& 51.9\%
+& 58.7\%
+& \textbf{65.7\%}
+& 65.5\%
+& 66.8\% \\
+167{,}979
+& 58.8\%
+& 65.8\%
+& \textbf{72.1\%}
+& 71.9\%
+& 72.9\% \\
+228{,}942
+& 66.3\%
+& 72.0\%
+& \textbf{78.1\%}
+& 77.9\%
+& 78.7\% \\
+312{,}031
+& 73.7\%
+& 78.4\%
+& \textbf{83.6\%}
+& 83.6\%
+& 84.2\% \\
+425{,}275
+& 81.1\%
+& 84.3\%
+& \textbf{88.7\%}
+& 88.6\%
+& 89.0\% \\
+579{,}619
+& 87.4\%
+& 89.6\%
+& \textbf{92.7\%}
+& 92.6\%
+& 93.0\% \\
+789{,}977
+& 92.6\%
+& 93.8\%
+& \textbf{95.9\%}
+& 95.7\%
+& 96.0\% \\
+1{,}076{,}679
+& 96.2\%
+& 96.6\%
+& 97.1\%
+& \textbf{97.9\%}
+& 98.0\% \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\end{table}

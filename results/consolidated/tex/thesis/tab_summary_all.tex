@@ -1,0 +1,50 @@
+\begin{table}[ht]
+\centering
+\scriptsize
+\caption{Budget required to achieve $>90\%$ convergence for selected precision settings and prior intervals. Improvement factors are relative to the brute-force baseline; values greater than one indicate a lower required budget.}
+\label{tab:summary-all}
+\begin{tabular}{l c c c c}
+\toprule
+Algorithm
+& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-3}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.001,0.01)$}
+& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.001,0.1)$} \\
+\midrule
+A.~\ref{alg:brute-force}: BF
+& 45.9
+& 4{,}530
+& 441
+& 4{,}520 \\
+A.~\ref{alg:linear-search}: LS
+& 42.5
+& 2{,}910
+& 377
+& 3{,}480 \\
+A.~\ref{alg:binary-search}: BS
+& 32.4
+& 2{,}830
+& 334
+& 2{,}450 \\
+A.~\ref{alg:reverse-engineering}: RE
+& 29.8
+& 2{,}600
+& 302
+& 2{,}450 \\
+\midrule
+Sep. ($N=1$)
+& 680
+& 67{,}200
+& --
+& 67{,}300 \\
+\midrule
+\textit{Ceiling}
+& 24.7
+& 2{,}470
+& 242
+& 2{,}300 \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\end{table}

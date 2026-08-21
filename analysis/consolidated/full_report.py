@@ -308,11 +308,61 @@ def part_algorithms(man):
     w("The maximisation is a three-round geometric refinement followed by an exact integer scan, "
       "capped at `N_max = floor(pi/(2 phi_min))` from the prior support.")
     w()
-    w("**Assumption this rests on, stated rather than hidden.** For `binary_deep` the pilot is the "
-      "deepest probe that *passed* the overshoot test, i.e. it is selected for having read high. "
-      "Treating it afterwards as an unbiased Gaussian pilot is outside the derivation. This is not "
-      "assumed away: the detector false-alarm and miss rates (§10) and the `N_guess/N_opt` "
-      "distribution (§8) measure the consequence directly.")
+    w("### 2.6 The two reference rows")
+    w()
+    w("Reported in the thesis tables for context, deliberately **not** protocols under comparison, "
+      "and excluded from the regime rule, the \"points won\" count and every diagnostic aggregate.")
+    w()
+    w("**Separable (`N = 1`).** `m = floor(B/1) = B` — the whole budget as shots at unit depth. "
+      "Same rule as brute force, which uses `N = N_min` instead. Its sd is `1/(2 sqrt(B))`: no "
+      "`sqrt(N)` gain at all, which is the point of the row.")
+    w()
+    w("**Ceiling.** At fixed budget there is no independent shot count to choose: `m` follows from "
+      "the depth, and Eq. (3.4) gives")
+    w()
+    w("```")
+    w("N   = min( floor(pi/(2 phi)), B )        the deepest non-aliasing depth, capped so m >= 1")
+    w("m   = floor(B / N)                       whole shots, so N*m <= B, like every other row")
+    w("phi_hat = phi + Z / (2 N sqrt(m)),  Z ~ N(0,1)")
+    w("```")
+    w()
+    w("It is **exact**: nothing is sampled. The convergence probability given `phi` is the closed "
+      "form above, and the reported rate is that probability averaged over the prior. So this row "
+      "carries no `R`, no Monte-Carlo error and no interval — the value is the value.")
+    w()
+    w("An earlier version of this pipeline instead *simulated* the ceiling, drawing "
+      "`phi_hat = phi + Z/(2 N sqrt(m))` with `Z ~ N(0,1)`, so that it would flow through the same "
+      "code path and carry a Wilson interval like every other row. That was dropped: it reports a "
+      "number that wobbles by about +/- 0.4 pp between seeds in place of one that is exactly "
+      "73.4844% at the headline point, and a bound has no sampling error to report in the first "
+      "place. The uniformity was not worth the noise.")
+    w()
+    w("*Why the probability comes from Eq. (3.4) rather than from the binomial readout.* At "
+      "`N ~ N_opt` the readout probability `p0 = cos^2(N phi)` sits against 0, so every shot returns "
+      "0 and the arccos estimator is pinned at `pi/(2N)` **regardless of the data**. An oracle that "
+      "knows `phi` could then read its own answer back off that constant, to accuracy "
+      "`~2 phi^2/pi`, using almost no shots; whenever `phi < sqrt(pi eps / 2)` that is already "
+      "inside tolerance, which is how an exact oracle comes to report a ~400x advantage at "
+      "`U(0.001,0.01), eps = 1e-4`. Using Eq. (3.4) closes that loophole: the accuracy has to come "
+      "from the statistics, not from the choice of `N`. Eq. (3.4) is not an extra assumption "
+      "introduced for this row — it is the law the statistical safeguard and the binary-search "
+      "overshoot test are both derived from.")
+    w()
+    w("*What kind of bound this is.* It bounds what the Chapter-3 family can achieve **under its "
+      "own asymptotic law**, and it is non-degenerate everywhere. It is deliberately not a strict "
+      "bound on the exact estimator, precisely because the exact estimator can exploit the "
+      "boundary-clamping above. Two consequences, both measured rather than assumed:")
+    w()
+    w("* Because `m` is an integer, `N_opt` is not always the best admissible depth: at "
+      "`B = 896, phi = 0.01` the bound `N_opt = 157` affords `m = 5` and spends 785 of 896, while "
+      "`N = 149` affords `m = 6`, spends 894, and is better (`N sqrt(m)` = 365 vs 351). The row "
+      "reported here uses `N_opt`, so it is a ceiling *for the depth an omniscient protocol would "
+      "name*, not the supremum over all admissible depths. "
+      "`qmetrology.oracle.ceiling_rate` computes the latter (at most 0.27 pp higher, and only where "
+      "`m` is a handful of shots) if a strict supremum is ever wanted.")
+    w("* Over all 221 operating points, the best implementable algorithm exceeds this ceiling at 93 "
+      "(point-estimate, algorithm, budget) cells — and at **none** of them does the algorithm's 95% "
+      "Wilson lower bound clear the ceiling. Every exceedance is inside Monte-Carlo noise.")
     w()
     w("---")
     w()
@@ -766,6 +816,9 @@ def part_performance(man, diag, cross, reg):
     w()
     by_pt = {}
     for r in diag:
+        # reference rows (separable, ceiling) are not protocols and cannot "win" a point
+        if r["algorithm"] not in M.PROTOCOLS:
+            continue
         by_pt.setdefault((r["scenario_id"], r["budget"]), {})[r["algorithm"]] = f(r["rate"])
     wins = {a: 0 for a in M.ORDER}
     for v in by_pt.values():
@@ -777,9 +830,16 @@ def part_performance(man, diag, cross, reg):
         if v.size:
             w(f"| {SHORT[a]} | {pct(v.mean(),1)} | {pct(np.median(v),1)} | {pct(v.min(),1)} | "
               f"{pct(v.max(),1)} | {wins[a]}/{len(by_pt)} |")
+    for a in M.REFERENCE:
+        v = col([r for r in diag if r["algorithm"] == a], "rate")
+        if v.size:
+            w(f"| *{M.ALGORITHMS[a]['label']}* | {pct(v.mean(),1)} | {pct(np.median(v),1)} | "
+              f"{pct(v.min(),1)} | {pct(v.max(),1)} | -- |")
     w()
     w("Means and medians mix scenarios and budgets; they summarise the table, they are not a "
-      "headline claim. The per-cell rows with Wilson intervals are in `performance_curves.csv`.")
+      "headline claim. The per-cell rows with Wilson intervals are in `performance_curves.csv`. "
+      "The last two rows are reference points, not protocols under comparison: they cannot win a "
+      "point and are excluded from every diagnostic aggregate and from the regime rule.")
     w()
     w("### 7.2 Budget to reach a target reliability, relative to brute force")
     w()
@@ -872,11 +932,13 @@ def part_exploration(man, diag):
     w()
     w("### 8.1 Exploration cost")
     w()
-    w("Each cell contributes its own within-cell statistic; the table then takes the **median "
-      "across cells** for all three share columns, so they are directly comparable (a mean of "
-      "per-cell means and a median of per-cell p90s would not be).")
+    w("Each cell contributes its own within-cell statistic. The three *share* columns then take "
+      "the **median across cells**, so they are directly comparable (a mean of per-cell means "
+      "against a median of per-cell p90s would not be). The probe columns instead take the **mean "
+      "across cells**, which — since every cell has the same R — is exactly the pooled mean over "
+      "all runs, and is the interpretable \"probes per trial\" number.")
     w()
-    w("| algorithm | expl. share: median | mean | p90 | mean probes | median probes | "
+    w("| algorithm | expl. share: median | mean | p90 | mean probes/trial | median probes | "
       "only one probe | no exploitation phase |")
     w("|---|---:|---:|---:|---:|---:|---:|---:|")
     for a in M.ORDER:
@@ -884,7 +946,7 @@ def part_exploration(man, diag):
         if not rs:
             continue
         has_guess = M.ALGORITHMS[a]["has_guess"]
-        probes = (f"{np.median(col(rs,'n_probes_mean')):.1f} | "
+        probes = (f"{col(rs,'n_probes_mean').mean():.1f} | "
                   f"{np.median(col(rs,'n_probes_median')):.1f} | "
                   f"{pct(col(rs,'single_probe').mean(),1)}") if has_guess else "-- | -- | --"
         w(f"| {SHORT[a]} | {pct(np.median(col(rs,'exploration_share_median')),2)} | "

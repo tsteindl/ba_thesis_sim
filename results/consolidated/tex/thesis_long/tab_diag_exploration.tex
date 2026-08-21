@@ -1,0 +1,249 @@
+\begin{table}[ht]
+\centering
+\small
+\caption{Quality of the depth the exploration phase returns, before any safeguard is applied. $N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{how deep should the exploitation go}; $N_{\mathrm{opt}}=\lfloor \pi/2\phi \rfloor$ is the deepest non-aliasing depth. Brute force is absent because it does not search: its $N_{\mathrm{guess}}$ is undefined, not zero. Aggregated over the 144 informative operating points.}
+\label{tab:diag-exploration}
+\begin{tabular}{lcccccc}
+\toprule
+Algorithm
+& \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}
+& \makecell{Mean abs.\ \\ rel.\ error}
+& \makecell{Exact \\ hit}
+& \makecell{Within \\ $10\%$}
+& \makecell{Guess \\ overshoot}
+& \makecell{Probes \\ per trial} \\
+\midrule
+\multicolumn{7}{l}{\itshape U(0.01,0.1), eps=1e-03} \\
+A.~\ref{alg:linear-search}: LS
+& 0.83
+& 0.29
+& 7.1\%
+& 32.0\%
+& 10.6\%
+& 9.7 \\
+A.~\ref{alg:binary-search}: BS
+& 0.54
+& 0.44
+& 2.9\%
+& 11.4\%
+& 1.2\%
+& 1.5 \\
+A.~\ref{alg:reverse-engineering}: Rev. Eng.
+& 1.00
+& 0.12
+& 16.9\%
+& 60.9\%
+& 38.3\%
+& 1.1 \\
+\midrule
+\multicolumn{7}{l}{\itshape U(0.01,0.1), eps=1e-04} \\
+A.~\ref{alg:linear-search}: LS
+& 1.00
+& 0.05
+& 39.5\%
+& 87.6\%
+& 16.2\%
+& 31.4 \\
+A.~\ref{alg:binary-search}: BS
+& 0.97
+& 0.15
+& 23.8\%
+& 62.9\%
+& 21.9\%
+& 8.3 \\
+A.~\ref{alg:reverse-engineering}: Rev. Eng.
+& 1.00
+& 0.03
+& 47.3\%
+& 95.3\%
+& 26.6\%
+& 1.0 \\
+\midrule
+\multicolumn{7}{l}{\itshape U(0.01,0.1), eps=1e-05} \\
+A.~\ref{alg:linear-search}: LS
+& 1.00
+& 0.04
+& 56.7\%
+& 89.6\%
+& 6.6\%
+& 34.1 \\
+A.~\ref{alg:binary-search}: BS
+& 0.98
+& 0.14
+& 39.8\%
+& 66.2\%
+& 7.9\%
+& 8.3 \\
+A.~\ref{alg:reverse-engineering}: Rev. Eng.
+& 1.00
+& 0.01
+& 72.3\%
+& 99.6\%
+& 13.9\%
+& 1.0 \\
+\midrule
+\multicolumn{7}{l}{\itshape U(0.01,0.1), eps=1e-06} \\
+A.~\ref{alg:linear-search}: LS
+& 1.00
+& 0.05
+& 51.9\%
+& 86.6\%
+& 2.2\%
+& 32.2 \\
+A.~\ref{alg:binary-search}: BS
+& 1.00
+& 0.12
+& 46.4\%
+& 70.8\%
+& 6.1\%
+& 8.3 \\
+A.~\ref{alg:reverse-engineering}: Rev. Eng.
+& 1.00
+& 0.01
+& 77.9\%
+& 99.7\%
+& 11.1\%
+& 1.0 \\
+\midrule
+\multicolumn{7}{l}{\itshape U(0.01,0.1), eps=1e-07} \\
+A.~\ref{alg:linear-search}: LS
+& 1.00
+& 0.05
+& 52.1\%
+& 87.8\%
+& 1.4\%
+& 33.7 \\
+A.~\ref{alg:binary-search}: BS
+& 1.00
+& 0.11
+& 48.7\%
+& 71.9\%
+& 3.4\%
+& 8.3 \\
+A.~\ref{alg:reverse-engineering}: Rev. Eng.
+& 1.00
+& 0.01
+& 78.4\%
+& 99.4\%
+& 10.8\%
+& 1.0 \\
+\midrule
+\multicolumn{7}{l}{\itshape U(0.01,0.1), eps=1e-08} \\
+A.~\ref{alg:linear-search}: LS
+& 1.00
+& 0.05
+& 51.1\%
+& 87.3\%
+& 1.1\%
+& 33.7 \\
+A.~\ref{alg:binary-search}: BS
+& 1.00
+& 0.09
+& 52.5\%
+& 75.8\%
+& 4.6\%
+& 8.3 \\
+A.~\ref{alg:reverse-engineering}: Rev. Eng.
+& 1.00
+& 0.01
+& 80.5\%
+& 99.7\%
+& 9.8\%
+& 1.0 \\
+\midrule
+\multicolumn{7}{l}{\itshape U(0.001,0.01), eps=1e-04} \\
+A.~\ref{alg:linear-search}: LS
+& 0.85
+& 0.32
+& 1.0\%
+& 30.9\%
+& 4.5\%
+& 33.8 \\
+A.~\ref{alg:binary-search}: BS
+& 0.55
+& 0.45
+& 0.7\%
+& 11.5\%
+& 0.0\%
+& 1.0 \\
+A.~\ref{alg:reverse-engineering}: Rev. Eng.
+& 0.99
+& 0.12
+& 1.6\%
+& 60.7\%
+& 41.8\%
+& 1.1 \\
+\midrule
+\multicolumn{7}{l}{\itshape U(0.001,0.1), eps=1e-04} \\
+A.~\ref{alg:linear-search}: LS
+& 0.97
+& 0.12
+& 25.2\%
+& 72.9\%
+& 15.0\%
+& 28.6 \\
+A.~\ref{alg:binary-search}: BS
+& 0.48
+& 0.51
+& 1.9\%
+& 7.8\%
+& 0.0\%
+& 1.0 \\
+A.~\ref{alg:reverse-engineering}: Rev. Eng.
+& 1.00
+& 0.04
+& 43.7\%
+& 90.4\%
+& 27.6\%
+& 1.0 \\
+\midrule
+\multicolumn{7}{l}{\itshape U(0.01,pi/4), eps=1e-03} \\
+A.~\ref{alg:linear-search}: LS
+& 1.00
+& 0.23
+& 51.1\%
+& 53.5\%
+& 5.5\%
+& 5.1 \\
+A.~\ref{alg:binary-search}: BS
+& 0.67
+& 0.41
+& 33.9\%
+& 33.9\%
+& 0.0\%
+& 1.0 \\
+A.~\ref{alg:reverse-engineering}: Rev. Eng.
+& 1.00
+& 0.05
+& 75.8\%
+& 82.2\%
+& 11.8\%
+& 1.0 \\
+\midrule
+\multicolumn{7}{l}{\itshape U(0.01,pi/2), eps=1e-03} \\
+A.~\ref{alg:linear-search}: LS
+& 1.00
+& 0.17
+& 66.4\%
+& 69.0\%
+& 12.0\%
+& 7.9 \\
+A.~\ref{alg:binary-search}: BS
+& 1.00
+& 0.34
+& 51.4\%
+& 51.4\%
+& 0.3\%
+& 1.4 \\
+A.~\ref{alg:reverse-engineering}: Rev. Eng.
+& 1.00
+& 0.04
+& 84.0\%
+& 86.4\%
+& 7.6\%
+& 1.1 \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize Per-point values with 95\% intervals and eligible denominators: \texttt{diagnostics\_by\_point.csv}.
+\end{table}

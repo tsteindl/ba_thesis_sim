@@ -79,7 +79,10 @@ def operating_points():
         by.setdefault((r["scenario_id"], int(f(r["budget"]))), []).append(r)
     rows = []
     for (sid, b), rs in sorted(by.items()):
-        rates = {r["algorithm"]: f(r["rate"]) for r in rs}
+        rates = {r["algorithm"]: f(r["rate"]) for r in rs
+                 if M.ALGORITHMS.get(r["algorithm"], {}).get("role", "protocol") == "protocol"}
+        if not rates:
+            continue
         best = max(rates.values())
         worst = min(rates.values())
         regime = "saturated" if best > SAT else ("floored" if best < FLOOR else "live")
@@ -108,8 +111,12 @@ def crossings(mode):
         rs.sort(key=lambda r: int(r["budget"]))
         b = np.array([int(r["budget"]) for r in rs], float)
         p = np.array([f(r["rate"]) for r in rs])
-        Rs = {int(r["R"]) for r in rs}
-        R = min(Rs)                     # row-specific R, never a hard-coded default
+        Rs = {int(f(r["R"])) for r in rs if str(r.get("R", "")).strip() not in ("", "nan")}
+        # The ceiling is exact -- closed-form probability averaged over the prior, nothing sampled.
+        # It has no R, so it gets its crossing as a point value with no bootstrap interval, rather
+        # than a bootstrap over a trial count it does not have.
+        exact = not Rs
+        R = min(Rs) if Rs else 0
         ref = by.get((sid, "brute"))
         if ref:
             ref = sorted(ref, key=lambda r: int(r["budget"]))
@@ -117,12 +124,19 @@ def crossings(mode):
             p_ref = np.array([f(r["rate"]) for r in ref])
         scen = scen_by_id.get(sid, {})
         for T in M.THRESHOLDS:
-            pt, lo, hi, cov = crossing_ci(b, p, T, R, n_boot=cfgm["n_boot"], seed=M.SEED_BOOT,
-                                          ci=M.CI_LEVEL)
+            if exact:
+                pt, lo, hi, cov = crossing(b, p, T), float("nan"), float("nan"), 1.0
+            else:
+                pt, lo, hi, cov = crossing_ci(b, p, T, R, n_boot=cfgm["n_boot"],
+                                              seed=M.SEED_BOOT, ci=M.CI_LEVEL)
             rat = rl = rh = float("nan")
             if ref is not None and algo != "brute":
-                rat, rl, rh, _c = ratio_ci(b_ref, p_ref, p, T, R, n_boot=cfgm["n_boot"],
-                                           seed=M.SEED_BOOT, ci=M.CI_LEVEL, budgets_alg=b)
+                if exact:
+                    ca, cb = crossing(b_ref, p_ref, T), crossing(b, p, T)
+                    rat = (ca / cb) if (np.isfinite(ca) and np.isfinite(cb) and cb) else float("nan")
+                else:
+                    rat, rl, rh, _c = ratio_ci(b_ref, p_ref, p, T, R, n_boot=cfgm["n_boot"],
+                                               seed=M.SEED_BOOT, ci=M.CI_LEVEL, budgets_alg=b)
             rows.append({
                 "setting": rs[0]["setting"], "scenario_id": sid,
                 "phi_min": rs[0]["phi_min"], "phi_max": rs[0]["phi_max"],
@@ -341,6 +355,7 @@ def report(mode, head, cross, params, regime):
     # every aggregate below is over LIVE points only: see operating_points.csv
     diag = [r for r in diag_all
             if regime.get((r["scenario_id"], int(f(r["budget"])))) == "live"]
+    diag_protocols = [r for r in diag if r["algorithm"] in M.PROTOCOLS]
     perf = load("performance_curves.csv")
     wins = load("winners.csv")
     audit = load("budget_audit.csv")
@@ -368,6 +383,10 @@ def report(mode, head, cross, params, regime):
     rate = {a: A(a, "rate") for a in M.ORDER}
     by_pt = {}
     for r in diag:
+        # only the protocols under comparison can "win" a point; the separable baseline and the
+        # ceiling are reference rows and are excluded by construction
+        if r["algorithm"] not in M.PROTOCOLS:
+            continue
         by_pt.setdefault((r["scenario_id"], r["budget"]), {})[r["algorithm"]] = f(r["rate"])
     live = by_pt      # `diag` is already restricted to the live points
     wins_count = {a: 0 for a in M.ORDER}

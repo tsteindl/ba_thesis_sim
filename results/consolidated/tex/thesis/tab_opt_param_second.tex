@@ -1,0 +1,35 @@
+\begin{table}[ht]
+\centering
+\scriptsize
+\caption{Frozen configurations at the $90\%$-convergence budget. \textbf{A budget crossing is interpolated between tested budgets; parameter dictionaries are not.} Each entry is therefore the winner at the \emph{nearest tested} budget, not an exact optimum at the interpolated $B_{90}$. Both bracketing winners are listed in \texttt{optimal\_params.csv}.}
+\label{tab:opt-param-second-tab}
+\begin{tabular}{llllll}
+\toprule
+Algorithm
+& Reported for
+& $\phi \sim \mathcal{U}(0.01,0.1)$, $\epsilon=$10^{-3}
+& $\phi \sim \mathcal{U}(0.01,0.1)$, $\epsilon=$10^{-4}
+& $\phi \sim \mathcal{U}(0.001,0.01)$, $\epsilon=$10^{-4}
+& $\phi \sim \mathcal{U}(0.001,0.1)$, $\epsilon=$10^{-4} \\
+\midrule
+A.~\ref{alg:linear-search}: LS
+& nearest tested $B$
+& \makecell{\texttt{m\_exploration=15}, \\ \texttt{lookback\_window=3}, \\ \texttt{safeguard=2}, \\ \texttt{inc=2}}
+& \makecell{\texttt{m\_exploration=176}, \\ \texttt{lookback\_window=8}, \\ \texttt{safeguard=1}, \\ \texttt{inc=1}}
+& \makecell{\texttt{m\_exploration=1}, \\ \texttt{lookback\_window=12}, \\ \texttt{safeguard=12}, \\ \texttt{inc=1}}
+& \makecell{\texttt{m\_exploration=472}, \\ \texttt{lookback\_window=4}, \\ \texttt{safeguard=1}, \\ \texttt{inc=2}} \\
+A.~\ref{alg:binary-search}: BS
+& nearest tested $B$
+& \makecell{\texttt{m\_exploration=289}, \\ \texttt{conf=0.5}}
+& \makecell{\texttt{m\_exploration=334}, \\ \texttt{conf=0.66}}
+& \makecell{\texttt{m\_exploration=391}, \\ \texttt{conf=0.5}}
+& \makecell{\texttt{m\_exploration=2635}, \\ \texttt{conf=0.5}} \\
+A.~\ref{alg:reverse-engineering}: RE
+& nearest tested $B$
+& \makecell{\texttt{m\_exploration=91}}
+& \makecell{\texttt{m\_exploration=1286}}
+& \makecell{\texttt{m\_exploration=116}}
+& \makecell{\texttt{m\_exploration=2288}} \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,43 @@
+\begin{table}[ht]
+\centering
+\small
+\caption{From the exploration's guess to the depth actually used. $N_*$ is the exploitation depth after the safeguard; \emph{unsafe-guess rescue} is $P(N_* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how often the safeguard pulls an aliasing guess back to safety. A median $N_*/N_{\mathrm{opt}}$ below one is intended: the rule maximises $P(\text{no overshoot})\times P(\text{converge})$ and deliberately backs off from the aliasing cliff.}
+\label{tab:diag-downstream}
+\begin{tabular}{lccccc}
+\toprule
+Algorithm
+& \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}
+& \makecell{Median \\ $N_*/N_{\mathrm{opt}}$}
+& \makecell{Final \\ overshoot}
+& \makecell{Unsafe-guess \\ rescue}
+& \makecell{Median expl. \\ budget share} \\
+\midrule
+A.~\ref{alg:brute-force}: BF (baseline)
+& --
+& 0.54
+& 0.00\%
+& --
+& 0.00\% \\
+A.~\ref{alg:linear-search}: LS
+& 1.00
+& 0.95
+& 2.35\%
+& 49.5\%
+& 1.78\% \\
+A.~\ref{alg:binary-search}: BS
+& 0.93
+& 1.00
+& 0.74\%
+& 96.4\%
+& 2.70\% \\
+A.~\ref{alg:reverse-engineering}: Rev. Eng.
+& 1.00
+& 1.00
+& 0.47\%
+& 97.3\%
+& 1.33\% \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize These are overlapping stage flags and conditional rates, \emph{not} a mutually exclusive decomposition of why trials fail.
+\end{table}

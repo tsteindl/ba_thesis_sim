@@ -1,0 +1,41 @@
+\begin{table}[ht]
+\centering
+\small
+\caption{Quality of the depth the exploration phase returns, before any safeguard is applied. $N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{how deep should the exploitation go}; $N_{\mathrm{opt}}=\lfloor \pi/2\phi \rfloor$ is the deepest non-aliasing depth. Brute force is absent because it does not search: its $N_{\mathrm{guess}}$ is undefined, not zero. Aggregated over the 144 informative operating points.}
+\label{tab:diag-exploration}
+\begin{tabular}{lcccccc}
+\toprule
+Algorithm
+& \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}
+& \makecell{Mean abs.\ \\ rel.\ error}
+& \makecell{Exact \\ hit}
+& \makecell{Within \\ $10\%$}
+& \makecell{Guess \\ overshoot}
+& \makecell{Probes \\ per trial} \\
+\midrule
+A.~\ref{alg:linear-search}: LS
+& 1.00
+& 0.14
+& 41.4\%
+& 68.6\%
+& 7.7\%
+& 23.4 \\
+A.~\ref{alg:binary-search}: BS
+& 0.93
+& 0.29
+& 31.0\%
+& 45.7\%
+& 4.1\%
+& 4.4 \\
+A.~\ref{alg:reverse-engineering}: RE
+& 1.00
+& 0.05
+& 59.1\%
+& 86.8\%
+& 19.3\%
+& 1.0 \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize Per-point values with 95\% intervals and eligible denominators: \texttt{diagnostics\_by\_point.csv}.
+\end{table}

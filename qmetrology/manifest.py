@@ -29,6 +29,8 @@ qmetrology/algorithms.py but are deliberately outside this manifest.
 import numpy as np
 
 from .algorithms import (find_phi_fixed_budget_brute_force,
+                         find_phi_fixed_budget_separable,
+                         find_phi_fixed_budget_ceiling,
                          find_phi_fixed_budget_linear_search,
                          find_phi_fixed_budget_binary_search_deep,
                          find_phi_fixed_budget_reverse_engineering_risk)
@@ -175,7 +177,35 @@ ALGORITHMS = {
         discrete={}),
 }
 
+# Reference rows: reported in the thesis tables for context, but NOT protocols under comparison.
+# They are deliberately kept out of ORDER so that every diagnostic aggregate, the "points won"
+# count and the live/saturated regime classification keep referring to the four algorithms under
+# test -- adding a ceiling to the regime rule would reclassify points purely because an
+# unimplementable bound saturates there.
+ALGORITHMS["separable"] = dict(
+    fn=find_phi_fixed_budget_separable,
+    variant="qmetrology.algorithms.find_phi_fixed_budget_separable",
+    label="Separable protocol (N=1)", adaptive=False, has_detector=False, has_guess=False,
+    fixed_params={}, role="baseline")
+
+# The Eq.(3.4) ceiling is SIMULATED like every other row -- same seeds, same phase draws, same R,
+# same Wilson interval. It is told N_opt instead of searching for it, and its error is drawn from
+# Eq. (3.4) rather than from the binomial readout (see the function's docstring for why). Evaluating
+# it by simulation rather than by quadrature over the prior costs nothing and removes a second,
+# separately-explained estimation route from the results.
+ALGORITHMS["oracle_hl"] = dict(
+    fn=find_phi_fixed_budget_ceiling,
+    variant="qmetrology.algorithms.find_phi_fixed_budget_ceiling",
+    label="Ceiling (N_opt, Eq. 3.4 law)", adaptive=False, has_detector=False,
+    has_guess=False, fixed_params={}, role="ceiling")
+
+for _k in ("brute", "linear", "binary_deep", "reverse_eng_risk"):
+    ALGORITHMS[_k]["role"] = "protocol"
+
 ORDER = ["brute", "linear", "binary_deep", "reverse_eng_risk"]
+PROTOCOLS = list(ORDER)                       # what the comparison and the regime rule use
+REFERENCE = ["separable", "oracle_hl"]        # extra rows for the thesis tables only
+TABLE_ORDER = ORDER + REFERENCE
 ADAPTIVE = [a for a in ORDER if ALGORITHMS[a]["adaptive"]]
 
 
