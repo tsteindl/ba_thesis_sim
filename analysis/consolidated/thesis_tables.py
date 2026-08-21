@@ -224,7 +224,7 @@ def tab_summary_low_prec(D, ci=False):
             continue
         if a in ("separable", "oracle_hl"):
             body.append(r"\midrule")
-        c1 = f"{100*r:.2f}\%"
+        c1 = f"{100*r:.2f}\\%"
         if ci and np.isfinite(lo):
             c1 += f" \\newline {{\\scriptsize [{100*lo:.2f}, {100*hi:.2f}]}}"
         c2 = tex_int(x) if np.isfinite(x) else "--"

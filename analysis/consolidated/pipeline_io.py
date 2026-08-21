@@ -10,7 +10,8 @@ import json
 import os
 
 # overridable so the test-suite can drive the whole pipeline into a scratch directory
-OUT = os.environ.get("CONSOLIDATED_OUT", "results/consolidated")
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+OUT = os.environ.get("CONSOLIDATED_OUT", os.path.join(REPO_ROOT, "results", "consolidated"))
 
 
 def path(*parts):

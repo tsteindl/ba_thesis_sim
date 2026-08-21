@@ -5,6 +5,7 @@ still plots the old opening-probe binary search at R = 40,000.
 
     python analysis/consolidated/thesis_figures.py            # all figures
     python analysis/consolidated/thesis_figures.py --only story,precision
+    python analysis/consolidated/thesis_figures.py --out DIR  # write somewhere else
 
 Figures (written to results/consolidated/):
     fig_story           convergence vs budget for the headline scenario, with the 90% crossing
@@ -32,6 +33,8 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from qmetrology import manifest as M
 from pipeline_io import path
+
+OUT = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else path("")
 
 PAPER_RC = {
     "figure.dpi": 140, "savefig.dpi": 140, "font.size": 11,
@@ -65,6 +68,10 @@ def load(name):
         return []
     with open(p, newline="") as fh:
         return list(csv.DictReader(fh))
+
+
+def out_path(name):
+    return os.path.join(OUT, name)
 
 
 def prior_of(label):
@@ -156,7 +163,7 @@ def fig_story(d, small=False):
     fig.tight_layout(rect=(0, 0.035, 1, 1))
     _foot(fig, d, bands="shaded bands are 95% Wilson intervals")
     name = "fig_story_small.png" if small else "fig_story.png"
-    fig.savefig(path(name), bbox_inches="tight")
+    fig.savefig(out_path(name), bbox_inches="tight")
     plt.close(fig)
     return name
 
@@ -184,7 +191,7 @@ def fig_precision(d):
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     _foot(fig, d, extra="Ratios > 1 mean less budget is required. Crossings are log-linearly "
           "interpolated between tested budgets.")
-    fig.savefig(path("fig_precision.png"), bbox_inches="tight")
+    fig.savefig(out_path("fig_precision.png"), bbox_inches="tight")
     plt.close(fig)
     return "fig_precision.png"
 
@@ -216,7 +223,7 @@ def fig_pareto(d):
                bbox_to_anchor=(0.5, -0.02))
     fig.tight_layout(rect=(0, 0.08, 1, 1))
     _foot(fig, d)
-    fig.savefig(path("fig_pareto.png"), bbox_inches="tight")
+    fig.savefig(out_path("fig_pareto.png"), bbox_inches="tight")
     plt.close(fig)
     return "fig_pareto.png"
 
@@ -250,7 +257,7 @@ def fig_error(d, sid=HEAD):
     ax.legend(fontsize=8.5, loc="lower left")
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     _foot(fig, d, bands="bands are the 25-75% range of the per-trial error")
-    fig.savefig(path("fig_error.png"), bbox_inches="tight")
+    fig.savefig(out_path("fig_error.png"), bbox_inches="tight")
     plt.close(fig)
     return "fig_error.png"
 
@@ -281,7 +288,7 @@ def fig_broad(d):
     axes[-1].legend(fontsize=8, loc="upper left")
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     _foot(fig, d, bands="shaded bands are 95% Wilson intervals")
-    fig.savefig(path("fig_broad.png"), bbox_inches="tight")
+    fig.savefig(out_path("fig_broad.png"), bbox_inches="tight")
     plt.close(fig)
     return "fig_broad.png"
 
@@ -290,6 +297,7 @@ def main():
     only = None
     if "--only" in sys.argv:
         only = set(sys.argv[sys.argv.index("--only") + 1].split(","))
+    os.makedirs(OUT, exist_ok=True)
     d = D()
     made = []
     with plt.rc_context(PAPER_RC):
@@ -304,7 +312,7 @@ def main():
             n = fn()
             if n:
                 made.append(n)
-    print(f"wrote {len(made)} figures to {path('')} at R = {d.R:,}")
+    print(f"wrote {len(made)} figures to {OUT} at R = {d.R:,}")
     for n in made:
         print(f"   {n}")
 
