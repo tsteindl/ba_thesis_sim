@@ -1,0 +1,290 @@
+"""The canonical experiment manifest (ALGORITHM_DIAGNOSTICS_HANDOFF.md, "Experiment matrix").
+
+One object defines every scenario, budget grid, algorithm, tuning grid, seed and trial count that
+the consolidated pipeline uses. Nothing downstream hard-codes a scenario list, an `R`, or a seed:
+`analysis/consolidated_run.py` reads them from here and every output row records the values it
+actually ran with, so the uncertainty code never has to assume a global default.
+
+Scenario families (all four are Chapter 4 families already in use, not new experiments):
+
+  fixed_budget           phi ~ U(0.01, 0.1), eps = 1e-3, B = 10,000 -- the Table 3.1 comparison.
+  budget_to_reliability  the eps = 1e-4 priors U(0.01,0.1), U(0.001,0.01), U(0.001,0.1), plus the
+                         low-precision standard scenario; the budget to reach p* comes from the
+                         swept convergence curve.
+  precision_sweep        U(0.01, 0.1) over eps = 1e-3 .. 1e-8.
+  broad_prior            U(0.01, pi/2) and U(0.01, pi/4) at eps = 1e-3, on the budget curve of
+                         results/broad_dist.csv (3e3 .. 2e6), which 04-broad-dist.tex reports.
+
+REPORTED ALGORITHMS. Exactly the four that are settled:
+
+  brute             Algorithm 3, parameter-free.
+  linear            Algorithm 4, tuned (m', lookback_window, s, inc).
+  binary_deep       Algorithm 5 + statistical safeguard fed by the DEEPEST accepted probe; tuned
+                    (m', conf).
+  reverse_eng_risk  Algorithm 6 + statistical safeguard; tuned (m').
+
+The superseded constant-safeguard variants and the exact-posterior/oracle arms stay in
+qmetrology/algorithms.py but are deliberately outside this manifest.
+"""
+import numpy as np
+
+from .algorithms import (find_phi_fixed_budget_brute_force,
+                         find_phi_fixed_budget_linear_search,
+                         find_phi_fixed_budget_binary_search_deep,
+                         find_phi_fixed_budget_reverse_engineering_risk)
+
+# ---------------------------------------------------------------------------- seeds and trials
+SEED_TUNE_BLOCKS = (42, 43)   # two disjoint tuning blocks; selection uses their MEAN rate
+SEED_TEST = 2024              # held-out evaluation, disjoint from every tuning block
+SEED_BOOT = 12345             # bootstrap / resampling seed for the uncertainty layer
+
+# R_tune  trials per tuning block in stages A and B (locate m', then scan the full discrete grid)
+# R_tune2 trials per tuning block in stage C, the final refinement -- this is what controls the
+#         VARIANCE of which configuration wins, the one uncertainty component that cannot be
+#         recovered from stored output afterwards (analysis/tuning_stability.py)
+# n_m1/2/3  exploration-size grid points in stages A / B / C
+MODES = {
+    "smoke": dict(R_tune=40, R_tune2=60, R_test=200, n_budgets=2, n_m1=3, n_m2=3, n_m3=3,
+                  disc_stride=4, R_audit=500, n_boot=50),
+    "quick": dict(R_tune=150, R_tune2=300, R_test=1500, n_budgets=4, n_m1=6, n_m2=5, n_m3=5,
+                  disc_stride=2, R_audit=2000, n_boot=200),
+    "full":  dict(R_tune=800, R_tune2=1500, R_test=40_000, n_budgets=16, n_m1=16, n_m2=9, n_m3=9,
+                  disc_stride=1, R_audit=20_000, n_boot=2000),
+    # --max: the overnight configuration. Denser budget grid (the crossing interpolation was the
+    # weakest reported quantity), denser m', the full widened discrete grids, and a much larger
+    # final-stage R so the winner is chosen with less noise than the differences it is choosing on.
+    "max":   dict(R_tune=700, R_tune2=6000, R_test=50_000, n_budgets=22, n_m1=24, n_m2=10, n_m3=15,
+                  disc_stride=1, R_audit=50_000, n_boot=2000),
+}
+
+CI_LEVEL = 95
+THRESHOLDS = (0.50, 0.80, 0.90, 0.95)
+CROSSING_RULE = "log-linear interpolation of the convergence-vs-budget curve (qmetrology.uncertainty.crossing)"
+
+
+# ---------------------------------------------------------------------------------- scenarios
+def brute90(phi_max, eps):
+    """Analytic budget for brute force to reach ~90% convergence -- the anchor of the budget grid."""
+    n_min = max(1, int(np.floor(np.pi / (2 * phi_max))))
+    return 0.6724 / (n_min * eps ** 2)
+
+
+SCENARIOS = [
+    # id,                phi_min, phi_max,   eps,   budget rule,                     families
+    dict(id="narrow_e3", phi_min=0.01, phi_max=0.1, eps=1e-3,
+         budget_rule=("brute90", 1 / 50, 30), pin_budgets=(10_000,),
+         families=("fixed_budget", "budget_to_reliability", "precision_sweep")),
+    dict(id="narrow_e4", phi_min=0.01, phi_max=0.1, eps=1e-4,
+         budget_rule=("brute90", 1 / 50, 30), pin_budgets=(),
+         families=("budget_to_reliability", "precision_sweep")),
+    dict(id="narrow_e5", phi_min=0.01, phi_max=0.1, eps=1e-5,
+         budget_rule=("brute90", 1 / 50, 30), pin_budgets=(), families=("precision_sweep",)),
+    dict(id="narrow_e6", phi_min=0.01, phi_max=0.1, eps=1e-6,
+         budget_rule=("brute90", 1 / 50, 30), pin_budgets=(), families=("precision_sweep",)),
+    dict(id="narrow_e7", phi_min=0.01, phi_max=0.1, eps=1e-7,
+         budget_rule=("brute90", 1 / 50, 30), pin_budgets=(), families=("precision_sweep",)),
+    dict(id="narrow_e8", phi_min=0.01, phi_max=0.1, eps=1e-8,
+         budget_rule=("brute90", 1 / 50, 30), pin_budgets=(), families=("precision_sweep",)),
+    dict(id="small_e4", phi_min=0.001, phi_max=0.01, eps=1e-4,
+         budget_rule=("brute90", 1 / 50, 30), pin_budgets=(),
+         families=("budget_to_reliability",)),
+    dict(id="wide_e4", phi_min=0.001, phi_max=0.1, eps=1e-4,
+         budget_rule=("brute90", 1 / 50, 30), pin_budgets=(),
+         families=("budget_to_reliability",)),
+    dict(id="broad_pi4_e3", phi_min=0.01, phi_max=float(np.pi / 4), eps=1e-3,
+         budget_rule=("explicit_log", 3_000, 2_000_000), pin_budgets=(),
+         families=("broad_prior",)),
+    dict(id="broad_pi2_e3", phi_min=0.01, phi_max=float(np.pi / 2), eps=1e-3,
+         budget_rule=("explicit_log", 3_000, 2_000_000), pin_budgets=(),
+         families=("broad_prior",)),
+]
+for _s in SCENARIOS:
+    _s.setdefault("phi_dist", "uniform")
+    hi = {round(np.pi / 2, 4): "pi/2", round(np.pi / 4, 4): "pi/4"}.get(
+        round(_s["phi_max"], 4), f"{_s['phi_max']:g}")
+    _s["label"] = f"U({_s['phi_min']:g},{hi}), eps={_s['eps']:.0e}"
+
+
+def budgets_for(scen, n_budgets):
+    """The budget grid of one scenario -- the manifest's rule, plus any pinned headline budgets."""
+    kind = scen["budget_rule"][0]
+    if kind == "brute90":
+        _k, lo_f, hi_f = scen["budget_rule"]
+        c = brute90(scen["phi_max"], scen["eps"])
+        lo, hi = c * lo_f, c * hi_f
+    elif kind == "explicit_log":
+        _k, lo, hi = scen["budget_rule"]
+    else:
+        raise ValueError(kind)
+    grid = np.geomspace(lo, hi, n_budgets)
+    return sorted({int(b) for b in grid} | {int(b) for b in scen.get("pin_budgets", ())})
+
+
+def n_min_of(scen):
+    return max(1, int(np.pi // (2 * scen["phi_max"])))
+
+
+def n_max_of(scen):
+    return max(1, int(np.pi // (2 * scen["phi_min"])))
+
+
+# --------------------------------------------------------------------------------- algorithms
+ALGORITHMS = {
+    "brute": dict(
+        fn=find_phi_fixed_budget_brute_force,
+        variant="qmetrology.algorithms.find_phi_fixed_budget_brute_force",
+        label="Brute force", adaptive=False, has_detector=False, has_guess=False,
+        fixed_params={}),
+    "linear": dict(
+        fn=find_phi_fixed_budget_linear_search,
+        variant="qmetrology.algorithms.find_phi_fixed_budget_linear_search",
+        label="Linear search", adaptive=True, has_detector=True, has_guess=True,
+        fixed_params={},
+        # The first production sweep selected the TOP of the old [1,2,5] / [0,1,2] grids at 64.8% /
+        # 15.7% of live cells -- an unbounded-above boundary of exactly the kind
+        # analysis/fine_sweep.py removed for m'. All three axes now extend well past where the
+        # winners sat, and `at_axis_bound` reports a pinned optimum on ANY axis, not just m'.
+        # inc and safeguard keep 1 and 0 as their physical minima.
+        # safeguard reaches 24 because the cost model still pinned it at the TOP of [0..6] on
+        # small_e4, where N_min = 157: `s` is an ABSOLUTE depth decrement, so the useful range grows
+        # with N and a grid tuned for N_min = 15 cannot serve N_min = 157. lookback_window and inc
+        # keep 1 as their physical minimum.
+        discrete=dict(lookback_window=[1, 2, 3, 4, 5, 6, 8, 12, 20],
+                      safeguard=[0, 1, 2, 3, 4, 6, 8, 12, 16, 24],
+                      inc=[1, 2, 3, 5, 8])),
+    "binary_deep": dict(
+        fn=find_phi_fixed_budget_binary_search_deep,
+        variant="qmetrology.algorithms.find_phi_fixed_budget_binary_search_deep",
+        label="Binary search (stat. safeguard, deepest probe)",
+        adaptive=True, has_detector=True, has_guess=True,
+        fixed_params={"eps_target": "eps"},
+        # conf is densest at the bottom: 63% of live winners chose 0.5, where the normal quantile is
+        # zero and the branch rule degenerates to a plain comparison against the reference estimate.
+        # 0.5 is a genuine floor (below it the test would accept probes reading LOWER than the
+        # reference, inverting its meaning), so the grid is refined just above it rather than
+        # extended below it. The top end is not binding (1.9% of winners at 0.99) but is kept dense
+        # enough that a high-conf regime would be resolved if one existed.
+        discrete=dict(conf=[0.5, 0.52, 0.55, 0.58, 0.62, 0.66, 0.70, 0.75, 0.80, 0.85, 0.90,
+                            0.95, 0.99])),
+    "reverse_eng_risk": dict(
+        fn=find_phi_fixed_budget_reverse_engineering_risk,
+        variant="qmetrology.algorithms.find_phi_fixed_budget_reverse_engineering_risk",
+        label="Reverse engineering (stat. safeguard)",
+        adaptive=True, has_detector=False, has_guess=True,
+        fixed_params={"eps_target": "eps"},
+        discrete={}),
+}
+
+ORDER = ["brute", "linear", "binary_deep", "reverse_eng_risk"]
+ADAPTIVE = [a for a in ORDER if ALGORITHMS[a]["adaptive"]]
+
+
+def m_bounds(scen, budget):
+    """Exploration-size bounds that cannot bind (analysis/fine_sweep.py).
+
+    lower  m' = 1, one shot -- the physical minimum.
+    upper  m' = budget // N_min, the largest pilot affordable at all: a probe at the opening depth
+           costs m' * N_min, beyond which the algorithm cannot take even its first probe.
+    Both endpoints are reported per row, so a boundary hit is informative rather than an artifact.
+    """
+    return 1, max(2, int(budget // n_min_of(scen)))
+
+
+def stage1_m(scen, budget, n_m1):
+    lo, hi = m_bounds(scen, budget)
+    return np.unique(np.geomspace(lo, hi, n_m1).astype(np.int64))
+
+
+def stage2_m(scen, budget, m_win, n_m2):
+    lo, hi = m_bounds(scen, budget)
+    return np.unique(np.clip(np.geomspace(max(lo, m_win / 4), min(hi, m_win * 4), n_m2),
+                             lo, hi).astype(np.int64))
+
+
+def stage3_m(scen, budget, m_win, n_m3):
+    """Final refinement: +/- a factor of two around the stage-B winner."""
+    lo, hi = m_bounds(scen, budget)
+    return np.unique(np.clip(np.geomspace(max(lo, m_win / 2), min(hi, m_win * 2), n_m3),
+                             lo, hi).astype(np.int64))
+
+
+def strided_discrete(algo, stride):
+    """Subsample each discrete axis, always keeping both endpoints.
+
+    Only the cheap modes use a stride > 1: `--smoke` and `--quick` exist to exercise the code path
+    and to sanity-check numbers, and scanning all 450 linear-search combinations there costs more
+    than the rest of the run. The production modes (`--full`, `--max`) use stride 1, i.e. the whole
+    grid, so a boundary flag always refers to the real search box.
+    """
+    out = {}
+    for k, vals in ALGORITHMS[algo].get("discrete", {}).items():
+        if stride <= 1 or len(vals) <= 3:
+            out[k] = list(vals)
+            continue
+        sub = list(vals[::stride])
+        if vals[-1] not in sub:
+            sub.append(vals[-1])
+        out[k] = sub
+    return out
+
+
+def coarse_discrete(algo):
+    """A 3-point-per-axis skeleton of the discrete grid, used only to LOCATE the exploration size.
+
+    The full linear-search grid is 11 x 6 x 5 = 330 combinations; crossing that with a 24-point m'
+    grid would be 7,920 configurations before any refinement. Stage A therefore scans m' against a
+    skeleton (bottom / middle / top of each axis) and stage B scans the FULL discrete grid at the m'
+    that skeleton found, which searches the same space without the product blowing up.
+    """
+    out = {}
+    for k, vals in ALGORITHMS[algo].get("discrete", {}).items():
+        out[k] = list(vals) if len(vals) <= 3 else [vals[0], vals[len(vals) // 2], vals[-1]]
+    return out
+
+
+def stage2_discrete(algo, win):
+    """Refine only the neighbourhood of the stage-1 discrete winner (a full re-scan of every
+    discrete axis at stage-2 R buys nothing and costs the bulk of the tuning time)."""
+    spec = ALGORITHMS[algo].get("discrete", {})
+    out = {}
+    for k, vals in spec.items():
+        i = vals.index(win[k])
+        out[k] = vals[max(0, i - 1):i + 2]
+    return out
+
+
+def to_json(mode):
+    """The manifest as written to results/consolidated/experiment_manifest.json."""
+    cfg = MODES[mode]
+    return {
+        "mode": mode,
+        "generated_by": "analysis/consolidated_run.py",
+        "seeds": {"tune_blocks": list(SEED_TUNE_BLOCKS), "test": SEED_TEST,
+                  "bootstrap": SEED_BOOT},
+        "trials": {"R_tune_per_block_stage1": cfg["R_tune"],
+                   "R_tune_per_block_stage2": cfg["R_tune2"], "R_test": cfg["R_test"]},
+        "tuning": {
+            "procedure": "three-stage grid: (A) m' over the full box [1, B//N_min] against a "
+                         "3-point-per-axis skeleton of the discrete grid; (B) the FULL discrete "
+                         "grid at m' within x4 of the stage-A winner; (C) refinement within x2 of "
+                         "the stage-B winner over the neighbouring discrete values, at R_tune2. "
+                         "Every stage is evaluated on every tuning block; the winner is the argmax "
+                         "of the MEAN block rate, ties broken toward the smaller exploration size",
+            "n_m_stage1": cfg["n_m1"], "n_m_stage2": cfg["n_m2"], "n_m_stage3": cfg["n_m3"],
+            "held_out": "the frozen winner is re-evaluated on SEED_TEST only",
+            "boundary_reporting": "at_axis_bound flags a winner pinned at an endpoint of ANY axis "
+                                  "(exploration size or a discrete axis), against the full grid",
+        },
+        "uncertainty": {"ci_level": CI_LEVEL, "n_boot": cfg["n_boot"],
+                        "boot_seed": SEED_BOOT,
+                        "proportions": "Wilson score interval at the row's own R",
+                        "continuous": "run-level percentile bootstrap",
+                        "crossing_rule": CROSSING_RULE},
+        "thresholds_pct": [int(100 * t) for t in THRESHOLDS],
+        "scenarios": [{k: v for k, v in s.items() if k != "fn"} | {
+            "budgets": budgets_for(s, cfg["n_budgets"]),
+            "N_min": n_min_of(s), "N_max": n_max_of(s)} for s in SCENARIOS],
+        "algorithms": {k: {kk: vv for kk, vv in v.items() if kk != "fn"}
+                       for k, v in ALGORITHMS.items()},
+        "algorithm_order": ORDER,
+    }

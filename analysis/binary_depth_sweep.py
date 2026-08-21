@@ -52,7 +52,7 @@ def _one_trial(seed, pmin, pmax, eps, budget, m_exploration, conf):
     out = _binary_search_explore(rng, phi, pmax, pmin, m_exploration, budget, conf)
     if out is None:
         return None
-    _ph, _Nb, used, _pa, _Na, phi_0, N_0, L = out
+    _ph, _Nb, used, _pa, _Na, phi_0, N_0, L, _U, _hist = out
     rem = budget - used
     n_opt = max(1, int(np.pi // (2 * phi)))
     n_sup = max(int(np.pi // (2 * pmin)), 1)
