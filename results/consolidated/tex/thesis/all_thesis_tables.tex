@@ -8,7 +8,7 @@
 % ---- tab_summary_low_prec.tex ------------------------------------
 \begin{table}[ht]
 \centering
-\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The \textit{ceiling} row is not an implementable protocol but an upper bound: it selects the exploitation depth knowing the true $\phi$.}
+\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated analytically using the asymptotic QCRB law.}
 \label{tab:summary-low-prec}
 \begin{tabular}{lcc}
 \toprule
@@ -33,20 +33,20 @@ Separable protocol ($N=1$)
 & 15.68\%
 & 680{,}000 \\
 \midrule
-\textit{Attainable Ceiling} (Eq. \ref{eq:qcrb-ent})
+Oracle ($N_\text{opt}$)
 & 73.48\%
-& 24{,}700 \\
+& 24{,}435 \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
 \end{table}
 
 
 % ---- tab_summary_low_prec_ci.tex ---------------------------------
 \begin{table}[ht]
 \centering
-\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The \textit{ceiling} row is not an implementable protocol but an upper bound: it selects the exploitation depth knowing the true $\phi$. Brackets give 95\% intervals (Wilson for rates, bootstrap for budgets); the ceiling is exact and carries none.}
+\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated analytically using the asymptotic QCRB law. Brackets give 95\% intervals (Wilson for rates, bootstrap for budgets); the oracle is exact and carries none.}
 \label{tab:summary-low-prec-ci}
 \begin{tabular}{lcc}
 \toprule
@@ -71,13 +71,13 @@ Separable protocol ($N=1$)
 & 15.68\% \newline {\scriptsize [15.36, 16.00]}
 & 680{,}000 \newline {\scriptsize [669{,}000, 691{,}000]} \\
 \midrule
-\textit{Attainable Ceiling} (Eq. \ref{eq:qcrb-ent})
+Oracle ($N_\text{opt}$)
 & 73.48\%
-& 24{,}700 \\
+& 24{,}435 \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
 \end{table}
 
 
@@ -85,41 +85,41 @@ Separable protocol ($N=1$)
 \begin{table}[ht]
 \centering
 \small
-\caption{Budget to reach $90\%$ convergence, expressed two ways. \textbf{Top of each cell:} $B_{\mathrm{brute}}/B_{\mathrm{alg}}$, the factor less budget than the baseline (greater than one is better). \textbf{Bottom:} $B_{\mathrm{alg}}/B_{\mathrm{ceiling}}$, how many times the attainable optimum the algorithm still needs ($1.00\texttimes$ would be optimal). The second number is what makes the first interpretable: $1.5\texttimes$ is near-optimal where only $1.6\texttimes$ was available and mediocre where $2.0\texttimes$ was. The two multiply to the ceiling's own factor in the last row. The separable protocol is omitted -- it is slower than the baseline; its raw budget is in Table~\ref{tab:summary-all}.}
+\caption{Budget to reach $90\%$ convergence, expressed two ways. \textbf{First number:} $B_{\mathrm{brute}}/B_{\mathrm{alg}}$, the factor less budget than the baseline ($>1$ is better). \textbf{Second number:} $B_{\mathrm{alg}}/B_{\mathrm{oracle}}$, the algorithm's budget relative to the oracle reference ($1.00\texttimes$ means equal budget). The second number is what makes the first interpretable: it shows directly how far the algorithm remains from the oracle reference. The two multiply to the oracle's own factor in the last row. The separable protocol is omitted -- it is slower than the baseline; its raw budget is in Table~\ref{tab:summary-all-ci}.}
 \label{tab:ratios}
 \begin{tabular}{lcccc}
 \toprule
-\makecell[l]{Algorithm \\ {\scriptsize $B_{\mathrm{brute}}/B_{\mathrm{alg}}$} \\ {\scriptsize ($B_{\mathrm{alg}}/B_{\mathrm{ceiling}}$)}}
+\makecell[l]{Algorithm \\ {\scriptsize $B_{\mathrm{brute}}/B_{\mathrm{alg}}$} \\ {\scriptsize ($B_{\mathrm{alg}}/B_{\mathrm{oracle}}$)}}
 & \makecell{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon = 10^{-3}$}
 & \makecell{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon = 10^{-4}$}
 & \makecell{$\phi \sim \mathcal{U}(0.001,0.01)$ \\ $\epsilon = 10^{-4}$}
 & \makecell{$\phi \sim \mathcal{U}(0.001,0.1)$ \\ $\epsilon = 10^{-4}$} \\
 \midrule
 A.~\ref{alg:linear-search}: LS
-& \makecell{1.08\texttimes{\scriptsize (1.72\texttimes\ opt.)}}
-& \makecell{1.56\texttimes{\scriptsize (1.18\texttimes\ opt.)}}
-& \makecell{1.17\texttimes{\scriptsize (1.56\texttimes\ opt.)}}
-& \makecell{1.30\texttimes{\scriptsize (1.51\texttimes\ opt.)}} \\
+& \makecell{1.08\texttimes{\scriptsize (1.74\texttimes\ oracle)}}
+& \makecell{1.56\texttimes{\scriptsize (1.19\texttimes\ oracle)}}
+& \makecell{1.17\texttimes{\scriptsize (1.57\texttimes\ oracle)}}
+& \makecell{1.30\texttimes{\scriptsize (1.52\texttimes\ oracle)}} \\
 A.~\ref{alg:binary-search}: BS
-& \makecell{1.42\texttimes{\scriptsize (1.31\texttimes\ opt.)}}
-& \makecell{1.60\texttimes{\scriptsize (1.15\texttimes\ opt.)}}
-& \makecell{1.32\texttimes{\scriptsize (1.38\texttimes\ opt.)}}
-& \makecell{1.84\texttimes{\scriptsize (1.07\texttimes\ opt.)}} \\
+& \makecell{1.42\texttimes{\scriptsize (1.33\texttimes\ oracle)}}
+& \makecell{1.60\texttimes{\scriptsize (1.16\texttimes\ oracle)}}
+& \makecell{1.32\texttimes{\scriptsize (1.39\texttimes\ oracle)}}
+& \makecell{1.84\texttimes{\scriptsize (1.07\texttimes\ oracle)}} \\
 A.~\ref{alg:reverse-engineering}: RE
-& \makecell{1.54\texttimes{\scriptsize (1.21\texttimes\ opt.)}}
-& \makecell{1.74\texttimes{\scriptsize (1.05\texttimes\ opt.)}}
-& \makecell{1.46\texttimes{\scriptsize (1.25\texttimes\ opt.)}}
-& \makecell{1.84\texttimes{\scriptsize (1.07\texttimes\ opt.)}} \\
+& \makecell{1.54\texttimes{\scriptsize (1.22\texttimes\ oracle)}}
+& \makecell{1.74\texttimes{\scriptsize (1.06\texttimes\ oracle)}}
+& \makecell{1.46\texttimes{\scriptsize (1.26\texttimes\ oracle)}}
+& \makecell{1.84\texttimes{\scriptsize (1.07\texttimes\ oracle)}} \\
 \midrule
-\textit{Ceiling}
-& \makecell{1.86\texttimes{\scriptsize (1.00\texttimes\ opt.)}}
-& \makecell{1.83\texttimes{\scriptsize (1.00\texttimes\ opt.)}}
-& \makecell{1.82\texttimes{\scriptsize (1.00\texttimes\ opt.)}}
-& \makecell{1.97\texttimes{\scriptsize (1.00\texttimes\ opt.)}} \\
+Oracle ($N_\text{opt}$)
+& \makecell{1.88\texttimes{\scriptsize (1.00\texttimes\ oracle)}}
+& \makecell{1.85\texttimes{\scriptsize (1.00\texttimes\ oracle)}}
+& \makecell{1.84\texttimes{\scriptsize (1.00\texttimes\ oracle)}}
+& \makecell{1.98\texttimes{\scriptsize (1.00\texttimes\ oracle)}} \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
 \end{table}
 
 
@@ -164,15 +164,15 @@ Sep. ($N=1$)
 & --
 & 67{,}300 \\
 \midrule
-\textit{Ceiling}
-& 24.7
-& 2{,}470
-& 242
-& 2{,}300 \\
+Oracle ($N_\text{opt}$)
+& 24.4
+& 2{,}442.3
+& 239.5
+& 2{,}283 \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
 \end{table}
 
 
@@ -217,15 +217,15 @@ Sep. ($N=1$)
 & --
 & 67{,}300 \newline {\scriptsize [66{,}300, 68{,}500]} \\
 \midrule
-\textit{Ceiling}
-& 24.7
-& 2{,}470
-& 242
-& 2{,}300 \\
+Oracle ($N_\text{opt}$)
+& 24.4
+& 2{,}442.3
+& 239.5
+& 2{,}283 \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
 \end{table}
 
 
@@ -233,7 +233,7 @@ Sep. ($N=1$)
 \begin{table}[ht]
 \centering
 \small
-\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the ceiling column bounds how much of it is attainable at all.}
+\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the oracle column bounds how much of it is attainable at all.}
 \label{tab:scaling-with-prec}
 \begin{tabular}{lcccc}
 \toprule
@@ -241,42 +241,42 @@ Precision $\epsilon$
 & Linear search
 & Binary search
 & Reverse engineering
-& \textit{Attainable Ceiling} \\
+& Oracle ($N_\text{opt}$) \\
 \midrule
 $10^{-3}$
 & 1.08\texttimes
 & 1.42\texttimes
 & 1.54\texttimes
-& 1.86\texttimes \\
+& 1.88\texttimes \\
 $10^{-4}$
 & 1.56\texttimes
 & 1.60\texttimes
 & 1.74\texttimes
-& 1.83\texttimes \\
+& 1.85\texttimes \\
 $10^{-5}$
 & 1.57\texttimes
 & 1.75\texttimes
 & 1.80\texttimes
-& 1.82\texttimes \\
+& 1.85\texttimes \\
 $10^{-6}$
 & 1.63\texttimes
 & 1.78\texttimes
 & 1.80\texttimes
-& 1.83\texttimes \\
+& 1.85\texttimes \\
 $10^{-7}$
 & 1.65\texttimes
 & 1.79\texttimes
 & 1.81\texttimes
-& 1.83\texttimes \\
+& 1.85\texttimes \\
 $10^{-8}$
 & 1.62\texttimes
 & 1.77\texttimes
 & 1.82\texttimes
-& 1.83\texttimes \\
+& 1.85\texttimes \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
 \end{table}
 
 
@@ -284,7 +284,7 @@ $10^{-8}$
 \begin{table}[ht]
 \centering
 \small
-\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the ceiling column bounds how much of it is attainable at all. Brackets give 95\% bootstrap intervals; these are conservative (the two curves are resampled independently despite being seed-paired).}
+\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the oracle column bounds how much of it is attainable at all. Brackets give 95\% bootstrap intervals; these are conservative (the two curves are resampled independently despite being seed-paired).}
 \label{tab:scaling-with-prec-ci}
 \begin{tabular}{lcccc}
 \toprule
@@ -292,42 +292,42 @@ Precision $\epsilon$
 & Linear search
 & Binary search
 & Reverse engineering
-& \textit{Attainable Ceiling} \\
+& Oracle ($N_\text{opt}$) \\
 \midrule
 $10^{-3}$
 & 1.08\texttimes \newline {\scriptsize [1.06, 1.11]}
 & 1.42\texttimes \newline {\scriptsize [1.39, 1.44]}
 & 1.54\texttimes \newline {\scriptsize [1.51, 1.58]}
-& 1.86\texttimes \\
+& 1.88\texttimes \\
 $10^{-4}$
 & 1.56\texttimes \newline {\scriptsize [1.52, 1.59]}
 & 1.60\texttimes \newline {\scriptsize [1.57, 1.63]}
 & 1.74\texttimes \newline {\scriptsize [1.71, 1.78]}
-& 1.83\texttimes \\
+& 1.85\texttimes \\
 $10^{-5}$
 & 1.57\texttimes \newline {\scriptsize [1.53, 1.60]}
 & 1.75\texttimes \newline {\scriptsize [1.72, 1.79]}
 & 1.80\texttimes \newline {\scriptsize [1.76, 1.83]}
-& 1.82\texttimes \\
+& 1.85\texttimes \\
 $10^{-6}$
 & 1.63\texttimes \newline {\scriptsize [1.60, 1.67]}
 & 1.78\texttimes \newline {\scriptsize [1.75, 1.81]}
 & 1.80\texttimes \newline {\scriptsize [1.77, 1.83]}
-& 1.83\texttimes \\
+& 1.85\texttimes \\
 $10^{-7}$
 & 1.65\texttimes \newline {\scriptsize [1.62, 1.68]}
 & 1.79\texttimes \newline {\scriptsize [1.76, 1.83]}
 & 1.81\texttimes \newline {\scriptsize [1.78, 1.84]}
-& 1.83\texttimes \\
+& 1.85\texttimes \\
 $10^{-8}$
 & 1.62\texttimes \newline {\scriptsize [1.59, 1.65]}
 & 1.77\texttimes \newline {\scriptsize [1.74, 1.80]}
 & 1.82\texttimes \newline {\scriptsize [1.78, 1.85]}
-& 1.83\texttimes \\
+& 1.85\texttimes \\
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
 \end{table}
 
 
@@ -335,7 +335,7 @@ $10^{-8}$
 \begin{table}[ht]
 \centering
 \small
-\caption{Convergence under a broad uniform prior $\phi\sim\mathcal{U}(0.01,\pi/2)$ at $\epsilon=10^{-3}$: average share of simulations that converge, by budget. The best implementable entry in each row is set in bold; the ceiling is an upper bound, not a competitor. Only budgets in the informative band are listed (see \texttt{operating\_points.csv}).}
+\caption{Convergence under a broad uniform prior $\phi\sim\mathcal{U}(0.01,\pi/2)$ at $\epsilon=10^{-3}$: average share of simulations that converge, by budget. The best implementable entry in each row is set in bold; the oracle is an analytic reference, not a competitor. Only budgets in the informative band are listed (see \texttt{operating\_points.csv}).}
 \label{tab:broad-pi2}
 \begin{tabular}{rccccc}
 \toprule
@@ -344,7 +344,7 @@ Budget $C=N\cdot m$
 & Linear search
 & Binary search
 & Reverse engineering
-& \textit{Attainable Ceiling} \\
+& Oracle ($N_\text{opt}$) \\
 \midrule
 3{,}000
 & 8.8\%
@@ -469,7 +469,7 @@ Budget $C=N\cdot m$
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
 \end{table}
 
 
@@ -477,7 +477,7 @@ Budget $C=N\cdot m$
 \begin{table}[ht]
 \centering
 \small
-\caption{Convergence under a broad uniform prior $\phi\sim\mathcal{U}(0.01,\pi/4)$ at $\epsilon=10^{-3}$: average share of simulations that converge, by budget. The best implementable entry in each row is set in bold; the ceiling is an upper bound, not a competitor. Only budgets in the informative band are listed (see \texttt{operating\_points.csv}).}
+\caption{Convergence under a broad uniform prior $\phi\sim\mathcal{U}(0.01,\pi/4)$ at $\epsilon=10^{-3}$: average share of simulations that converge, by budget. The best implementable entry in each row is set in bold; the oracle is an analytic reference, not a competitor. Only budgets in the informative band are listed (see \texttt{operating\_points.csv}).}
 \label{tab:broad-pi4}
 \begin{tabular}{rccccc}
 \toprule
@@ -486,7 +486,7 @@ Budget $C=N\cdot m$
 & Linear search
 & Binary search
 & Reverse engineering
-& \textit{Attainable Ceiling} \\
+& Oracle ($N_\text{opt}$) \\
 \midrule
 3{,}000
 & 12.4\%
@@ -599,30 +599,97 @@ Budget $C=N\cdot m$
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\end{table}
+
+
+% ---- tab_robustness_across_thresholds.tex ------------------------
+\begin{table}[ht]
+\centering
+\scriptsize
+\caption{Robustness of the adaptive advantage across target convergence probabilities. Each cell reports $\max_a B_{\mathrm{BF}}(p^\ast)/B_a(p^\ast)$ over the three adaptive algorithms, followed by its pointwise 95\% bootstrap interval and the algorithm attaining the maximum. Values greater than one mean that the selected adaptive algorithm requires less budget than brute force. The maximizing algorithm is selected separately at each threshold.}
+\label{tab:robustness-across-thresholds}
+\begin{tabular}{lcccc}
+\toprule
+Scenario
+& \makecell{$50\%$ convergence}
+& \makecell{$80\%$ convergence}
+& \makecell{$90\%$ convergence}
+& \makecell{$95\%$ convergence} \\
+\midrule
+\makecell[l]{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon=10^{-3}$}
+& \makecell{1.49\texttimes \\ {\scriptsize [1.45, 1.53]} \\ {\scriptsize RE}}
+& \makecell{1.53\texttimes \\ {\scriptsize [1.51, 1.56]} \\ {\scriptsize RE}}
+& \makecell{1.54\texttimes \\ {\scriptsize [1.51, 1.58]} \\ {\scriptsize RE}}
+& \makecell{1.48\texttimes \\ {\scriptsize [1.44, 1.52]} \\ {\scriptsize RE}} \\
+\makecell[l]{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon=10^{-4}$}
+& \makecell{2.00\texttimes \\ {\scriptsize [1.95, 2.05]} \\ {\scriptsize RE}}
+& \makecell{1.84\texttimes \\ {\scriptsize [1.80, 1.88]} \\ {\scriptsize RE}}
+& \makecell{1.74\texttimes \\ {\scriptsize [1.71, 1.78]} \\ {\scriptsize RE}}
+& \makecell{1.61\texttimes \\ {\scriptsize [1.57, 1.64]} \\ {\scriptsize RE}} \\
+\makecell[l]{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon=10^{-5}$}
+& \makecell{2.20\texttimes \\ {\scriptsize [2.14, 2.25]} \\ {\scriptsize RE}}
+& \makecell{1.93\texttimes \\ {\scriptsize [1.89, 1.97]} \\ {\scriptsize RE}}
+& \makecell{1.80\texttimes \\ {\scriptsize [1.76, 1.83]} \\ {\scriptsize RE}}
+& \makecell{1.70\texttimes \\ {\scriptsize [1.67, 1.74]} \\ {\scriptsize RE}} \\
+\makecell[l]{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon=10^{-6}$}
+& \makecell{2.22\texttimes \\ {\scriptsize [2.16, 2.28]} \\ {\scriptsize RE}}
+& \makecell{1.94\texttimes \\ {\scriptsize [1.90, 1.98]} \\ {\scriptsize RE}}
+& \makecell{1.80\texttimes \\ {\scriptsize [1.77, 1.83]} \\ {\scriptsize RE}}
+& \makecell{1.71\texttimes \\ {\scriptsize [1.67, 1.74]} \\ {\scriptsize RE}} \\
+\makecell[l]{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon=10^{-7}$}
+& \makecell{2.21\texttimes \\ {\scriptsize [2.15, 2.26]} \\ {\scriptsize RE}}
+& \makecell{1.95\texttimes \\ {\scriptsize [1.91, 1.98]} \\ {\scriptsize RE}}
+& \makecell{1.81\texttimes \\ {\scriptsize [1.78, 1.84]} \\ {\scriptsize RE}}
+& \makecell{1.70\texttimes \\ {\scriptsize [1.66, 1.73]} \\ {\scriptsize BS}} \\
+\makecell[l]{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon=10^{-8}$}
+& \makecell{2.21\texttimes \\ {\scriptsize [2.15, 2.26]} \\ {\scriptsize RE}}
+& \makecell{1.94\texttimes \\ {\scriptsize [1.90, 1.98]} \\ {\scriptsize BS}}
+& \makecell{1.82\texttimes \\ {\scriptsize [1.78, 1.85]} \\ {\scriptsize RE}}
+& \makecell{1.71\texttimes \\ {\scriptsize [1.67, 1.74]} \\ {\scriptsize RE}} \\
+\makecell[l]{$\phi \sim \mathcal{U}(0.001,0.01)$ \\ $\epsilon=10^{-4}$}
+& \makecell{1.42\texttimes \\ {\scriptsize [1.39, 1.45]} \\ {\scriptsize RE}}
+& \makecell{1.47\texttimes \\ {\scriptsize [1.44, 1.49]} \\ {\scriptsize RE}}
+& \makecell{1.46\texttimes \\ {\scriptsize [1.43, 1.49]} \\ {\scriptsize RE}}
+& \makecell{1.40\texttimes \\ {\scriptsize [1.37, 1.43]} \\ {\scriptsize RE}} \\
+\makecell[l]{$\phi \sim \mathcal{U}(0.001,0.1)$ \\ $\epsilon=10^{-4}$}
+& \makecell{2.38\texttimes \\ {\scriptsize [2.33, 2.44]} \\ {\scriptsize BS}}
+& \makecell{2.04\texttimes \\ {\scriptsize [2.00, 2.08]} \\ {\scriptsize BS}}
+& \makecell{1.85\texttimes \\ {\scriptsize [1.81, 1.88]} \\ {\scriptsize RE}}
+& \makecell{1.71\texttimes \\ {\scriptsize [1.67, 1.74]} \\ {\scriptsize BS}} \\
+\makecell[l]{$\phi \sim \mathcal{U}(0.01,\pi/4)$ \\ $\epsilon=10^{-3}$}
+& \makecell{2.08\texttimes \\ {\scriptsize [2.03, 2.13]} \\ {\scriptsize RE}}
+& \makecell{1.75\texttimes \\ {\scriptsize [1.71, 1.78]} \\ {\scriptsize BS}}
+& \makecell{1.57\texttimes \\ {\scriptsize [1.53, 1.60]} \\ {\scriptsize BS}}
+& \makecell{1.46\texttimes \\ {\scriptsize [1.43, 1.50]} \\ {\scriptsize BS}} \\
+\makecell[l]{$\phi \sim \mathcal{U}(0.01,\pi/2)$ \\ $\epsilon=10^{-3}$}
+& \makecell{2.01\texttimes \\ {\scriptsize [1.97, 2.06]} \\ {\scriptsize BS}}
+& \makecell{1.60\texttimes \\ {\scriptsize [1.57, 1.63]} \\ {\scriptsize BS}}
+& \makecell{1.44\texttimes \\ {\scriptsize [1.41, 1.47]} \\ {\scriptsize BS}}
+& \makecell{1.34\texttimes \\ {\scriptsize [1.32, 1.36]} \\ {\scriptsize BS}} \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize LS = linear search, BS = binary search, RE = reverse engineering. Parameters were tuned on seeds 42, 43; frozen configurations were evaluated on held-out seed 2024 with $R=50{,}000$ trials per point. Budget crossings use log-linear interpolation between tested budgets.
 \end{table}
 
 
 % ---- tab_opt_param_first.tex -------------------------------------
 \begin{table}[ht]
 \centering
-\caption{Frozen configurations for Table~\ref{tab:summary-low-prec}, fixed budget $10{,}000$ ($\epsilon=10^{-3}$, $\mathcal{U}(0.01,0.1)$). The pilot cost column is the \emph{measured} mean exploration spend as a share of the budget, not a value derived from $m'$.}
+\caption{Parameter configurations selected for Table~\ref{tab:summary-low-prec-ci} at fixed budget $10{,}000$ ($\epsilon=10^{-3}$, $\phi\sim\mathcal{U}(0.01,0.1)$). For Reverse Engineering, the planned one-pilot exploration share is $m'N_{\min}/B$; realized shares including pilot retries are reported in Table~\ref{tab:diag-downstream}.}
 \label{tab:opt-param-first-tab}
-\begin{tabular}{llc}
+\begin{tabular}{ll}
 \toprule
 Algorithm
-& Optimal parameters
-& \makecell{Pilot cost, \\ \% of budget} \\
+& Selected parameters \\
 \midrule
-A.~\ref{alg:linear-search}: Linear search
-& \makecell{\texttt{m\_exploration=2}, \\ \texttt{lookback\_window=4}, \\ \texttt{safeguard=1}, \\ \texttt{inc=1}}
-& 9.2\% \\
-A.~\ref{alg:binary-search}: Binary search
-& \makecell{\texttt{m\_exploration=114}, \\ \texttt{conf=0.5}}
-& 17.1\% \\
-A.~\ref{alg:reverse-engineering}: Reverse engineering
-& \makecell{\texttt{m\_exploration=44}}
-& 6.7\% \\
+Linear search
+& \texttt{m\_exploration=2, lookback\_window=4, safeguard=1, inc=1} \\
+Binary search
+& \texttt{m\_exploration=114, conf=0.5} \\
+Reverse engineering
+& \texttt{m\_exploration=44}, planned $B_{\mathrm{expl}}/B=6.60\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -632,35 +699,33 @@ A.~\ref{alg:reverse-engineering}: Reverse engineering
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Frozen configurations at the $90\%$-convergence budget. \textbf{A budget crossing is interpolated between tested budgets; parameter dictionaries are not.} Each entry is therefore the winner at the \emph{nearest tested} budget, not an exact optimum at the interpolated $B_{90}$. Both bracketing winners are listed in \texttt{optimal\_params.csv}.}
+\caption{Parameter configurations selected near the $90\%$-convergence budget. A budget crossing is interpolated between tested budgets; parameter dictionaries are not. Each entry is therefore the selected configuration at the nearest tested budget, not a configuration evaluated at the interpolated $B_{90}$. For Reverse Engineering, the planned one-pilot exploration share is $m'N_{\min}/B$ at that tested budget; realized shares including retries are reported in Table~\ref{tab:diag-downstream}.}
 \label{tab:opt-param-second-tab}
-\begin{tabular}{llllll}
+\begin{tabular}{lllll}
 \toprule
 Algorithm
-& Reported for
-& $\phi \sim \mathcal{U}(0.01,0.1)$, $\epsilon=$10^{-3}
-& $\phi \sim \mathcal{U}(0.01,0.1)$, $\epsilon=$10^{-4}
-& $\phi \sim \mathcal{U}(0.001,0.01)$, $\epsilon=$10^{-4}
-& $\phi \sim \mathcal{U}(0.001,0.1)$, $\epsilon=$10^{-4} \\
+& \makecell{$\phi \sim \mathcal{U}(0.01,0.1)$, \\ $\epsilon=10^{-3}$}
+& \makecell{$\phi \sim \mathcal{U}(0.01,0.1)$, \\ $\epsilon=10^{-4}$}
+& \makecell{$\phi \sim \mathcal{U}(0.001,0.01)$, \\ $\epsilon=10^{-4}$}
+& \makecell{$\phi \sim \mathcal{U}(0.001,0.1)$, \\ $\epsilon=10^{-4}$} \\
 \midrule
-A.~\ref{alg:linear-search}: LS
-& nearest tested $B$
-& \makecell{\texttt{m\_exploration=15}, \\ \texttt{lookback\_window=3}, \\ \texttt{safeguard=2}, \\ \texttt{inc=2}}
-& \makecell{\texttt{m\_exploration=176}, \\ \texttt{lookback\_window=8}, \\ \texttt{safeguard=1}, \\ \texttt{inc=1}}
-& \makecell{\texttt{m\_exploration=1}, \\ \texttt{lookback\_window=12}, \\ \texttt{safeguard=12}, \\ \texttt{inc=1}}
-& \makecell{\texttt{m\_exploration=472}, \\ \texttt{lookback\_window=4}, \\ \texttt{safeguard=1}, \\ \texttt{inc=2}} \\
-A.~\ref{alg:binary-search}: BS
-& nearest tested $B$
-& \makecell{\texttt{m\_exploration=289}, \\ \texttt{conf=0.5}}
-& \makecell{\texttt{m\_exploration=334}, \\ \texttt{conf=0.66}}
-& \makecell{\texttt{m\_exploration=391}, \\ \texttt{conf=0.5}}
-& \makecell{\texttt{m\_exploration=2635}, \\ \texttt{conf=0.5}} \\
-A.~\ref{alg:reverse-engineering}: RE
-& nearest tested $B$
-& \makecell{\texttt{m\_exploration=91}}
-& \makecell{\texttt{m\_exploration=1286}}
-& \makecell{\texttt{m\_exploration=116}}
-& \makecell{\texttt{m\_exploration=2288}} \\
+LS
+& \makecell{\texttt{m\_exploration=15}, \\ \texttt{lookback\_window=3}, \\ \texttt{safeguard=2}, \\ \texttt{inc=2}, \\ {\scriptsize $B=41{,}326$}}
+& \makecell{\texttt{m\_exploration=176}, \\ \texttt{lookback\_window=8}, \\ \texttt{safeguard=1}, \\ \texttt{inc=1}, \\ {\scriptsize $B=2{,}917{,}365$}}
+& \makecell{\texttt{m\_exploration=1}, \\ \texttt{lookback\_window=12}, \\ \texttt{safeguard=12}, \\ \texttt{inc=1}, \\ {\scriptsize $B=394{,}843$}}
+& \makecell{\texttt{m\_exploration=472}, \\ \texttt{lookback\_window=4}, \\ \texttt{safeguard=1}, \\ \texttt{inc=2}, \\ {\scriptsize $B=4{,}132{,}694$}} \\
+\midrule
+BS
+& \makecell{\texttt{m\_exploration=289}, \\ \texttt{conf=0.5}, \\ {\scriptsize $B=29{,}173$}}
+& \makecell{\texttt{m\_exploration=334}, \\ \texttt{conf=0.66}, \\ {\scriptsize $B=2{,}917{,}365$}}
+& \makecell{\texttt{m\_exploration=391}, \\ \texttt{conf=0.5}, \\ {\scriptsize $B=394{,}843$}}
+& \makecell{\texttt{m\_exploration=2635}, \\ \texttt{conf=0.5}, \\ {\scriptsize $B=2{,}059{,}436$}} \\
+\midrule
+RE
+& \makecell{\texttt{m\_exploration=91}, \\ {\scriptsize $B=29{,}173$}, \\ {\scriptsize planned $B_{\mathrm{expl}}/B=4.68\%$}}
+& \makecell{\texttt{m\_exploration=1286}, \\ {\scriptsize $B=2{,}917{,}365$}, \\ {\scriptsize planned $B_{\mathrm{expl}}/B=0.66\%$}}
+& \makecell{\texttt{m\_exploration=116}, \\ {\scriptsize $B=278{,}729$}, \\ {\scriptsize planned $B_{\mathrm{expl}}/B=6.53\%$}}
+& \makecell{\texttt{m\_exploration=2288}, \\ {\scriptsize $B=2{,}059{,}436$}, \\ {\scriptsize planned $B_{\mathrm{expl}}/B=1.67\%$}} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -670,7 +735,7 @@ A.~\ref{alg:reverse-engineering}: RE
 \begin{table}[ht]
 \centering
 \small
-\caption{Quality of the depth the exploration phase returns, before any safeguard is applied. $N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{how deep should the exploitation go}; $N_{\mathrm{opt}}=\lfloor \pi/2\phi \rfloor$ is the deepest non-aliasing depth. Brute force is absent because it does not search: its $N_{\mathrm{guess}}$ is undefined, not zero. Aggregated over the 144 informative operating points.}
+\caption{Quality of the value of $N$ returned by exploration, before any safeguard is applied. $N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{which value of $N$ should be used for exploitation}; $N_{\mathrm{opt}}=\lfloor \pi/2\phi \rfloor$ is the largest non-aliasing value. Brute force is absent because it does not search: its $N_{\mathrm{guess}}$ is undefined, not zero. Broad-prior scenarios are excluded; the values aggregate the remaining 106 informative operating points.}
 \label{tab:diag-exploration}
 \begin{tabular}{lcccccc}
 \toprule
@@ -683,25 +748,25 @@ Algorithm
 & \makecell{Probes \\ per trial} \\
 \midrule
 A.~\ref{alg:linear-search}: LS
-& 1.00
-& 0.14
-& 41.4\%
-& 68.6\%
-& 7.7\%
-& 23.4 \\
+& 0.99
+& 0.12
+& 35.0\%
+& 71.1\%
+& 7.2\%
+& 29.5 \\
 A.~\ref{alg:binary-search}: BS
-& 0.93
-& 0.29
-& 31.0\%
-& 45.7\%
-& 4.1\%
-& 4.4 \\
+& 0.90
+& 0.25
+& 26.6\%
+& 46.6\%
+& 5.5\%
+& 5.5 \\
 A.~\ref{alg:reverse-engineering}: RE
 & 1.00
-& 0.05
-& 59.1\%
-& 86.8\%
-& 19.3\%
+& 0.04
+& 51.5\%
+& 87.7\%
+& 22.8\%
 & 1.0 \\
 \bottomrule
 \end{tabular}
@@ -714,7 +779,7 @@ A.~\ref{alg:reverse-engineering}: RE
 \begin{table}[ht]
 \centering
 \small
-\caption{From the exploration's guess to the depth actually used. $N_*$ is the exploitation depth after the safeguard; \emph{unsafe-guess rescue} is $P(N_* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how often the safeguard pulls an aliasing guess back to safety. A median $N_*/N_{\mathrm{opt}}$ below one is intended: the rule maximises $P(\text{no overshoot})\times P(\text{converge})$ and deliberately backs off from the aliasing cliff.}
+\caption{From the exploration's guess to the value of $N$ actually used. $N_*$ is the exploitation value after the safeguard; \emph{unsafe-guess rescue} is $P(N_* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how often the safeguard pulls an aliasing guess back to safety. A median $N_*/N_{\mathrm{opt}}$ below one is intended: the rule maximises $P(\text{no overshoot})\times P(\text{converge})$ and deliberately backs off from the aliasing cliff.}
 \label{tab:diag-downstream}
 \begin{tabular}{lccccc}
 \toprule
@@ -760,7 +825,7 @@ A.~\ref{alg:reverse-engineering}: RE
 \begin{table}[ht]
 \centering
 \small
-\caption{How well each search's own overshoot decision matches the simulation truth $N_i > N_{\mathrm{opt}}$. Rates are \emph{trial-level}: a run is a false alarm if at least one safe probe was declared an overshoot, and a miss if at least one overshooting probe was accepted. Trial-level is the correct unit because probes within a run are dependent; the probe-level counts are supporting telemetry only. Reverse engineering and brute force have no detector and are omitted rather than scored as zero. Linear search makes no per-probe declaration, so its classification is the backtracking decision of its own stopping rule.}
+\caption{How well each search's own overshoot decision matches the simulation truth $N_i > N_{\mathrm{opt}}$. Rates are \emph{trial-level}: a run is a false alarm if at least one safe probe was declared an overshoot, and a miss if at least one overshooting probe was accepted. Trial-level is the correct unit because probes within a run are dependent; the probe-level counts are supporting telemetry only. Reverse engineering and brute force have no detector and are omitted rather than scored as zero. Reverse engineering's $N_{\mathrm{guess}}$ and the safeguard's correction to $N_*$ are instead evaluated in Tables~\ref{tab:diag-exploration} and \ref{tab:diag-downstream}. Linear search makes no per-probe declaration, so its classification is the backtracking decision of its own stopping rule.}
 \label{tab:diag-detector}
 \begin{tabular}{lccccc}
 \toprule

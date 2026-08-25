@@ -1,7 +1,7 @@
 \begin{table}[ht]
 \centering
 \small
-\caption{Quality of the depth the exploration phase returns, before any safeguard is applied. $N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{how deep should the exploitation go}; $N_{\mathrm{opt}}=\lfloor \pi/2\phi \rfloor$ is the deepest non-aliasing depth. Brute force is absent because it does not search: its $N_{\mathrm{guess}}$ is undefined, not zero. Aggregated over the 144 informative operating points.}
+\caption{Quality of the value of $N$ returned by exploration, before any safeguard is applied, for the precision sweep. $N_{\mathrm{guess}}$ is each algorithm's proposed exploitation value and $N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the largest non-aliasing value. Brute force is absent because it does not search. Each scenario group aggregates its informative tested budgets (79 operating points in total).}
 \label{tab:diag-exploration}
 \begin{tabular}{lcccccc}
 \toprule
@@ -28,7 +28,7 @@ A.~\ref{alg:binary-search}: BS
 & 11.4\%
 & 1.2\%
 & 1.5 \\
-A.~\ref{alg:reverse-engineering}: Rev. Eng.
+A.~\ref{alg:reverse-engineering}: RE
 & 1.00
 & 0.12
 & 16.9\%
@@ -51,7 +51,7 @@ A.~\ref{alg:binary-search}: BS
 & 62.9\%
 & 21.9\%
 & 8.3 \\
-A.~\ref{alg:reverse-engineering}: Rev. Eng.
+A.~\ref{alg:reverse-engineering}: RE
 & 1.00
 & 0.03
 & 47.3\%
@@ -74,7 +74,7 @@ A.~\ref{alg:binary-search}: BS
 & 66.2\%
 & 7.9\%
 & 8.3 \\
-A.~\ref{alg:reverse-engineering}: Rev. Eng.
+A.~\ref{alg:reverse-engineering}: RE
 & 1.00
 & 0.01
 & 72.3\%
@@ -97,7 +97,7 @@ A.~\ref{alg:binary-search}: BS
 & 70.8\%
 & 6.1\%
 & 8.3 \\
-A.~\ref{alg:reverse-engineering}: Rev. Eng.
+A.~\ref{alg:reverse-engineering}: RE
 & 1.00
 & 0.01
 & 77.9\%
@@ -120,7 +120,7 @@ A.~\ref{alg:binary-search}: BS
 & 71.9\%
 & 3.4\%
 & 8.3 \\
-A.~\ref{alg:reverse-engineering}: Rev. Eng.
+A.~\ref{alg:reverse-engineering}: RE
 & 1.00
 & 0.01
 & 78.4\%
@@ -143,13 +143,31 @@ A.~\ref{alg:binary-search}: BS
 & 75.8\%
 & 4.6\%
 & 8.3 \\
-A.~\ref{alg:reverse-engineering}: Rev. Eng.
+A.~\ref{alg:reverse-engineering}: RE
 & 1.00
 & 0.01
 & 80.5\%
 & 99.7\%
 & 9.8\%
 & 1.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Exploration-quality diagnostics for the prior-range variants at $\epsilon=10^{-4}$. Definitions are as in Table~\ref{tab:diag-exploration}; the scenario groups comprise 27 informative operating points.}
+\label{tab:diag-exploration-priors}
+\begin{tabular}{lcccccc}
+\toprule
+Algorithm
+& \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}
+& \makecell{Mean abs.\ \\ rel.\ error}
+& \makecell{Exact \\ hit}
+& \makecell{Within \\ $10\%$}
+& \makecell{Guess \\ overshoot}
+& \makecell{Probes \\ per trial} \\
 \midrule
 \multicolumn{7}{l}{\itshape U(0.001,0.01), eps=1e-04} \\
 A.~\ref{alg:linear-search}: LS
@@ -166,7 +184,7 @@ A.~\ref{alg:binary-search}: BS
 & 11.5\%
 & 0.0\%
 & 1.0 \\
-A.~\ref{alg:reverse-engineering}: Rev. Eng.
+A.~\ref{alg:reverse-engineering}: RE
 & 0.99
 & 0.12
 & 1.6\%
@@ -189,61 +207,13 @@ A.~\ref{alg:binary-search}: BS
 & 7.8\%
 & 0.0\%
 & 1.0 \\
-A.~\ref{alg:reverse-engineering}: Rev. Eng.
+A.~\ref{alg:reverse-engineering}: RE
 & 1.00
 & 0.04
 & 43.7\%
 & 90.4\%
 & 27.6\%
 & 1.0 \\
-\midrule
-\multicolumn{7}{l}{\itshape U(0.01,pi/4), eps=1e-03} \\
-A.~\ref{alg:linear-search}: LS
-& 1.00
-& 0.23
-& 51.1\%
-& 53.5\%
-& 5.5\%
-& 5.1 \\
-A.~\ref{alg:binary-search}: BS
-& 0.67
-& 0.41
-& 33.9\%
-& 33.9\%
-& 0.0\%
-& 1.0 \\
-A.~\ref{alg:reverse-engineering}: Rev. Eng.
-& 1.00
-& 0.05
-& 75.8\%
-& 82.2\%
-& 11.8\%
-& 1.0 \\
-\midrule
-\multicolumn{7}{l}{\itshape U(0.01,pi/2), eps=1e-03} \\
-A.~\ref{alg:linear-search}: LS
-& 1.00
-& 0.17
-& 66.4\%
-& 69.0\%
-& 12.0\%
-& 7.9 \\
-A.~\ref{alg:binary-search}: BS
-& 1.00
-& 0.34
-& 51.4\%
-& 51.4\%
-& 0.3\%
-& 1.4 \\
-A.~\ref{alg:reverse-engineering}: Rev. Eng.
-& 1.00
-& 0.04
-& 84.0\%
-& 86.4\%
-& 7.6\%
-& 1.1 \\
 \bottomrule
 \end{tabular}
-\\[2pt]
-\footnotesize Per-point values with 95\% intervals and eligible denominators: \texttt{diagnostics\_by\_point.csv}.
 \end{table}

@@ -14,7 +14,6 @@ import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
-from qmetrology import algorithms as ALG
 from qmetrology import manifest as M
 from qmetrology.experiments import N_JOBS
 from qmetrology.pipeline import _task, _chunks, seeds_for
@@ -65,14 +64,9 @@ def pilot_comparison(R=20_000):
         scen = by_id[sid]
         cfg = {"m_exploration": m, "conf": conf}
         a, ka, na = _rate("binary_deep", scen, B, cfg, R, M.SEED_TEST)
-        # binary_risk is not in the manifest; evaluate it through the same worker by borrowing the
-        # manifest entry and swapping the function in a temporary registration
-        M.ALGORITHMS["_binary_risk_audit"] = dict(
-            M.ALGORITHMS["binary_deep"],
-            fn=ALG.find_phi_fixed_budget_binary_search_risk,
-            variant="qmetrology.algorithms.find_phi_fixed_budget_binary_search_risk")
+        # The hidden audit arm is importable in spawned Windows workers, but is not a reported
+        # algorithm (it is absent from ORDER and TABLE_ORDER).
         b, kb, nb = _rate("_binary_risk_audit", scen, B, cfg, R, M.SEED_TEST)
-        del M.ALGORITHMS["_binary_risk_audit"]
         lo_a, hi_a = wilson(a, na)
         rows.append(dict(scenario=scen["label"], budget=B, m=m, conf=conf, R=R,
                          deep=100 * a, opening=100 * b, delta_pp=100 * (a - b),

@@ -31,61 +31,33 @@ def find_phi_fixed_budget_oracle(rng, phi, phi_max, phi_min, budget, eps_target)
     return phi_hat, m * N
 
 
-def find_phi_fixed_budget_oracle_alias(rng, phi, phi_max, phi_min, budget):
-    """Oracle without a safeguard: N = floor(pi/(2 phi)), the deepest non-aliasing circuit.
+def find_phi_fixed_budget_oracle_nopt(rng, phi, phi_max, phi_min, budget, eps_target=None,
+                                      trace=None):
+    """Brute force at the oracle-provided N_opt, using the real binomial estimator.
 
-    Reverse engineering (Algorithm 6) with a perfect pilot and C_safe = 1. It falls short of the true
-    oracle at tight eps because the estimator is boundary-clamped at N phi ~ pi/2, which shows that
-    backing off the inferred depth is required even under perfect information.
+    This differs from ordinary brute force only in its number of phase gates: it is handed
+    N_opt = floor(pi/(2 phi)) instead of using the prior-safe N_min.  It then takes the maximum
+    number of whole shots allowed by the hard budget.  No Gaussian error is injected.
     """
     N = alias_depth(phi, budget)
-    m = int(budget / N)
+    m = int(budget) // N
     phi_hat = simulate_errors(rng, phi, m, N)
+    if trace is not None:
+        trace.nominal_budget = float(budget)
+        trace.set_exploration(0.0, N_guess=None, status="ok")
+        trace.set_exploitation(N, m)
     return phi_hat, m * N
 
 
-# The attainable ceiling (Eq. 3.7). Reported as a reference row, not a protocol under comparison.
+def find_phi_fixed_budget_oracle_alias(rng, phi, phi_max, phi_min, budget):
+    """Backward-compatible name for the N_opt oracle."""
+    return find_phi_fixed_budget_oracle_nopt(rng, phi, phi_max, phi_min, budget)
+
+
 def find_phi_fixed_budget_ceiling(rng, phi, phi_max, phi_min, budget, eps_target=None, trace=None):
-    """Omniscient depth, honest statistics: N = N_opt is handed over, the error must still be earned.
-
-    Run exactly like every other fixed-budget algorithm -- same signature, same seed, same phase
-    draw, same budget rule -- with two differences: it is told the optimal depth instead of having
-    to search for it, and its measurement error is drawn from the Eq. (3.4) law rather than from the
-    binomial readout.
-
-        N = min( floor(pi/(2 phi)), budget )        the deepest non-aliasing depth, capped so m >= 1
-        m = floor(budget / N)                       whole shots, so N*m <= budget like everyone else
-        phi_hat = phi + Z / (2 N sqrt(m)),  Z ~ N(0,1)
-
-    WHY THE ERROR IS DRAWN FROM EQ. (3.4) RATHER THAN SIMULATED FROM THE BINOMIAL. At N ~ N_opt the
-    readout probability p0 = cos^2(N phi) sits against 0, so every shot returns 0 and the arccos
-    estimator is pinned at pi/(2N) *regardless of the data*. An oracle that knows phi could then read
-    its own answer back off that constant, to accuracy ~2 phi^2/pi, using almost no shots -- and
-    whenever phi < sqrt(pi eps / 2) that is already inside tolerance, which is how the exact oracle
-    comes to report a ~400x advantage at phi ~ U(0.001,0.01), eps = 1e-4. Drawing the error from
-    Eq. (3.4) removes that loophole: the accuracy has to come from the statistics, not from the
-    choice of N. The result is a bound on what the Chapter-3 family can achieve under its own
-    asymptotic law, non-degenerate everywhere -- and it is not a strict bound on the exact estimator,
-    which is stated wherever it is reported.
-
-    Since m = floor(budget/N), sd = 1/(2 N sqrt(m)) and only the product N*sqrt(m) matters: the shot
-    count is not a free parameter, it follows from the depth.
-    """
-    N = max(int(np.pi // (2 * phi)), 1) if phi > 0 else 1
-    N = max(min(N, int(budget)), 1)
-    m = int(budget) // N
-    if trace is not None:
-        trace.nominal_budget = float(budget)
-        # no exploration: the depth is given, not searched for
-        trace.set_exploration(0.0, N_guess=None, status="ok")
-    if m < 1:
-        if trace is not None:
-            trace.status = "no_exploitation_shots"
-        return np.inf, 0
-    phi_hat = phi + float(rng.standard_normal()) / (2.0 * N * np.sqrt(m))
-    if trace is not None:
-        trace.set_exploitation(N, m)
-    return phi_hat, N * m
+    """Backward-compatible name; the former artificial Gaussian runner has been removed."""
+    return find_phi_fixed_budget_oracle_nopt(
+        rng, phi, phi_max, phi_min, budget, eps_target=eps_target, trace=trace)
 
 
 # Separable baseline (N = 1)
@@ -732,6 +704,7 @@ def find_phi_fixed_budget_linear_search_post(rng, phi, phi_max, phi_min, m_explo
 # originals rather than replacing them.
 FIXED_BUDGET = {
     "oracle": find_phi_fixed_budget_oracle,
+    "oracle_nopt": find_phi_fixed_budget_oracle_nopt,
     "oracle_alias": find_phi_fixed_budget_oracle_alias,
     "separable": find_phi_fixed_budget_separable,
     "ceiling": find_phi_fixed_budget_ceiling,

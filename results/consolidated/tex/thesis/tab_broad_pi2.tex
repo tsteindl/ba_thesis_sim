@@ -1,7 +1,7 @@
 \begin{table}[ht]
 \centering
 \small
-\caption{Convergence under a broad uniform prior $\phi\sim\mathcal{U}(0.01,\pi/2)$ at $\epsilon=10^{-3}$: average share of simulations that converge, by budget. The best implementable entry in each row is set in bold; the ceiling is an upper bound, not a competitor. Only budgets in the informative band are listed (see \texttt{operating\_points.csv}).}
+\caption{Convergence under a broad uniform prior $\phi\sim\mathcal{U}(0.01,\pi/2)$ at $\epsilon=10^{-3}$: average share of simulations that converge, by budget. The best implementable entry in each row is set in bold; the oracle is an analytic reference, not a competitor. Only budgets in the informative band are listed (see \texttt{operating\_points.csv}).}
 \label{tab:broad-pi2}
 \begin{tabular}{rccccc}
 \toprule
@@ -10,7 +10,7 @@ Budget $C=N\cdot m$
 & Linear search
 & Binary search
 & Reverse engineering
-& \textit{Attainable Ceiling} \\
+& Oracle ($N_\text{opt}$) \\
 \midrule
 3{,}000
 & 8.8\%
@@ -135,5 +135,5 @@ Budget $C=N\cdot m$
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The ceiling is exact -- its convergence probability is known in closed form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error and no interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
 \end{table}

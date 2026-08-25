@@ -14,6 +14,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from qmetrology import manifest as M
+from qmetrology.oracle import oracle_budget_for_rate
 from qmetrology.uncertainty import crossing, crossing_ci, ratio_ci, grid_sensitivity
 from pipeline_io import Table, path
 
@@ -112,7 +113,7 @@ def crossings(mode):
         b = np.array([int(r["budget"]) for r in rs], float)
         p = np.array([f(r["rate"]) for r in rs])
         Rs = {int(f(r["R"])) for r in rs if str(r.get("R", "")).strip() not in ("", "nan")}
-        # The ceiling is exact -- closed-form probability averaged over the prior, nothing sampled.
+        # The oracle is analytic -- closed-form probability averaged over the prior, nothing sampled.
         # It has no R, so it gets its crossing as a point value with no bootstrap interval, rather
         # than a bootstrap over a trial count it does not have.
         exact = not Rs
@@ -124,7 +125,12 @@ def crossings(mode):
             p_ref = np.array([f(r["rate"]) for r in ref])
         scen = scen_by_id.get(sid, {})
         for T in M.THRESHOLDS:
-            if exact:
+            analytic_oracle = algo == "oracle_hl"
+            if analytic_oracle:
+                pt = float(oracle_budget_for_rate(
+                    T, f(scen["eps"]), f(scen["phi_min"]), f(scen["phi_max"])))
+                lo, hi, cov = float("nan"), float("nan"), 1.0
+            elif exact:
                 pt, lo, hi, cov = crossing(b, p, T), float("nan"), float("nan"), 1.0
             else:
                 pt, lo, hi, cov = crossing_ci(b, p, T, R, n_boot=cfgm["n_boot"],
@@ -132,7 +138,8 @@ def crossings(mode):
             rat = rl = rh = float("nan")
             if ref is not None and algo != "brute":
                 if exact:
-                    ca, cb = crossing(b_ref, p_ref, T), crossing(b, p, T)
+                    ca = crossing(b_ref, p_ref, T)
+                    cb = pt if analytic_oracle else crossing(b, p, T)
                     rat = (ca / cb) if (np.isfinite(ca) and np.isfinite(cb) and cb) else float("nan")
                 else:
                     rat, rl, rh, _c = ratio_ci(b_ref, p_ref, p, T, R, n_boot=cfgm["n_boot"],
@@ -143,14 +150,18 @@ def crossings(mode):
                 "phi_distribution": rs[0]["phi_distribution"], "eps": rs[0]["eps"],
                 "algorithm": algo, "implementation_variant": rs[0]["implementation_variant"],
                 "threshold_pct": int(100 * T),
-                "budget_to_reach": sig(pt), "budget_to_reach_lo": sig(lo),
+                "budget_to_reach": int(pt) if analytic_oracle else sig(pt),
+                "budget_to_reach_lo": sig(lo),
                 "budget_to_reach_hi": sig(hi),
                 "ratio_vs_brute": round(rat, 2) if np.isfinite(rat) else "",
                 "ratio_lo": round(rl, 2) if np.isfinite(rl) else "",
                 "ratio_hi": round(rh, 2) if np.isfinite(rh) else "",
-                "grid_sensitivity_rel": round(grid_sensitivity(b, p, T), 4)
-                    if np.isfinite(grid_sensitivity(b, p, T)) else "",
-                "crossing_rule": M.CROSSING_RULE, "R": R, "n_boot": cfgm["n_boot"],
+                "grid_sensitivity_rel": "" if analytic_oracle else
+                    (round(grid_sensitivity(b, p, T), 4)
+                     if np.isfinite(grid_sensitivity(b, p, T)) else ""),
+                "crossing_rule": ("smallest integer budget with analytic oracle rate >= threshold"
+                                  if analytic_oracle else M.CROSSING_RULE),
+                "R": R, "n_boot": cfgm["n_boot"],
                 "boot_seed": M.SEED_BOOT, "ci_level": M.CI_LEVEL,
                 "coverage": round(cov, 3), "n_budget_points": len(b),
             })
@@ -384,7 +395,7 @@ def report(mode, head, cross, params, regime):
     by_pt = {}
     for r in diag:
         # only the protocols under comparison can "win" a point; the separable baseline and the
-        # ceiling are reference rows and are excluded by construction
+        # oracle are reference rows and are excluded by construction
         if r["algorithm"] not in M.PROTOCOLS:
             continue
         by_pt.setdefault((r["scenario_id"], r["budget"]), {})[r["algorithm"]] = f(r["rate"])

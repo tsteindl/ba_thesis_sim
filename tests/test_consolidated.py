@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.join(ROOT, "analysis", "consolidated"))
 from qmetrology import algorithms as ALG
 from qmetrology import diagnostics as D
 from qmetrology import manifest as M
+from qmetrology import oracle as O
 from qmetrology import pipeline as P
 from qmetrology.trace import AlgorithmTrace, ProbeTrace, n_opt, run_record
 
@@ -67,6 +68,31 @@ def _run(algo, seed, pmin, pmax, eps, B, trace=None):
     if trace is not None:
         trace.finalize(phi, out[0], out[1], eps)
     return phi, out
+
+
+def test_oracle_is_analytic_and_uses_whole_shots():
+    """The reported Oracle has no trial runner and its analytic integer B90 is minimal."""
+    target, eps, N = 0.9, 1e-3, 31
+    m = O.oracle_shots_for_rate(target, eps, N)
+    p = lambda shots: 2 * O.ndtr(2 * eps * N * np.sqrt(shots)) - 1
+    assert p(m) >= target and (m == 1 or p(m - 1) < target)
+
+    b90 = O.oracle_budget_for_rate(target, eps, 0.01, 0.1)
+    assert b90 == 24_435
+    assert O.oracle_rate(b90, eps, 0.01, 0.1) >= target
+    assert O.oracle_rate(b90 - 1, eps, 0.01, 0.1) < target
+
+    # This narrow interval has N_opt=31 throughout.  The prior average must therefore reduce to the
+    # same single closed-form probability with the whole-shot count floor(B/N_opt).
+    budget = 10_000
+    expected = p(budget // N)
+    assert abs(O.oracle_rate(budget, eps, 0.05, 0.0505) - expected) < 1e-14
+    sigma = 1.0 / (2.0 * N * np.sqrt(budget // N))
+    expected_median = sigma * O.ndtri(0.75)
+    assert abs(O.oracle_abs_error_quantile(budget, 0.5, 0.05, 0.0505)
+               - expected_median) < 1e-14
+    assert abs(O.oracle_error_variance(budget, 0.05, 0.0505) - sigma ** 2) < 1e-18
+    assert M.ALGORITHMS["oracle_hl"]["fn"] is None
 
 
 # ---------------------------------------------------------------------------- 1. neutrality
@@ -358,6 +384,10 @@ def test_end_to_end_smoke_and_provenance():
             assert key(w) not in wmap, f"duplicate winner for {key(w)}"
             wmap[key(w)] = w
         for r in perf:
+            if r["algorithm"] == "oracle_hl":
+                assert key(r) not in wmap, "the analytic oracle must not have a simulated winner"
+                assert r["R"] == "" and r["rate_lo"] == "" and r["rate_hi"] == ""
+                continue
             w = wmap[key(r)]
             assert w["params"] == r["params"], (key(r), w["params"], r["params"])
             assert abs(float(w["heldout_rate"]) - float(r["rate"])) < 1e-12
@@ -365,7 +395,7 @@ def test_end_to_end_smoke_and_provenance():
             if w["tuned"] == "True":
                 assert json.loads(w["block_rates"]), key(r)
         # every reported R is the manifest's, and appears on every derived row
-        assert {int(r["R"]) for r in perf} == {M.MODES["smoke"]["R_test"]}
+        assert {int(r["R"]) for r in perf if r["R"]} == {M.MODES["smoke"]["R_test"]}
         for name in ("budget_crossings.csv", "detector_confusion.csv", "budget_audit.csv",
                      "diagnostics_by_point.csv", "diagnostics_headline.csv", "optimal_params.csv",
                      "diagnostics_by_phase.csv"):
@@ -373,8 +403,9 @@ def test_end_to_end_smoke_and_provenance():
         for name in ("REPORT.md", "experiment_manifest.json", "algorithm_code_audit.md"):
             assert os.path.exists(os.path.join(d, name)) or name == "algorithm_code_audit.md"
         cross = _read(d, "budget_crossings.csv")
-        perf_R = {int(r["R"]) for r in perf}
-        assert {int(c["R"]) for c in cross} <= perf_R, "crossing CI must use the curve's own R"
+        perf_R = {int(r["R"]) for r in perf if r["R"]}
+        assert {int(c["R"]) for c in cross if int(c["R"]) > 0} <= perf_R, \
+            "crossing CI must use the curve's own R"
         assert all(c["crossing_rule"] for c in cross)
         # appendix rows must state which tested budget a B_90 configuration belongs to
         par = _read(d, "optimal_params.csv")

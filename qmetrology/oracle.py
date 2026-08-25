@@ -1,53 +1,17 @@
-"""The omniscient benchmark: the depth N a protocol would pick if it already knew phi.
+"""Oracle calculations for the fixed-budget phase-estimation comparison.
 
-Every adaptive algorithm in Chapter 3 spends part of its budget learning phi only so that it can
-choose the exploitation depth N. This module removes that problem entirely: given the true phi, it
-returns the depth that maximises the convergence probability at budget C. The resulting convergence
-rate is an *upper bound* for the whole family — no exploration schedule, safeguard, or stopping rule
-can beat an algorithm that already knows the answer — which turns the reported budget ratios from
-"adaptive beats brute force" into "adaptive closes x% of the gap to what is achievable at all".
+The consolidated thesis results use one simple reference: the oracle is handed
+N_opt = floor(pi/(2 phi)), takes m = floor(B/N_opt) whole shots, and its convergence probability is
+computed from the asymptotic normal law that saturates the QCRB. `oracle_rate` averages that law
+exactly over the discrete N_opt distribution of a uniform prior, and `oracle_budget_for_rate` finds
+the smallest integer budget reaching a requested convergence probability. Neither function draws
+artificial estimator errors.
 
-Three ceilings are provided, and the differences between them are themselves results:
-
-  `alias_depth`     N = floor(pi / (2 phi)) — the largest depth that does not alias (N phi <= pi/2).
-                    This is what Eq. (3.6) reverse-engineers from the pilot, with C_safe = 1.
-                    Perfect knowledge of phi, no backoff.
-
-  `optimal_depth`   N* = argmax_N P(|phi_hat - phi| < eps), evaluated exactly from the binomial law.
-                    The tightest valid bound — but see the degeneracy warning below: it is *valid*
-                    everywhere and *informative* only where 2 phi^2 / pi > eps.
-
-  `heisenberg_prob` the same perfect depth choice, but with the accuracy required to come from the
-                    sampling distribution (Eq. 3.4) instead of from the aliasing constant. Not a
-                    strict bound on the exact estimator, but the ceiling that means something:
-                    non-degenerate everywhere, analytic, and directly comparable to Eq. (3.7).
-
-**Report `heisenberg_prob` as the headline ceiling.** The exact oracle is the right object
-mathematically and the wrong one rhetorically: in scenarios where the whole prior satisfies
-phi < sqrt(pi eps / 2) it answers from the choice of N alone and reports absurd advantages
-(~400x at phi ~ U(0.001,0.01), eps = 1e-4). `degeneracy_share` quantifies how much of a given
-prior is affected, and should be quoted wherever the exact oracle is.
-
-`alias_depth` is *not* optimal, and that is the point: at N = floor(pi/(2 phi)) the readout
-probability p0 = cos^2(N phi) sits against the boundary p0 ~ 0, where the arccos estimator is
-boundary-clamped rather than asymptotically normal (the Var = 1/(4 N^2 m) law of Eq. (3.4) assumes
-p0 (1-p0) >> 1/m). The residual pi/2 - N phi < phi leaves a systematic error of order phi^2, which is
-harmless at eps = 10^-3 and fatal at eps = 10^-6. The optimal depth therefore backs off from the
-aliasing bound even with *perfect* information — the safeguard is not only a hedge against pilot
-noise, and a protocol that inferred phi exactly would still need one.
-
-Exact convergence probability. With K ~ Binomial(m, cos^2(N phi)) and phi_hat = arccos(sqrt(K/m))/N,
-
-    |phi_hat - phi| < eps  <=>  A < arccos(sqrt(K/m)) < B,   A = max(N(phi-eps), 0)
-                                                             B = min(N(phi+eps), pi/2)
-                           <=>  m cos^2 B < K < m cos^2 A     (arccos is decreasing)
-
-so P = F(ceil(m cos^2 A) - 1) - F(floor(m cos^2 B)) with F the Binomial(m, cos^2(N phi)) CDF. No
-simulation and no normal approximation enter, so the bound holds at every budget, not just
-asymptotically.
+The exact-binomial depth search and older analytic variants below are retained for legacy analyses,
+but they are not the oracle reported by the consolidated pipeline.
 """
 import numpy as np
-from scipy.special import ndtr   # standard normal CDF, vectorised
+from scipy.special import ndtr, ndtri   # standard normal CDF and inverse CDF, vectorised
 from scipy.stats import binom
 
 _EXHAUSTIVE_MAX = 4096   # scan every admissible depth when there are at most this many
@@ -250,8 +214,8 @@ def ceiling_prob(phi, budget, eps, n_max=None):
 def ceiling_prob_at_nopt(phi, budget, eps):
     """P(converge) at N = N_opt with whole shots -- the REPORTED ceiling.
 
-        N = min( floor(pi/(2 phi)), budget )     the deepest non-aliasing depth, capped so m >= 1
-        m = floor(budget / N)                    whole shots, so N*m <= budget
+        N = floor(pi/(2 phi))                    the Oracle's known N_opt
+        m = floor(budget / N)                    maximum affordable number of whole shots
         P = 2 Phi( 2 eps N sqrt(m) ) - 1         Eq. (3.4) at that depth
 
     Exact: nothing is sampled, so there is no Monte-Carlo error and no interval to report. The
@@ -266,16 +230,145 @@ def ceiling_prob_at_nopt(phi, budget, eps):
     this by more than Monte-Carlo noise.
     """
     phi = np.asarray(phi, dtype=float)
-    N = np.minimum(np.maximum(np.floor(np.pi / (2.0 * phi)), 1.0), float(budget))
+    N = np.maximum(np.floor(np.pi / (2.0 * phi)), 1.0)
     m = np.floor(float(budget) / N)
     return np.clip(2.0 * ndtr(2.0 * eps * N * np.sqrt(np.maximum(m, 0.0))) - 1.0, 0.0, 1.0)
 
 
-def ceiling_rate_at_nopt(budget, eps, phi_min, phi_max, n_grid=20001):
-    """The reported ceiling under phi ~ U(phi_min, phi_max): `ceiling_prob_at_nopt` averaged over
-    the prior. Exact to ~1e-6 relative; no simulation, hence no error bar."""
-    phi = np.linspace(phi_min, phi_max, n_grid)
-    return float(np.trapezoid(ceiling_prob_at_nopt(phi, budget, eps), phi) / (phi_max - phi_min))
+def oracle_shots_for_rate(target, eps, N):
+    """Smallest whole-shot count attaining ``target`` under the asymptotic QCRB law.
+
+    With a locally unbiased, asymptotically efficient estimator,
+
+        phi_hat - phi ~ Normal(0, 1 / (4 m N^2)),
+
+    so P(|phi_hat - phi| < eps) = 2 Phi(2 eps N sqrt(m)) - 1.  Inverting this
+    expression gives the required shot count directly; no random errors are drawn.
+    """
+    target, eps, N = float(target), float(eps), int(N)
+    if not 0.0 < target < 1.0:
+        raise ValueError("target must lie strictly between zero and one")
+    if eps <= 0.0 or N < 1:
+        raise ValueError("eps and N must be positive")
+    z = float(ndtri((1.0 + target) / 2.0))
+    return max(int(np.ceil((z / (2.0 * eps * N)) ** 2)), 1)
+
+
+def _uniform_nopt_distribution(phi_min, phi_max):
+    """Possible N_opt values and their exact probabilities under a uniform phase prior.
+
+    floor(pi/(2 phi)) = n on (pi/(2(n+1)), pi/(2n)].  Intersecting those intervals
+    with the prior support turns the prior average into a short finite sum instead of a
+    Monte-Carlo estimate or a dense quadrature grid.
+    """
+    phi_min, phi_max = float(phi_min), float(phi_max)
+    if not 0.0 < phi_min < phi_max:
+        raise ValueError("require 0 < phi_min < phi_max")
+    n_lo = max(int(np.floor(np.pi / (2.0 * phi_max))), 1)
+    n_hi = max(int(np.floor(np.pi / (2.0 * phi_min))), 1)
+    n = np.arange(n_lo, n_hi + 1, dtype=np.int64)
+    lo = np.maximum(phi_min, np.pi / (2.0 * (n + 1.0)))
+    hi = np.minimum(phi_max, np.pi / (2.0 * n))
+    weights = np.maximum(hi - lo, 0.0) / (phi_max - phi_min)
+    live = weights > 0.0
+    n, weights = n[live], weights[live]
+    # The intervals partition the support; normalising only removes floating-point roundoff.
+    weights = weights / weights.sum()
+    return n, weights
+
+
+def oracle_rate(budget, eps, phi_min, phi_max):
+    """Prior-averaged convergence rate of the QCRB oracle, without simulation.
+
+    The oracle is handed N_opt(phi).  At hard budget B it takes the maximum affordable
+    number of whole shots, m = floor(B/N_opt), and its conditional convergence probability
+    follows from the asymptotic normal law that saturates the QCRB.  For a uniform prior the
+    average is an exact finite sum over the possible integer values of N_opt.
+
+    "Exact" here means exact under that asymptotic model; it is not an exact finite-shot
+    binomial calculation.
+    """
+    budget, eps = int(budget), float(eps)
+    if budget < 1 or eps <= 0.0:
+        raise ValueError("budget and eps must be positive")
+    n_opt, weights = _uniform_nopt_distribution(phi_min, phi_max)
+    m = budget // n_opt
+    prob = 2.0 * ndtr(2.0 * eps * n_opt * np.sqrt(m)) - 1.0
+    return float(np.dot(weights, np.clip(prob, 0.0, 1.0)))
+
+
+def oracle_abs_error_quantile(budget, quantile, phi_min, phi_max):
+    """Quantile of ``|phi_hat-phi|`` for the analytic QCRB Oracle.
+
+    Conditional on N_opt, the absolute error is half-normal with
+    sigma = 1/(2 N_opt sqrt(m)).  The uniform phase prior therefore gives an exact finite mixture
+    over the possible N_opt values.  Its scalar quantile is found deterministically; no estimator
+    errors or phase values are sampled.
+    """
+    budget, quantile = int(budget), float(quantile)
+    if budget < 1 or not 0.0 < quantile < 1.0:
+        raise ValueError("budget must be positive and quantile must lie between zero and one")
+    n_opt, weights = _uniform_nopt_distribution(phi_min, phi_max)
+    m = budget // n_opt
+    live = m > 0
+    if float(weights[live].sum()) < quantile:
+        return float("inf")
+    sigma = 1.0 / (2.0 * n_opt[live] * np.sqrt(m[live]))
+    weights = weights[live]
+
+    def cdf(x):
+        return float(np.dot(weights, 2.0 * ndtr(x / sigma) - 1.0))
+
+    lo, hi = 0.0, float(np.max(sigma))
+    while cdf(hi) < quantile:
+        hi *= 2.0
+    for _ in range(64):
+        mid = (lo + hi) / 2.0
+        if cdf(mid) >= quantile:
+            hi = mid
+        else:
+            lo = mid
+    return hi
+
+
+def oracle_error_variance(budget, phi_min, phi_max):
+    """Prior-averaged QCRB variance at known N_opt and whole-shot count floor(B/N_opt)."""
+    budget = int(budget)
+    if budget < 1:
+        raise ValueError("budget must be positive")
+    n_opt, weights = _uniform_nopt_distribution(phi_min, phi_max)
+    m = budget // n_opt
+    if np.any(m == 0):
+        return float("inf")
+    return float(np.dot(weights, 1.0 / (4.0 * n_opt ** 2 * m)))
+
+
+def oracle_budget_for_rate(target, eps, phi_min, phi_max):
+    """Smallest integer hard budget whose prior-averaged oracle rate reaches ``target``.
+
+    Integer shots make the rate a monotone step function, so there is no single closed-form
+    inverse after averaging over the different N_opt values.  A doubling search followed by
+    integer bisection finds the exact first step and normally needs only a few dozen evaluations
+    of the finite sum in `oracle_rate`.
+    """
+    target = float(target)
+    if not 0.0 < target < 1.0:
+        raise ValueError("target must lie strictly between zero and one")
+    lo, hi = 1, 1
+    while oracle_rate(hi, eps, phi_min, phi_max) < target:
+        hi *= 2
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if oracle_rate(mid, eps, phi_min, phi_max) >= target:
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+
+
+def ceiling_rate_at_nopt(budget, eps, phi_min, phi_max, n_grid=None):
+    """Backward-compatible name for `oracle_rate`; ``n_grid`` is ignored."""
+    return oracle_rate(budget, eps, phi_min, phi_max)
 
 
 def ceiling_rate(budget, eps, phi_min, phi_max, n_grid=20001):

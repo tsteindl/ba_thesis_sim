@@ -23,16 +23,17 @@ REPORTED ALGORITHMS. Exactly the four that are settled:
                     (m', conf).
   reverse_eng_risk  Algorithm 6 + statistical safeguard; tuned (m').
 
-The superseded constant-safeguard variants and the exact-posterior/oracle arms stay in
-qmetrology/algorithms.py but are deliberately outside this manifest.
+The superseded constant-safeguard variants and the simulated oracle arms stay in
+qmetrology/algorithms.py but are deliberately outside the reported protocols.  The analytic Oracle
+reference has metadata below, but intentionally has no trial runner.
 """
 import numpy as np
 
 from .algorithms import (find_phi_fixed_budget_brute_force,
                          find_phi_fixed_budget_separable,
-                         find_phi_fixed_budget_ceiling,
                          find_phi_fixed_budget_linear_search,
                          find_phi_fixed_budget_binary_search_deep,
+                         find_phi_fixed_budget_binary_search_risk,
                          find_phi_fixed_budget_reverse_engineering_risk)
 
 # ---------------------------------------------------------------------------- seeds and trials
@@ -161,9 +162,10 @@ ALGORITHMS = {
         adaptive=True, has_detector=True, has_guess=True,
         fixed_params={"eps_target": "eps"},
         # conf is densest at the bottom: 63% of live winners chose 0.5, where the normal quantile is
-        # zero and the branch rule degenerates to a plain comparison against the reference estimate.
-        # 0.5 is a genuine floor (below it the test would accept probes reading LOWER than the
-        # reference, inverting its meaning), so the grid is refined just above it rather than
+        # zero and the branch rule becomes a plain comparison against the reference estimate. 0.5 is
+        # a genuine floor: below it the threshold would lie ABOVE the reference, so the detector
+        # would reject some probes even when their estimate increased. That is a different decision
+        # rule, not a lower confidence level, so the grid is refined just above 0.5 rather than
         # extended below it. The top end is not binding (1.9% of winners at 0.99) but is kept dense
         # enough that a high-conf regime would be resolved if one existed.
         discrete=dict(conf=[0.5, 0.52, 0.55, 0.58, 0.62, 0.66, 0.70, 0.75, 0.80, 0.85, 0.90,
@@ -180,24 +182,30 @@ ALGORITHMS = {
 # Reference rows: reported in the thesis tables for context, but NOT protocols under comparison.
 # They are deliberately kept out of ORDER so that every diagnostic aggregate, the "points won"
 # count and the live/saturated regime classification keep referring to the four algorithms under
-# test -- adding a ceiling to the regime rule would reclassify points purely because an
-# unimplementable bound saturates there.
+# test -- adding an oracle to the regime rule would reclassify points purely because an
+# unimplementable reference saturates there.
 ALGORITHMS["separable"] = dict(
     fn=find_phi_fixed_budget_separable,
     variant="qmetrology.algorithms.find_phi_fixed_budget_separable",
     label="Separable protocol (N=1)", adaptive=False, has_detector=False, has_guess=False,
     fixed_params={}, role="baseline")
 
-# The Eq.(3.4) ceiling is SIMULATED like every other row -- same seeds, same phase draws, same R,
-# same Wilson interval. It is told N_opt instead of searching for it, and its error is drawn from
-# Eq. (3.4) rather than from the binomial readout (see the function's docstring for why). Evaluating
-# it by simulation rather than by quadrature over the prior costs nothing and removes a second,
-# separately-explained estimation route from the results.
+# The Oracle is an explicit analytic exception.  It has no trial runner, winner, trace, sampled
+# error distribution or confidence interval.  analysis/consolidated/add_baselines.py writes one
+# deterministic rate for every plotted budget, and finalize.py computes exact integer crossings.
 ALGORITHMS["oracle_hl"] = dict(
-    fn=find_phi_fixed_budget_ceiling,
-    variant="qmetrology.algorithms.find_phi_fixed_budget_ceiling",
-    label="Ceiling (N_opt, Eq. 3.4 law)", adaptive=False, has_detector=False,
-    has_guess=False, fixed_params={}, role="ceiling")
+    fn=None,
+    variant="qmetrology.oracle.oracle_rate (analytic QCRB rate at N_opt)",
+    label="Oracle N_opt", adaptive=False, has_detector=False,
+    has_guess=False, fixed_params={}, role="oracle")
+
+# Internal audit arm.  It is intentionally absent from ORDER/TABLE_ORDER, but must live in the
+# importable manifest so Windows worker processes can resolve it during the deepest-vs-opening
+# probe comparison in analysis/consolidated/audit.py.
+ALGORITHMS["_binary_risk_audit"] = dict(
+    ALGORITHMS["binary_deep"],
+    fn=find_phi_fixed_budget_binary_search_risk,
+    variant="qmetrology.algorithms.find_phi_fixed_budget_binary_search_risk")
 
 for _k in ("brute", "linear", "binary_deep", "reverse_eng_risk"):
     ALGORITHMS[_k]["role"] = "protocol"

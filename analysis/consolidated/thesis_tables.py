@@ -50,7 +50,7 @@ LABEL = {
     "binary_deep": r"A.~\ref{alg:binary-search}: Binary search",
     "reverse_eng_risk": r"A.~\ref{alg:reverse-engineering}: Reverse engineering",
     "separable": r"Separable protocol ($N=1$)",
-    "oracle_hl": r"\textit{Attainable Ceiling} (Eq. \ref{eq:qcrb-ent})",
+    "oracle_hl": r"Oracle ($N_\text{opt}$)",
 }
 LABEL_NARROW = {
     "brute": r"A.~\ref{alg:brute-force}: BF",
@@ -58,7 +58,7 @@ LABEL_NARROW = {
     "binary_deep": r"A.~\ref{alg:binary-search}: BS",
     "reverse_eng_risk": r"A.~\ref{alg:reverse-engineering}: RE",
     "separable": r"Sep. ($N=1$)",
-    "oracle_hl": r"\textit{Ceiling}",
+    "oracle_hl": r"Oracle ($N_\text{opt}$)",
 }
 
 _FORCE = (sys.argv[sys.argv.index("--names") + 1] if "--names" in sys.argv else "auto")
@@ -80,8 +80,14 @@ def head_label(a):
     header is both ugly and redundant with the row labels elsewhere in the document.
     """
     if a == "oracle_hl":
-        return r"\textit{Attainable Ceiling}"
+        return r"Oracle ($N_\text{opt}$)"
     t = LABEL[a]
+    return t.split(": ", 1)[1] if ": " in t else t
+
+def head_label_narrow(a):
+    if a == "oracle_hl":
+        return r"Oracle ($N_\text{opt}$)"
+    t = LABEL_NARROW[a]
     return t.split(": ", 1)[1] if ": " in t else t
 
 
@@ -135,9 +141,8 @@ def prior_tex(s):
 
 FOOT = (r"\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds "
         r"42 and 43 and the frozen winner is re-validated on the independent seed 2024 at "
-        r"$R=%s$ trials. The ceiling is exact -- its convergence probability is known in closed "
-        r"form for each $\phi$ and averaged over the prior -- so it carries no Monte-Carlo error "
-        r"and no interval.")
+        r"$R=%s$ trials. The oracle is exact and can be calculated analytically for each $\phi$."
+        r" Thus it carries no confidence interval.")
 
 
 def wrap(body, caption, label, size=None, foot=None):
@@ -210,7 +215,7 @@ def tab_summary_low_prec(D, ci=False):
 
     The x-factors used to live in these cells, which made every entry carry two numbers and forced
     the reader to hold a baseline in their head. They now have their own table
-    (`tab_ratios`), where brute force and the ceiling can both be shown as reference columns.
+    (`tab_ratios`), where brute force and the oracle can both be shown as reference columns.
     """
     sid, B = "narrow_e3", 10_000
     body = [r"\begin{tabular}{lcc}", r"\toprule", "Algorithm",
@@ -235,30 +240,30 @@ def tab_summary_low_prec(D, ci=False):
            r"$\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ "
            r"and the budget required to achieve \(>90\%\) convergence. Improvement factors "
            r"relative to the baseline are collected in Table~\ref{tab:ratios}. The "
-           r"\textit{ceiling} row is not an implementable protocol but an upper bound: it selects "
-           r"the exploitation depth knowing the true $\phi$.")
+           r"Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true "
+           r"$N_\text{opt}$ and is evaluated analytically using the asymptotic QCRB law.")
     if ci:
         cap += (r" Brackets give 95\% intervals (Wilson for rates, bootstrap for budgets); the "
-                r"ceiling is exact and carries none.")
+                r"oracle is exact and carries none.")
     return wrap(body, cap, "tab:summary-low-prec" + ("-ci" if ci else ""),
                 foot=FOOT % f"{D.R:,}".replace(",", "{,}"))
 
 
 def tab_ratios(D):
-    """Improvement over the baseline, and distance from the ceiling -- both as budget ratios.
+    """Improvement over the baseline, and distance from the oracle -- both as budget ratios.
 
-    A bare ratio vs brute force cannot be read on its own: 1.5x is near-optimal where only 1.6x was
-    available and mediocre where 2.0x was. Each cell therefore carries two numbers, and both are
+    A bare ratio vs brute force cannot be read on its own: the same factor can be close to or far
+    from the oracle reference. Each cell therefore carries two numbers, and both are
     ratios of the SAME quantity (the budget to reach 90%), so no new unit is introduced:
 
         top     B_brute / B_alg       the factor less budget than the baseline (>1 is better)
-        bottom  B_alg / B_ceiling     how many times the attainable optimum it still needs
-                                      (1.00 = optimal)
+        bottom  B_alg / B_oracle     budget relative to the oracle reference
+                                      (1.00 = equal oracle budget)
 
-    They are self-consistent by construction: (B_brute/B_alg) x (B_alg/B_ceiling) = B_brute/B_ceiling,
-    the ceiling's own factor in the last row. A reader can multiply across and check.
+    They are self-consistent by construction: (B_brute/B_alg) x (B_alg/B_oracle) = B_brute/B_oracle,
+    the oracle's own factor in the last row. A reader can multiply across and check.
 
-    REJECTED ALTERNATIVE: rate_alg / rate_ceiling ("share of the ceiling"). It is the simplest thing
+    REJECTED ALTERNATIVE: rate_alg / rate_oracle ("share of the oracle"). It is the simplest thing
     to say, but it compresses everything into 92-99.5% and gives brute force 92%, which makes the
     baseline look near-optimal and the adaptive gains look like rounding error. It is also a rate
     share inside a budget table.
@@ -271,7 +276,7 @@ def tab_ratios(D):
     algs = ["linear", "binary_deep", "reverse_eng_risk"]
     body = [r"\begin{tabular}{l" + "c" * len(cols) + "}", r"\toprule",
             r"\makecell[l]{Algorithm \\ {\scriptsize $B_{\mathrm{brute}}/B_{\mathrm{alg}}$} "
-            r"\\ {\scriptsize ($B_{\mathrm{alg}}/B_{\mathrm{ceiling}}$)}}"]
+            r"\\ {\scriptsize ($B_{\mathrm{alg}}/B_{\mathrm{oracle}}$)}}"]
     for sid in cols:
         sc = D.scen[sid]
         e = int(round(np.log10(f(sc["eps"]))))
@@ -288,7 +293,7 @@ def tab_ratios(D):
                 cells.append("& --")
                 continue
             cells.append(rf"& \makecell{{{Bb/Ba:.2f}\texttimes"
-                         rf"{{\scriptsize ({Ba/Bc:.2f}\texttimes\ opt.)}}}}")
+                         rf"{{\scriptsize ({Ba/Bc:.2f}\texttimes\ oracle)}}}}")
         cells[-1] += r" \\"
         body += [lab(a, narrow=not LONG)] + cells
     body.append(r"\midrule")
@@ -296,20 +301,20 @@ def tab_ratios(D):
     for sid in cols:
         Bb, Bc = D.crossing(sid, "brute")[0], D.crossing(sid, "oracle_hl")[0]
         cells.append(rf"& \makecell{{{Bb/Bc:.2f}\texttimes"
-                     rf"{{\scriptsize (1.00\texttimes\ opt.)}}}}"
+                     rf"{{\scriptsize (1.00\texttimes\ oracle)}}}}"
                      if np.isfinite(Bb) and np.isfinite(Bc) else "& --")
     cells[-1] += r" \\"
-    body += [r"\textit{Ceiling}"] + cells
-    cap = (r"Budget to reach $90\%$ convergence, expressed two ways. \textbf{Top of each cell:} "
+    body += [r"Oracle ($N_\text{opt}$)"] + cells
+    cap = (r"Budget to reach $90\%$ convergence, expressed two ways. \textbf{First number:} "
            r"$B_{\mathrm{brute}}/B_{\mathrm{alg}}$, the factor less budget than the baseline "
-           r"(greater than one is better). \textbf{Bottom:} "
-           r"$B_{\mathrm{alg}}/B_{\mathrm{ceiling}}$, how many times the attainable optimum the "
-           r"algorithm still needs ($1.00\texttimes$ would be optimal). The second number is what "
-           r"makes the first interpretable: $1.5\texttimes$ is near-optimal where only "
-           r"$1.6\texttimes$ was available and mediocre where $2.0\texttimes$ was. The two "
-           r"multiply to the ceiling's own factor in the last row. The separable protocol is "
+           r"($>1$ is better). \textbf{Second number:} "
+           r"$B_{\mathrm{alg}}/B_{\mathrm{oracle}}$, the algorithm's budget relative to the "
+           r"oracle reference ($1.00\texttimes$ means equal budget). The second number is what "
+           r"makes the first interpretable: it shows directly how far the algorithm remains from "
+           r"the oracle reference. The two "
+           r"multiply to the oracle's own factor in the last row. The separable protocol is "
            r"omitted -- it is slower than the baseline; its raw budget is in "
-           r"Table~\ref{tab:summary-all}.")
+           r"Table~\ref{tab:summary-all-ci}.")
     return wrap(body, cap, "tab:ratios", size="small",
                 foot=FOOT % f"{D.R:,}".replace(",", "{,}"))
 
@@ -386,7 +391,7 @@ def tab_scaling_with_prec(D, ci=False):
         body += [eps_tex(D.scen[sid]["eps"])] + cells
     cap = (r"Improvement factor over the brute-force baseline as the precision requirement tightens, "
            r"at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with "
-           r"precision and then saturates; the ceiling column bounds how much of it is attainable "
+           r"precision and then saturates; the oracle column bounds how much of it is attainable "
            r"at all.")
     if ci:
         cap += r" Brackets give 95\% bootstrap intervals; these are conservative (the two curves are resampled independently despite being seed-paired)."
@@ -420,89 +425,165 @@ def tab_broad(D, sid, tag):
         body += [tex_int(b)] + cells
     cap = (rf"Convergence under a broad uniform prior $\phi\sim\mathcal{{U}}(0.01,{tag})$ at "
            r"$\epsilon=10^{-3}$: average share of simulations that converge, by budget. The best "
-           r"implementable entry in each row is set in bold; the ceiling is an upper bound, not a "
-           r"competitor. Only budgets in the informative band are listed (see "
+           r"implementable entry in each row is set in bold; the oracle is an analytic reference, "
+           r"not a competitor. Only budgets in the informative band are listed (see "
            r"\texttt{operating\_points.csv}).")
     lab = "tab:broad-" + ("pi2" if "pi/2" in tag else "pi4")
     return wrap(body, cap, lab, size="small", foot=FOOT % f"{D.R:,}".replace(",", "{,}"))
 
 
-# ====================================================== Appendix: winning parameters
-def _params_cell(algo, params):
+# =============================================== Appendix: threshold robustness
+def tab_robustness_across_thresholds(D):
+    """Best adaptive budget ratio at each reliability threshold.
+
+    The winning algorithm is selected separately in every cell. This avoids the old table's
+    ambiguity: its final "Winner" column named only the winner at 90%, even though the four ratios
+    could come from different algorithms.
+    """
+    thresholds = [int(t) for t in D.man["thresholds_pct"]]
+    scenarios = D.man["scenarios"]
+    adaptive = ["linear", "binary_deep", "reverse_eng_risk"]
+    short = {"linear": "LS", "binary_deep": "BS", "reverse_eng_risk": "RE"}
+
+    body = ([r"\begin{tabular}{l" + "c" * len(thresholds) + "}", r"\toprule", "Scenario"]
+            + [rf"& \makecell{{${t}\%$ convergence}}" for t in thresholds])
+    body[-1] += r" \\"
+    body.append(r"\midrule")
+
+    for s in scenarios:
+        cells = []
+        for threshold in thresholds:
+            candidates = []
+            for algo in adaptive:
+                _b, _blo, _bhi, ratio, lo, hi = D.crossing(s["id"], algo, threshold)
+                if np.isfinite(ratio):
+                    candidates.append((ratio, algo, lo, hi))
+            if not candidates:
+                cells.append("& --")
+                continue
+            ratio, algo, lo, hi = max(candidates, key=lambda x: x[0])
+            interval = (rf" \\ {{\scriptsize [{lo:.2f}, {hi:.2f}]}}"
+                        if np.isfinite(lo) and np.isfinite(hi) else "")
+            cells.append(rf"& \makecell{{{ratio:.2f}\texttimes{interval}"
+                         rf" \\ {{\scriptsize {short[algo]}}}}}")
+        cells[-1] += r" \\"
+        scenario = rf"\makecell[l]{{{prior_tex(s)} \\ $\epsilon={eps_tex(s['eps'])[1:-1]}$}}"
+        body += [scenario] + cells + [""]
+
+    cap = (r"Robustness of the adaptive advantage across target convergence probabilities. Each "
+           r"cell reports $\max_a B_{\mathrm{BF}}(p^\ast)/B_a(p^\ast)$ over the three adaptive "
+           r"algorithms, followed by its pointwise 95\% bootstrap interval and the algorithm "
+           r"attaining the maximum. Values greater than one mean that the selected adaptive "
+           r"algorithm requires less budget than brute force. The maximizing algorithm is selected "
+           r"separately at each threshold.")
+    tune = ", ".join(str(x) for x in D.man["seeds"]["tune_blocks"])
+    test = D.man["seeds"]["test"]
+    R_tex = f"{D.R:,}".replace(",", "{,}")
+    foot = (rf"\footnotesize LS = linear search, BS = binary search, RE = reverse engineering. "
+            rf"Parameters were tuned on seeds {tune}; frozen configurations were evaluated on "
+            rf"held-out seed {test} with $R={R_tex}$ trials per point. Budget crossings use "
+            r"log-linear interpolation between tested budgets.")
+    return wrap(body, cap, "tab:robustness-across-thresholds", size="scriptsize", foot=foot)
+
+
+# ======================================================= Appendix: selected parameters
+def _parameter_items(params):
     p = {k: v for k, v in params.items() if k not in ("eps_target", "budget")}
     if not p:
-        return "--"
+        return []
     order = ["m_exploration", "lookback_window", "safeguard", "inc", "conf"]
     items = sorted(p.items(), key=lambda kv: order.index(kv[0]) if kv[0] in order else 99)
-    esc = []
-    for k, v in items:
-        kk = k.replace("_", "\\_")
-        esc.append("\\texttt{" + kk + "=" + str(v) + "}")
-    return r"\makecell{" + r", \\ ".join(esc) + "}"
+    return [k.replace("_", "\\_") + "=" + str(v) for k, v in items]
 
 
-def _pilot_pct(D, sid, budget, algo, params):
-    """Exploration cost as a share of the budget, measured (not derived from m')."""
-    for r in D.diag:
-        if (r["scenario_id"] == sid and int(f(r["budget"])) == int(budget)
-                and r["algorithm"] == algo):
-            v = f(r.get("exploration_share_mean"))
-            return f"{100*v:.1f}\\%" if np.isfinite(v) else "--"
-    return "--"
+def _params_cell(params, budget=None, shot_fraction=None):
+    items = _parameter_items(params)
+    if not items:
+        return "--"
+    lines = [r"\texttt{" + x + "}" for x in items]
+    if budget is not None:
+        B = f"{int(budget):,}".replace(",", "{,}")
+        lines.append(r"{\scriptsize $B=" + B + "$}")
+    if shot_fraction is not None:
+        lines.append(r"{\scriptsize planned $m'/B="
+                     + f"{100*shot_fraction:.2f}" + r"\%$}")
+    return r"\makecell{" + r", \\ ".join(lines) + "}"
+
+
+def _params_inline(params, shot_fraction=None):
+    items = _parameter_items(params)
+    out = r"\texttt{" + ", ".join(items) + "}" if items else "--"
+    if shot_fraction is not None:
+        out += (r", planned $m'/B="
+                + f"{100*shot_fraction:.2f}" + r"\%$")
+    return out
+
+
+def _re_shot_fraction(budget, params):
+    """Planned RE pilot shots as a fraction of the total resource budget."""
+    return float(params["m_exploration"] / budget)
 
 
 def tab_opt_param_first(D):
     sid, B = "narrow_e3", 10_000
-    body = [r"\begin{tabular}{llc}", r"\toprule", "Algorithm", "& Optimal parameters",
-            r"& \makecell{Pilot cost, \\ \% of budget} \\", r"\midrule"]
+    body = [r"\begin{tabular}{ll}", r"\toprule", "Algorithm",
+            r"& Selected parameters \\", r"\midrule"]
     for a in ["linear", "binary_deep", "reverse_eng_risk"]:
         p, _ = D.winner(sid, B, a)
-        body += [lab(a), f"& {_params_cell(a, p)}",
-                 f"& {_pilot_pct(D, sid, B, a, p)} \\\\"]
-    cap = (r"Frozen configurations for Table~\ref{tab:summary-low-prec}, fixed budget "
-           r"$10{,}000$ ($\epsilon=10^{-3}$, $\mathcal{U}(0.01,0.1)$). The pilot cost column is "
-           r"the \emph{measured} mean exploration spend as a share of the budget, not a value "
-           r"derived from $m'$.")
+        shot_fraction = _re_shot_fraction(B, p) if a == "reverse_eng_risk" else None
+        body += [head_label(a), f"& {_params_inline(p, shot_fraction)} \\\\"]
+    cap = (r"Parameter configurations selected for "
+           r"Table~\ref{tab:summary-low-prec-ci} at fixed budget $10{,}000$ "
+           r"($\epsilon=10^{-3}$, $\phi\sim\mathcal{U}(0.01,0.1)$). For Reverse Engineering, "
+           r"the planned exploration-shot count is additionally reported as the fraction $m'/B$. "
+           r"Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.")
     return wrap(body, cap, "tab:opt-param-first-tab")
 
 
 def tab_opt_param_second(D):
-    """Winning parameters at the 90% budget -- with the interpolation caveat made explicit."""
+    """Selected parameters near B90, with the interpolation caveat made explicit."""
     cols = [c for c, _ in ALL_COLS if c in D.scen]
-    body = [r"\begin{tabular}{ll" + "l" * len(cols) + "}", r"\toprule",
-            "Algorithm", "& Reported for"]
+    body = [r"\setlength{\tabcolsep}{2pt}",
+            r"\begin{tabular}{l" + "l" * len(cols) + "}", r"\toprule", "Algorithm"]
     for sid in cols:
-        body.append(rf"& {prior_tex(D.scen[sid])}, $\epsilon=$" +
-                    eps_tex(D.scen[sid]["eps"]).replace("$", ""))
+        eps = eps_tex(D.scen[sid]["eps"])[1:-1]
+        body.append(rf"& \makecell{{{prior_tex(D.scen[sid])}, \\ $\epsilon={eps}$}}")
     body[-1] += r" \\"
     body.append(r"\midrule")
-    for a in ["linear", "binary_deep", "reverse_eng_risk"]:
-        for tag, label in (("nearest", r"nearest tested $B$"),):
-            cells = []
-            for sid in cols:
-                b90 = D.crossing(sid, a)[0]
-                buds = D.budgets(sid)
-                if not np.isfinite(b90) or not buds:
-                    cells.append("& --")
-                    continue
-                bb = np.array(buds, float)
-                near = int(bb[int(np.argmin(np.abs(np.log(bb) - np.log(b90))))])
-                p, _ = D.winner(sid, near, a)
-                cells.append(f"& {_params_cell(a, p)}")
-            cells[-1] += r" \\"
-            body += [lab(a, narrow=True), f"& {label}"] + cells
-    cap = (r"Frozen configurations at the $90\%$-convergence budget. \textbf{A budget crossing is "
-           r"interpolated between tested budgets; parameter dictionaries are not.} Each entry is "
-           r"therefore the winner at the \emph{nearest tested} budget, not an exact optimum at the "
-           r"interpolated $B_{90}$. Both bracketing winners are listed in "
-           r"\texttt{optimal\_params.csv}.")
+    rows = ["linear", "binary_deep", "reverse_eng_risk"]
+    for a in rows:
+        cells = []
+        for sid in cols:
+            b90 = D.crossing(sid, a)[0]
+            buds = D.budgets(sid)
+            if not np.isfinite(b90) or not buds:
+                cells.append("& --")
+                continue
+            bb = np.array(buds, float)
+            near = int(bb[int(np.argmin(np.abs(np.log(bb) - np.log(b90))))])
+            p, _ = D.winner(sid, near, a)
+            shot_fraction = _re_shot_fraction(near, p) if a == "reverse_eng_risk" else None
+            cells.append(f"& {_params_cell(p, near, shot_fraction)}")
+        cells[-1] += r" \\"
+        body += [head_label(a) if LONG else head_label_narrow(a)] + cells
+        if a != rows[-1]:
+            body.append(r"\midrule")
+
+    cap = (r"Parameter configurations selected near the $90\%$-convergence budget. "
+           r"A budget crossing is "
+           r"interpolated between tested budgets; parameter dictionaries are not. Each entry is "
+           r"therefore the selected configuration at the nearest tested budget, "
+           r"not a configuration evaluated at the interpolated $B_{90}$. For Reverse Engineering, "
+           r"the planned exploration-shot count is additionally reported as $m'/B$ at that tested "
+           r"budget. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.")
     return wrap(body, cap, "tab:opt-param-second-tab", size="scriptsize")
 
 
 # ================================================= NEW: compact diagnostics tables
-def _agg(D, algo, key, how="median", sid=None):
+def _agg(D, algo, key, how="median", sid=None, allowed_sids=None):
     rs = [r for r in D.live(D.diag) if r["algorithm"] == algo
-          and (sid is None or r["scenario_id"] == sid)]
+          and (sid is None or r["scenario_id"] == sid)
+          and (allowed_sids is None or r["scenario_id"] in allowed_sids)]
     v = np.array([f(r.get(key)) for r in rs], float)
     v = v[np.isfinite(v)]
     if not v.size:
@@ -510,15 +591,51 @@ def _agg(D, algo, key, how="median", sid=None):
     return float(np.median(v)) if how == "median" else float(v.mean())
 
 
+def tab_diag_search(D):
+    """Main-text summary of exploration quality, cost, and detector errors."""
+    algs = ["linear", "binary_deep", "reverse_eng_risk"]
+    body = [r"\begin{tabular}{lcccccc}", r"\toprule", "Algorithm",
+            r"& \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}",
+            r"& \makecell{Within \\ $10\%$}",
+            r"& \makecell{Guess \\ overshoot}",
+            r"& \makecell{Probes \\ per trial}",
+            r"& \makecell{Median expl. \\ budget share}",
+            r"& \makecell{False alarm \\ / miss} \\", r"\midrule"]
+    for a in algs:
+        rs = [r for r in D.live(D.det) if r["algorithm"] == a]
+        fa = np.mean([f(r["false_alarm_rate"]) for r in rs]) if rs else float("nan")
+        ms = np.mean([f(r["miss_rate"]) for r in rs]) if rs else float("nan")
+        detector = f"{100*fa:.1f}\\% / {100*ms:.1f}\\%" if np.isfinite(fa) else "--"
+        body += [lab(a, narrow=True),
+                 f"& {_agg(D,a,'guess_ratio_median'):.2f}",
+                 f"& {100*_agg(D,a,'guess_within10','mean'):.1f}\\%",
+                 f"& {100*_agg(D,a,'guess_overshoot','mean'):.1f}\\%",
+                 f"& {_agg(D,a,'n_probes_mean','mean'):.1f}",
+                 f"& {100*_agg(D,a,'exploration_share_median'):.2f}\\%",
+                 f"& {detector} \\\\"]
+    n_live = sum(1 for r in D.ops if r["regime"] == "live")
+    cap = (r"Exploration quality, cost, and overshoot-detector errors, aggregated over the "
+           rf"{n_live} informative operating points. $N_{{\mathrm{{guess}}}}$ is recorded before "
+           r"the safeguard and $N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the "
+           r"largest non-aliasing phase-gate count. False-alarm and miss rates are trial-level: "
+           r"they indicate whether at least one such event occurred during a run. Reverse "
+           r"engineering has no overshoot detector, so these rates are not applicable.")
+    return wrap(body, cap, "tab:diag-search", size="small")
+
+
 def tab_diag_exploration(D):
     algs = ["linear", "binary_deep", "reverse_eng_risk"]
+    broad = {s["id"] for s in M.SCENARIOS if "broad_prior" in s.get("families", ())}
+    allowed = {sid for sid in D.scen if sid not in broad}
+    if LONG:
+        return tab_diag_exploration_long(D, algs, allowed)
     body = [r"\begin{tabular}{lcccccc}", r"\toprule", "Algorithm",
             r"& \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}",
             r"& \makecell{Mean abs.\ \\ rel.\ error}",
             r"& \makecell{Exact \\ hit}", r"& \makecell{Within \\ $10\%$}",
             r"& \makecell{Guess \\ overshoot}",
             r"& \makecell{Probes \\ per trial} \\", r"\midrule"]
-    scen_ids = [x["id"] for x in M.SCENARIOS if x["id"] in D.scen] if LONG else [None]
+    scen_ids = [x["id"] for x in M.SCENARIOS if x["id"] in allowed] if LONG else [None]
     for sid in scen_ids:
         if LONG and sid != scen_ids[0]:
             body.append(r"\midrule")
@@ -528,55 +645,110 @@ def tab_diag_exploration(D):
         for a in algs:
             _s = sid
             body += [lab(a, narrow=True),
-                     f"& {_agg(D,a,'guess_ratio_median',sid=_s):.2f}",
-                     f"& {_agg(D,a,'guess_abs_rel_mean','mean',sid=_s):.2f}",
-                     f"& {100*_agg(D,a,'guess_exact','mean',sid=_s):.1f}\\%",
-                     f"& {100*_agg(D,a,'guess_within10','mean',sid=_s):.1f}\\%",
-                     f"& {100*_agg(D,a,'guess_overshoot','mean',sid=_s):.1f}\\%",
-                     f"& {_agg(D,a,'n_probes_mean','mean',sid=_s):.1f} \\\\"]
-    n_live = sum(1 for r in D.ops if r["regime"] == "live")
-    cap = (r"Quality of the depth the exploration phase returns, before any safeguard is applied. "
-           r"$N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{how deep should the "
-           r"exploitation go}; $N_{\mathrm{opt}}=\lfloor \pi/2\phi \rfloor$ is the deepest "
-           r"non-aliasing depth. Brute force is absent because it does not search: its "
+                     f"& {_agg(D,a,'guess_ratio_median',sid=_s,allowed_sids=allowed):.2f}",
+                     f"& {_agg(D,a,'guess_abs_rel_mean','mean',sid=_s,allowed_sids=allowed):.2f}",
+                     f"& {100*_agg(D,a,'guess_exact','mean',sid=_s,allowed_sids=allowed):.1f}\\%",
+                     f"& {100*_agg(D,a,'guess_within10','mean',sid=_s,allowed_sids=allowed):.1f}\\%",
+                     f"& {100*_agg(D,a,'guess_overshoot','mean',sid=_s,allowed_sids=allowed):.1f}\\%",
+                     f"& {_agg(D,a,'n_probes_mean','mean',sid=_s,allowed_sids=allowed):.1f} \\\\"]
+    n_live = sum(1 for r in D.ops
+                 if r["regime"] == "live" and r["scenario_id"] in allowed)
+    cap = (r"Quality of the value of $N$ returned by exploration, before any safeguard is applied. "
+           r"$N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{which value of $N$ "
+           r"should be used for exploitation}; "
+           r"$N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the "
+           r"largest non-aliasing value. Brute force is absent because it does not search: its "
            r"$N_{\mathrm{guess}}$ is undefined, not zero. "
-           rf"Aggregated over the {n_live} informative operating points.")
-    return wrap(body, cap, "tab:diag-exploration", size="small",
-                foot=(r"\footnotesize Per-point values with 95\% intervals and eligible "
-                      r"denominators: \texttt{diagnostics\_by\_point.csv}."))
+           rf"Broad-prior scenarios are excluded; the values aggregate the remaining {n_live} "
+           r"informative operating points.")
+    return wrap(body, cap, "tab:diag-exploration", size="small")
+
+
+def tab_diag_exploration_long(D, algs, allowed):
+    """Split scenario-level diagnostics into page-sized appendix tables."""
+    def make_body(scen_ids):
+        body = [r"\begin{tabular}{lcccccc}", r"\toprule", "Algorithm",
+                r"& \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}",
+                r"& \makecell{Mean abs.\ \\ rel.\ error}",
+                r"& \makecell{Exact \\ hit}", r"& \makecell{Within \\ $10\%$}",
+                r"& \makecell{Guess \\ overshoot}",
+                r"& \makecell{Probes \\ per trial} \\", r"\midrule"]
+        for i, sid in enumerate(scen_ids):
+            if i:
+                body.append(r"\midrule")
+            body.append(r"\multicolumn{7}{l}{\itshape " +
+                        D.scen[sid]["label"].replace("_", r"\_") + r"} \\")
+            for a in algs:
+                body += [lab(a, narrow=True),
+                         f"& {_agg(D,a,'guess_ratio_median',sid=sid,allowed_sids=allowed):.2f}",
+                         f"& {_agg(D,a,'guess_abs_rel_mean','mean',sid=sid,allowed_sids=allowed):.2f}",
+                         f"& {100*_agg(D,a,'guess_exact','mean',sid=sid,allowed_sids=allowed):.1f}\\%",
+                         f"& {100*_agg(D,a,'guess_within10','mean',sid=sid,allowed_sids=allowed):.1f}\\%",
+                         f"& {100*_agg(D,a,'guess_overshoot','mean',sid=sid,allowed_sids=allowed):.1f}\\%",
+                         f"& {_agg(D,a,'n_probes_mean','mean',sid=sid,allowed_sids=allowed):.1f} \\\\"]
+        return body
+
+    scen_ids = [x["id"] for x in M.SCENARIOS if x["id"] in allowed]
+    sweep_ids = [x["id"] for x in M.SCENARIOS
+                 if x["id"] in allowed and "precision_sweep" in x.get("families", ())]
+    variant_ids = [sid for sid in scen_ids if sid not in sweep_ids]
+    n_sweep = sum(1 for r in D.ops
+                  if r["regime"] == "live" and r["scenario_id"] in sweep_ids)
+    sweep_cap = (r"Quality of the value of $N$ returned by exploration, before any safeguard is "
+                 r"applied, for the precision sweep. $N_{\mathrm{guess}}$ is each algorithm's "
+                 r"proposed exploitation value and "
+                 r"$N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the largest "
+                 r"non-aliasing value. Brute force is absent because it does not search. Each "
+                 rf"scenario group aggregates its informative tested budgets ({n_sweep} operating "
+                 r"points in total).")
+    text = wrap(make_body(sweep_ids), sweep_cap, "tab:diag-exploration", size="small")
+    if variant_ids:
+        n_variants = sum(1 for r in D.ops
+                         if r["regime"] == "live" and r["scenario_id"] in variant_ids)
+        variant_cap = (r"Exploration-quality diagnostics for the prior-range variants at "
+                       r"$\epsilon=10^{-4}$. Definitions are as in "
+                       r"Table~\ref{tab:diag-exploration}; the scenario groups comprise "
+                       rf"{n_variants} informative operating points.")
+        text += "\n" + wrap(make_body(variant_ids), variant_cap,
+                            "tab:diag-exploration-priors", size="small")
+    return text
 
 
 def tab_diag_downstream(D):
     algs = ["brute", "linear", "binary_deep", "reverse_eng_risk"]
     body = [r"\begin{tabular}{lccccc}", r"\toprule", "Algorithm",
             r"& \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}",
-            r"& \makecell{Median \\ $N_*/N_{\mathrm{opt}}$}",
+            r"& \makecell{Median \\ $N^*/N_{\mathrm{opt}}$}",
             r"& \makecell{Final \\ overshoot}",
             r"& \makecell{Unsafe-guess \\ rescue}",
-            r"& \makecell{Median expl. \\ budget share} \\", r"\midrule"]
+            r"& \makecell{Converged \\ given safe $N^*$} \\", r"\midrule"]
     for a in algs:
-        g = _agg(D, a, "guess_ratio_median")
+        # Brute force does not search, but its fixed pre-exploitation choice is N_min.
+        g = _agg(D, a, "star_ratio_median" if a == "brute" else "guess_ratio_median")
         rc = _agg(D, a, "rescue_share", "mean")
         body += [lab(a, narrow=True),
                  f"& {g:.2f}" if np.isfinite(g) else "& --",
                  f"& {_agg(D,a,'star_ratio_median'):.2f}",
                  f"& {100*_agg(D,a,'star_overshoot','mean'):.2f}\\%",
                  f"& {100*rc:.1f}\\%" if np.isfinite(rc) else "& --",
-                 f"& {100*_agg(D,a,'exploration_share_median'):.2f}\\% \\\\"]
-    cap = (r"From the exploration's guess to the depth actually used. $N_*$ is the exploitation "
-           r"depth after the safeguard; \emph{unsafe-guess rescue} is "
-           r"$P(N_* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how "
-           r"often the safeguard pulls an aliasing guess back to safety. A median $N_*/N_{"
-           r"\mathrm{opt}}$ below one is intended: the rule maximises "
+                 f"& {100*_agg(D,a,'conv_given_safe_depth','mean'):.1f}\\% \\\\"]
+    n_live = sum(1 for r in D.ops if r["regime"] == "live")
+    cap = (r"From the exploration's guess to the value of $N$ actually used, aggregated over the "
+           rf"{n_live} informative operating points. $N^*$ is the "
+           r"exploitation value after the safeguard; \emph{unsafe-guess rescue} is "
+           r"$P(N^* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how "
+           r"often the safeguard pulls an aliasing guess back to safety. For the statistical "
+           r"safeguard, a median $N^*/N_{\mathrm{opt}}$ below one may be intentional: it maximizes "
            r"$P(\text{no overshoot})\times P(\text{converge})$ and deliberately backs off from the "
-           r"aliasing cliff.")
-    return wrap(body, cap, "tab:diag-downstream", size="small",
-                foot=(r"\footnotesize These are overlapping stage flags and conditional rates, "
-                      r"\emph{not} a mutually exclusive decomposition of why trials fail."))
+           r"aliasing cliff. \emph{Converged given safe $N^*$} is "
+           r"$P(|\hat\phi-\phi|<\epsilon\mid N^*\leq N_{\mathrm{opt}})$. "
+           r"Brute force performs no search, so its fixed "
+           r"$N_{\mathrm{guess}}=N_{\min}$ is reported.")
+    return wrap(body, cap, "tab:diag-downstream", size="small")
 
 
 def tab_diag_detector(D):
-    body = [r"\begin{tabular}{lccccc}", r"\toprule", "Algorithm",
+    body = [r"\setlength{\tabcolsep}{4pt}", r"\begin{tabular}{lccccc}", r"\toprule", "Algorithm",
             r"& \makecell{False-alarm \\ rate}", r"& \makecell{Miss \\ rate}",
             r"& \makecell{Probes \\ per trial}",
             r"& \makecell{Probe-level \\ TP / FP}", r"& \makecell{Probe-level \\ TN / FN} \\",
@@ -593,13 +765,19 @@ def tab_diag_detector(D):
                  f"& {_agg(D,a,'n_probes_mean','mean'):.1f}",
                  f"& {tex_int(tp)} / {tex_int(fp)}",
                  f"& {tex_int(tn)} / {tex_int(fn)} \\\\"]
+    n_live = sum(1 for r in D.ops if r["regime"] == "live")
     cap = (r"How well each search's own overshoot decision matches the simulation truth "
-           r"$N_i > N_{\mathrm{opt}}$. Rates are \emph{trial-level}: a run is a false alarm if at "
+           r"$N_i > N_{\mathrm{opt}}$, aggregated over the "
+           rf"{n_live} informative operating points. Rates are \emph{{trial-level}}: a run is a "
+           r"false alarm if at "
            r"least one safe probe was declared an overshoot, and a miss if at least one "
            r"overshooting probe was accepted. Trial-level is the correct unit because probes within "
            r"a run are dependent; the probe-level counts are supporting telemetry only. Reverse "
            r"engineering and brute force have no detector and are omitted rather than scored as "
-           r"zero. Linear search makes no per-probe declaration, so its classification is the "
+           r"zero. Reverse engineering's $N_{\mathrm{guess}}$ and the safeguard's correction to "
+           r"$N^*$ are instead evaluated in Tables~\ref{tab:diag-exploration}--"
+           r"\ref{tab:diag-exploration-priors} and \ref{tab:diag-downstream}. Linear search makes "
+           r"no per-probe declaration, so its classification is the "
            r"backtracking decision of its own stopping rule.")
     return wrap(body, cap, "tab:diag-detector", size="small")
 
@@ -625,8 +803,11 @@ def main():
         made.append(write("tab_broad_pi2.tex", tab_broad(D, "broad_pi2_e3", r"\pi/2")))
     if "broad_pi4_e3" in D.scen:
         made.append(write("tab_broad_pi4.tex", tab_broad(D, "broad_pi4_e3", r"\pi/4")))
+    made.append(write("tab_robustness_across_thresholds.tex",
+                      tab_robustness_across_thresholds(D)))
     made.append(write("tab_opt_param_first.tex", tab_opt_param_first(D)))
     made.append(write("tab_opt_param_second.tex", tab_opt_param_second(D)))
+    made.append(write("tab_diag_search.tex", tab_diag_search(D)))
     made.append(write("tab_diag_exploration.tex", tab_diag_exploration(D)))
     made.append(write("tab_diag_downstream.tex", tab_diag_downstream(D)))
     made.append(write("tab_diag_detector.tex", tab_diag_detector(D)))

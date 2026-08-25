@@ -223,6 +223,10 @@ def main():
                 traceback.print_exc()
         print(f"\nsweep finished in {(time.time()-t0)/60:.1f} min", flush=True)
 
+    # Add the cheap reference rows after the expensive protocol sweep. The oracle is analytic and
+    # separable needs no tuning, so this remains fast and makes the production command complete.
+    import add_baselines
+    add_baselines.main()
     import finalize
     finalize.main(mode)
     return mode

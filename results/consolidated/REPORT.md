@@ -15,7 +15,7 @@ Reported algorithms: `brute` (Brute force), `linear` (Linear search), `binary_de
 | Binary search (stat. safeguard, deepest probe) | 61.17% | 61.82% | 63/144 |
 | Reverse engineering (stat. safeguard) | 61.56% | 63.06% | 81/144 |
 
-**Every aggregate in this report is over the 144 LIVE operating points** of 221 â€” those where the best algorithm converges between 3% and 99%. At a saturated point every configuration ties, so the tuner's argmax, and therefore every diagnostic measured at that argmax, is Monte-Carlo noise rather than a property of the algorithm; at a floored point nothing converges at any depth. The per-point CSVs keep all 161 points and `operating_points.csv` carries the `regime` label to join on. Means and medians here mix scenarios and budgets, so they summarise the table rather than making a headline claim.
+**Every aggregate in this report is over the 144 LIVE operating points** of 221 — those where the best algorithm converges between 3% and 99%. At a saturated point every configuration ties, so the tuner's argmax, and therefore every diagnostic measured at that argmax, is Monte-Carlo noise rather than a property of the algorithm; at a floored point nothing converges at any depth. The per-point CSVs keep all 161 points and `operating_points.csv` carries the `regime` label to join on. Means and medians here mix scenarios and budgets, so they summarise the table rather than making a headline claim.
 
 Budget to reach 90% convergence, relative to brute force (>1 means the algorithm needs less budget):
 
@@ -27,7 +27,7 @@ Budget to reach 90% convergence, relative to brute force (>1 means the algorithm
 
 Crossing rule: log-linear interpolation of the convergence-vs-budget curve (qmetrology.uncertainty.crossing). Intervals are 95% percentile intervals from a parametric bootstrap (2000 replicates, seed 12345) of the convergence curve; full rows in `budget_crossings.csv`.
 
-## 2. Exploration phase â€” `N_guess / N_opt`
+## 2. Exploration phase — `N_guess / N_opt`
 
 | algorithm | median ratio (over points) | mean abs. rel. error | signed rel. error | exact hit | within 10% | guess overshoot | median expl. budget share | mean probes |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -88,7 +88,7 @@ Live operating points split into terciles of budget *within each scenario*, so t
 | Reverse engineering (stat. safeguard) | mid | 1.43% | 1.00 | 20.1% | 1.0 | 99.1% |
 | Reverse engineering (stat. safeguard) | high | 0.13% | 1.00 | 19.9% | 1.0 | 99.5% |
 
-## 3. Safeguard and final depth â€” `N_star / N_opt`
+## 3. Safeguard and final depth — `N_star / N_opt`
 
 | algorithm | median `N*/N_opt` | final overshoot | converged given a safe depth | unsafe-guess rescue | median `N*/N_guess` |
 |---|---:|---:|---:|---:|---:|
@@ -97,7 +97,7 @@ Live operating points split into terciles of budget *within each scenario*, so t
 | Binary search (stat. safeguard, deepest probe) | 1.00 | 0.74% | 61.3% | 96.4% | 1.05 |
 | Reverse engineering (stat. safeguard) | 1.00 | 0.47% | 61.7% | 97.3% | 0.99 |
 
-The safeguard's target is `N_opt`, and it deliberately backs off from the aliasing cliff, so a median below 1 is the intended behaviour rather than a miss. Early stopping, final overshoot and ordinary shot noise are reported here as overlapping stage flags and conditional rates, **not** as a mutually exclusive failure decomposition â€” no priority or counterfactual rule is defined that would justify one.
+The safeguard's target is `N_opt`, and it deliberately backs off from the aliasing cliff, so a median below 1 is the intended behaviour rather than a miss. Early stopping, final overshoot and ordinary shot noise are reported here as overlapping stage flags and conditional rates, **not** as a mutually exclusive failure decomposition — no priority or counterfactual rule is defined that would justify one.
 
 ### Detector quality (linear and binary search only)
 
@@ -115,7 +115,7 @@ The rates are trial-level (at least one safe probe declared an overshoot / at le
 * Continuous diagnostics: median with an exact order-statistic bootstrap percentile interval, plus the mean with a run-level percentile bootstrap (2000 replicates, seed 12345).
 * Budget crossings and ratios: parametric bootstrap of the convergence curve, same replicate count and seed.
 
-Budget-grid discretisation: re-deriving each crossing from the two half-density subgrids moves it by a median of 2.57% and at most 13.14%. Log-linear interpolation error is O(h^2) in the grid log-spacing, so the full-grid contribution is about a quarter of that.
+Budget-grid discretisation: re-deriving each crossing from the two half-density subgrids moves it by a median of 2.58% and at most 13.14%. Log-linear interpolation error is O(h^2) in the grid log-spacing, so the full-grid contribution is about a quarter of that.
 
 **Budget compliance.** Over every held-out run of every point, 0 trial(s) spent more than the nominal budget; the worst per-trial spend observed is 1.0000x the cap. Per-point rows are in `budget_audit.csv` (mean, median, p90, max and unused share). A mean spend of 1.0000x does not by itself certify compliance, which is why the per-trial maximum and the violation count are reported.
 
@@ -135,7 +135,7 @@ Budget-grid discretisation: re-deriving each crossing from the two half-density 
 
 ## Figures
 
-`fig_diagnostics_vs_budget.png` â€” exploration budget share, median `N_guess/N_opt` and final overshoot against the available budget (normalised per scenario). `fig_guess_vs_final_depth.png` â€” what the safeguard does to the exploration's guess, and how the final depth maps onto convergence. Both are regenerated by `python analysis/consolidated/figures.py` from `diagnostics_by_point.csv` alone.
+`fig_diagnostics_vs_budget.png` — exploration budget share, median `N_guess/N_opt` and final overshoot against the available budget (normalised per scenario). `fig_guess_vs_final_depth.png` — what the safeguard does to the exploration's guess, and how the final depth maps onto convergence. Both are regenerated by `python analysis/consolidated/figures.py` from `diagnostics_by_point.csv` alone.
 
 ## Files
 
