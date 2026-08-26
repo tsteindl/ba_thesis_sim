@@ -74,6 +74,15 @@ python analysis/consolidated/error_curves.py       # |phi_hat-phi| quantiles (ne
 python tests/test_consolidated.py --slow             # the validation suite
 ```
 
+Two side studies answer specific review questions and write their own CSVs into
+`results/consolidated/` without touching the sweep (see the `.md` next to each):
+
+```bash
+python analysis/consolidated/overshoot_criterion.py           # -> OVERSHOOT_CRITERION.md
+python analysis/consolidated/linear_search_claims.py          # audits linear_search_revision_notes.md
+python analysis/consolidated/linear_detector_study.py --curve # -> LINEAR_SEARCH.md
+```
+
 **Reported algorithms** (`qmetrology/manifest.py`, `ORDER`) — and only these:
 
 | key | algorithm | tuned parameters |

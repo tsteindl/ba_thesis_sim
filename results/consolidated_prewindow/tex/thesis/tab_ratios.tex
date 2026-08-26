@@ -1,0 +1,39 @@
+\begin{table}[ht]
+\centering
+\small
+\caption{Budget to reach $90\%$ convergence, expressed two ways. \textbf{First number:} $B_{\mathrm{brute}}/B_{\mathrm{alg}}$, the factor less budget than the baseline ($>1$ is better). \textbf{Second number:} $B_{\mathrm{alg}}/B_{\mathrm{oracle}}$, the algorithm's budget relative to the oracle reference ($1.00\texttimes$ means equal budget). The second number is what makes the first interpretable: it shows directly how far the algorithm remains from the oracle reference. The two multiply to the oracle's own factor in the last row. The separable protocol is omitted -- it is slower than the baseline; its raw budget is in Table~\ref{tab:summary-all-ci}.}
+\label{tab:ratios}
+\begin{tabular}{lcccc}
+\toprule
+\makecell[l]{Algorithm \\ {\scriptsize $B_{\mathrm{brute}}/B_{\mathrm{alg}}$} \\ {\scriptsize ($B_{\mathrm{alg}}/B_{\mathrm{oracle}}$)}}
+& \makecell{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon = 10^{-3}$}
+& \makecell{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon = 10^{-4}$}
+& \makecell{$\phi \sim \mathcal{U}(0.001,0.01)$ \\ $\epsilon = 10^{-4}$}
+& \makecell{$\phi \sim \mathcal{U}(0.001,0.1)$ \\ $\epsilon = 10^{-4}$} \\
+\midrule
+A.~\ref{alg:linear-search}: LS
+& \makecell{1.08\texttimes{\scriptsize (1.74\texttimes\ oracle)}}
+& \makecell{1.56\texttimes{\scriptsize (1.19\texttimes\ oracle)}}
+& \makecell{1.17\texttimes{\scriptsize (1.57\texttimes\ oracle)}}
+& \makecell{1.30\texttimes{\scriptsize (1.52\texttimes\ oracle)}} \\
+A.~\ref{alg:binary-search}: BS
+& \makecell{1.42\texttimes{\scriptsize (1.33\texttimes\ oracle)}}
+& \makecell{1.60\texttimes{\scriptsize (1.16\texttimes\ oracle)}}
+& \makecell{1.32\texttimes{\scriptsize (1.39\texttimes\ oracle)}}
+& \makecell{1.84\texttimes{\scriptsize (1.07\texttimes\ oracle)}} \\
+A.~\ref{alg:reverse-engineering}: RE
+& \makecell{1.54\texttimes{\scriptsize (1.22\texttimes\ oracle)}}
+& \makecell{1.74\texttimes{\scriptsize (1.06\texttimes\ oracle)}}
+& \makecell{1.46\texttimes{\scriptsize (1.26\texttimes\ oracle)}}
+& \makecell{1.84\texttimes{\scriptsize (1.07\texttimes\ oracle)}} \\
+\midrule
+Oracle ($N_\text{opt}$)
+& \makecell{1.88\texttimes{\scriptsize (1.00\texttimes\ oracle)}}
+& \makecell{1.85\texttimes{\scriptsize (1.00\texttimes\ oracle)}}
+& \makecell{1.84\texttimes{\scriptsize (1.00\texttimes\ oracle)}}
+& \makecell{1.98\texttimes{\scriptsize (1.00\texttimes\ oracle)}} \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\end{table}

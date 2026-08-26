@@ -4,11 +4,11 @@ Consolidated performance, algorithm diagnostics and uncertainty for the four alg
 
 | | |
 |---|---|
-| Generated | 2026-08-21 21:57 by `python analysis/consolidated/full_report.py` |
+| Generated | 2026-08-26 23:43 by `python analysis/consolidated/full_report.py` |
 | Sweep command | `python analysis/consolidated/run.py --max --keep-traces` |
 | Sweep mode | `max` |
 | Sweep wall clock | 307 min (5.1 h), 24 cores |
-| Repository commit | `67657cd` (working tree dirty) |
+| Repository commit | `49aec23` (working tree dirty) |
 | Scenarios | 10 |
 | Operating points | 221 (144 live, 77 saturated/floored) |
 | Evaluated (point, algorithm) cells | 1326 |
@@ -413,9 +413,10 @@ Neither endpoint can be criticised as arbitrary, and both are recorded per row (
 | `linear` | `lookback_window` | 1, 2, 3, 4, 5, 6, 8, 12, 20 | 9 |
 | `linear` | `safeguard` | 0, 1, 2, 3, 4, 6, 8, 12, 16, 24 | 10 |
 | `linear` | `inc` | 1, 2, 3, 5, 8 | 5 |
+| `linear` | `mean_window` | 0, 1, 2, 3, 4, 6, 8, 12 | 8 |
 | `binary_deep` | `conf` | 0.5, 0.52, 0.55, 0.58, 0.62, 0.66, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.99 | 13 |
 
-Linear search therefore has **450 discrete combinations**, binary search **13**, reverse engineering none.
+Linear search therefore has **3600 discrete combinations**, binary search **13**, reverse engineering none.
 
 **Why these ranges.** An earlier production sweep used `lookback_window in [1,2,5]` and `safeguard in [0,1,2]` and selected the **top** of those grids in 64.8% and 15.7% of live cells respectively — the optimum lay outside the search box, so those numbers understated linear search by an unknown amount. `safeguard` needed the largest extension because it is an *absolute* depth decrement: its useful range grows with `N_min`, and a grid tuned for `N_min = 15` cannot serve `N_min = 157`. §13 reports whether the current ranges bind.
 
@@ -510,7 +511,7 @@ The ratio `B_brute(p*) / B_algo(p*)` resamples both curves **independently**. Be
 
 Monte-Carlo error is not the only thing moving a crossing; the finite budget grid does too. This is probed directly and without assumptions: re-derive each crossing from the two half-density subgrids (`budgets[0::2]` and `budgets[1::2]`) and report the largest relative deviation. Log-linear interpolation error is `O(h^2)` in the grid log-spacing, so the full-density grid carries roughly **a quarter** of the deviation reported.
 
-Measured here: median **2.57%**, 90th percentile 6.69%, max 13.14% over 237 crossings — so the full-grid contribution is of order 0.64% at the median.
+Measured here: median **2.59%**, 90th percentile 6.74%, max 13.14% over 197 crossings — so the full-grid contribution is of order 0.65% at the median.
 
 ### 6.7 Rounding conventions
 
@@ -535,11 +536,10 @@ Convergence rate of the frozen winner on the held-out seed, R = 50,000 per cell.
 | algorithm | mean | median | min | max | points won |
 |---|---:|---:|---:|---:|---:|
 | Brute force | 51.3% | 49.0% | 8.8% | 97.4% | 0/144 |
-| Linear search | 57.6% | 57.1% | 10.4% | 97.9% | 0/144 |
+| Linear search | 59.0% | 58.9% | 11.3% | 98.5% | 0/144 |
 | Binary search | 61.2% | 61.8% | 12.1% | 98.7% | 63/144 |
 | Reverse engineering | 61.6% | 63.1% | 11.9% | 98.9% | 81/144 |
 | *Separable protocol (N=1)* | 22.0% | 15.7% | 0.0% | 96.2% | -- |
-| *Ceiling (N_opt, Eq. 3.4 law)* | 63.7% | 66.5% | 14.6% | 99.4% | -- |
 
 Means and medians mix scenarios and budgets; they summarise the table, they are not a headline claim. The per-cell rows with Wilson intervals are in `performance_curves.csv`. The last two rows are reference points, not protocols under comparison: they cannot win a point and are excluded from every diagnostic aggregate and from the regime rule.
 
@@ -549,10 +549,10 @@ Ratio `B_brute(p*) / B_algo(p*)`; **greater than 1 means the algorithm needs les
 
 | algorithm | p* | median ratio | min | max | scenarios with a crossing |
 |---|---|---:|---:|---:|---:|
-| Linear search | 50% | **1.58** | 1.06 | 2.08 | 10 |
-| Linear search | 80% | **1.52** | 1.07 | 1.81 | 10 |
-| Linear search | 90% | **1.43** | 1.08 | 1.65 | 10 |
-| Linear search | 95% | **1.35** | 1.03 | 1.56 | 10 |
+| Linear search | 50% | **1.76** | 1.26 | 2.07 | 10 |
+| Linear search | 80% | **1.59** | 1.21 | 1.88 | 10 |
+| Linear search | 90% | **1.49** | 1.14 | 1.67 | 10 |
+| Linear search | 95% | **1.41** | 1.10 | 1.54 | 10 |
 | Binary search | 50% | **2.08** | 1.41 | 2.38 | 10 |
 | Binary search | 80% | **1.82** | 1.39 | 2.04 | 10 |
 | Binary search | 90% | **1.68** | 1.32 | 1.84 | 10 |
@@ -566,16 +566,16 @@ Ratio `B_brute(p*) / B_algo(p*)`; **greater than 1 means the algorithm needs les
 
 | scenario | brute `B(90%)` | linear | binary | reverse eng. | best ratio |
 |---|---:|---:|---:|---:|---:|
-| `narrow_e3` | 45,900 | 42,500 | 32,400 | 29,800 | 1.54x |
+| `narrow_e3` | 45,900 | 35,500 | 32,400 | 29,800 | 1.54x |
 | `narrow_e4` | 4.53e+06 | 2.91e+06 | 2.83e+06 | 2.60e+06 | 1.74x |
-| `narrow_e5` | 4.51e+08 | 2.88e+08 | 2.57e+08 | 2.51e+08 | 1.80x |
-| `narrow_e6` | 4.51e+10 | 2.76e+10 | 2.54e+10 | 2.51e+10 | 1.80x |
-| `narrow_e7` | 4.51e+12 | 2.73e+12 | 2.52e+12 | 2.49e+12 | 1.81x |
-| `narrow_e8` | 4.51e+14 | 2.79e+14 | 2.55e+14 | 2.48e+14 | 1.82x |
-| `small_e4` | 441,000 | 377,000 | 334,000 | 302,000 | 1.46x |
-| `wide_e4` | 4.52e+06 | 3.48e+06 | 2.45e+06 | 2.45e+06 | 1.85x |
-| `broad_pi4_e3` | 339,000 | 306,000 | 216,000 | 219,000 | 1.57x |
-| `broad_pi2_e3` | 678,000 | 597,000 | 471,000 | 473,000 | 1.44x |
+| `narrow_e5` | 4.51e+08 | 2.76e+08 | 2.57e+08 | 2.51e+08 | 1.80x |
+| `narrow_e6` | 4.51e+10 | 2.73e+10 | 2.54e+10 | 2.51e+10 | 1.80x |
+| `narrow_e7` | 4.51e+12 | 2.70e+12 | 2.52e+12 | 2.49e+12 | 1.81x |
+| `narrow_e8` | 4.51e+14 | 2.72e+14 | 2.55e+14 | 2.48e+14 | 1.82x |
+| `small_e4` | 441,000 | 325,000 | 334,000 | 302,000 | 1.46x |
+| `wide_e4` | 4.52e+06 | 3.19e+06 | 2.45e+06 | 2.45e+06 | 1.85x |
+| `broad_pi4_e3` | 339,000 | 279,000 | 216,000 | 219,000 | 1.57x |
+| `broad_pi2_e3` | 678,000 | 595,000 | 471,000 | 473,000 | 1.44x |
 
 Full rows — every threshold, both interval endpoints, `coverage`, `grid_sensitivity_rel`, `R`, `n_boot`, `boot_seed` — are in `budget_crossings.csv`.
 
@@ -586,7 +586,7 @@ Full rows — every threshold, both interval endpoints, `coverage`, `grid_sensit
 | algorithm | converged | 95% Wilson CI | frozen configuration |
 |---|---:|---|---|
 | Brute force | **56.09%** | [55.66%, 56.53%] | none |
-| Linear search | **57.34%** | [56.91%, 57.78%] | inc=1, lookback_window=4, m_exploration=2, safeguard=1 |
+| Linear search | **64.10%** | [63.68%, 64.52%] | inc=1, lookback_window=6, m_exploration=1, mean_window=4, safeguard=0 |
 | Binary search | **65.07%** | [64.65%, 65.49%] | conf=0.5, m_exploration=114 |
 | Reverse engineering | **66.21%** | [65.79%, 66.62%] | m_exploration=44 |
 
@@ -598,7 +598,7 @@ The primary exploration diagnostic: how close the exploration phase's *own answe
 
 | algorithm | median ratio | mean abs. rel. err. | signed rel. err. | exact hit | within 5% | within 10% | guess overshoot |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Linear search | **1.00** | 0.14 | -0.12 | 41.4% | 56.7% | 68.6% | 7.7% |
+| Linear search | **1.00** | 0.16 | -0.11 | 37.3% | 50.9% | 61.1% | 6.6% |
 | Binary search | **0.93** | 0.29 | -0.28 | 31.0% | 38.2% | 45.7% | 4.1% |
 | Reverse engineering | **1.00** | 0.05 | +0.00 | 59.1% | 77.6% | 86.8% | 19.3% |
 
@@ -613,7 +613,7 @@ Each cell contributes its own within-cell statistic. The three *share* columns t
 | algorithm | expl. share: median | mean | p90 | mean probes/trial | median probes | only one probe | no exploitation phase |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Brute force | 0.00% | 0.00% | 0.00% | -- | -- | -- | 0.00% |
-| Linear search | 1.78% | 4.65% | 9.21% | 23.4 | 17.0 | 0.0% | 0.00% |
+| Linear search | 0.83% | 2.45% | 4.52% | 22.8 | 16.0 | 0.0% | 0.00% |
 | Binary search | 2.70% | 2.83% | 3.09% | 4.4 | 1.0 | 53.5% | 0.00% |
 | Reverse engineering | 1.33% | 1.37% | 1.33% | 1.0 | 1.0 | 98.6% | 0.04% |
 
@@ -628,7 +628,7 @@ Brute force takes no probes at all, so its probe-shape columns are blank rather 
 | algorithm | median `N*/N_opt` | Q1 | Q3 | final overshoot | exact | within 10% | converged given a safe depth |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Brute force | **0.54** | 0.31 | 0.75 | 0.00% | 12.7% | 17.8% | 51.3% |
-| Linear search | **0.95** | 0.77 | 0.98 | 2.35% | 24.2% | 57.4% | 58.2% |
+| Linear search | **0.95** | 0.72 | 0.97 | 1.72% | 22.8% | 54.2% | 59.7% |
 | Binary search | **1.00** | 0.94 | 1.00 | 0.74% | 44.5% | 76.0% | 61.3% |
 | Reverse engineering | **1.00** | 0.92 | 1.00 | 0.47% | 43.2% | 72.5% | 61.7% |
 
@@ -638,7 +638,7 @@ Brute force takes no probes at all, so its probe-shape columns are blank rather 
 
 | algorithm | median `N*/N_guess` | Q1 | Q3 | unsafe-guess rescue | backoff when the guess was already safe |
 |---|---:|---:|---:|---:|---:|
-| Linear search | 0.96 | 0.95 | 0.98 | 49.5% | 0.96x |
+| Linear search | 0.98 | 0.95 | 1.00 | 44.6% | 1.00x |
 | Binary search | 1.05 | 1.00 | 2.25 | 96.4% | 1.06x |
 | Reverse engineering | 0.99 | 0.92 | 1.00 | 97.3% | 1.00x |
 
@@ -654,7 +654,7 @@ Only linear and binary search make overshoot declarations. Reverse engineering a
 
 | algorithm | trial-level false alarm | trial-level miss | probe TP | FP | TN | FN | eligible runs |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Linear search | **45.3%** | **7.7%** | 39,858,860 | 8,624,168 | 119,238,860 | 1,116,350 | 7,200,000 |
+| Linear search | **53.8%** | **6.6%** | 26,034,339 | 11,647,285 | 125,047,269 | 1,230,018 | 7,200,000 |
 | Binary search | **22.8%** | **4.1%** | 14,367,412 | 4,664,659 | 12,323,125 | 335,727 | 7,200,000 |
 
 Rates are **trial-level** with Wilson intervals at the row's own R (§3): a run counts as a false alarm if *at least one* safe probe was declared an overshoot, and as a miss if *at least one* overshooting probe was accepted. Probe-level confusion counts are supporting telemetry and carry no interval, because probes within a run are dependent.
@@ -677,12 +677,12 @@ Per-cell rows with both interval endpoints and denominators: `detector_confusion
 | Brute force | 1e-06 | 0.00% | -- | 0.54 | 0.00% | 52.7% |
 | Brute force | 1e-07 | 0.00% | -- | 0.54 | 0.00% | 52.7% |
 | Brute force | 1e-08 | 0.00% | -- | 0.54 | 0.00% | 52.7% |
-| Linear search | 1e-03 | 4.03% | 0.83 | 0.76 | 5.35% | 53.5% |
-| Linear search | 1e-04 | 3.17% | 1.00 | 0.92 | 2.37% | 60.6% |
-| Linear search | 1e-05 | 0.81% | 1.00 | 0.95 | 0.75% | 63.1% |
-| Linear search | 1e-06 | 0.17% | 1.00 | 0.95 | 0.66% | 63.4% |
-| Linear search | 1e-07 | 0.01% | 1.00 | 1.00 | 0.67% | 63.7% |
-| Linear search | 1e-08 | 0.00% | 1.00 | 1.00 | 0.64% | 63.7% |
+| Linear search | 1e-03 | 2.68% | 0.72 | 0.71 | 2.17% | 57.8% |
+| Linear search | 1e-04 | 2.88% | 1.00 | 0.92 | 2.36% | 60.9% |
+| Linear search | 1e-05 | 1.18% | 1.00 | 0.95 | 0.79% | 63.0% |
+| Linear search | 1e-06 | 0.34% | 1.00 | 0.95 | 0.45% | 63.7% |
+| Linear search | 1e-07 | 0.06% | 1.00 | 1.00 | 0.49% | 64.2% |
+| Linear search | 1e-08 | 0.00% | 1.00 | 0.99 | 0.41% | 64.1% |
 | Binary search | 1e-03 | 15.56% | 0.54 | 0.87 | 1.56% | 58.7% |
 | Binary search | 1e-04 | 5.44% | 0.97 | 0.92 | 1.71% | 61.4% |
 | Binary search | 1e-05 | 1.57% | 0.98 | 0.97 | 0.27% | 64.2% |
@@ -702,9 +702,9 @@ Live points split into terciles of budget *within each scenario*, so scale diffe
 
 | algorithm | tercile | median expl. share | median `N_guess/N_opt` | guess overshoot | mean probes | only the opening probe |
 |---|---|---:|---:|---:|---:|---:|
-| Linear search | low | 1.01% | 1.00 | 9.9% | 20.2 | 0.0% |
-| Linear search | mid | 2.29% | 1.00 | 7.9% | 24.8 | 0.0% |
-| Linear search | high | 1.51% | 1.00 | 4.7% | 25.9 | 0.0% |
+| Linear search | low | 0.54% | 1.00 | 9.2% | 20.3 | 0.0% |
+| Linear search | mid | 0.87% | 1.00 | 7.1% | 22.7 | 0.0% |
+| Linear search | high | 1.22% | 1.00 | 2.8% | 25.8 | 0.0% |
 | Binary search | low | 5.58% | 0.97 | 6.2% | 4.4 | 52.8% |
 | Binary search | mid | 2.69% | 0.94 | 3.0% | 4.1 | 57.4% |
 | Binary search | high | 2.33% | 0.88 | 2.8% | 4.7 | 50.0% |
@@ -722,10 +722,10 @@ Each cell's runs split into quartiles of the true `phi` (`diagnostics_by_phase.c
 | Brute force | Q2 | -- | -- | 0.43 | 0.00% | 68.3% |
 | Brute force | Q3 | -- | -- | 0.65 | 0.00% | 68.1% |
 | Brute force | Q4 | -- | -- | 0.88 | 0.00% | 68.3% |
-| Linear search | Q1 | 0.68 | 9.8% | 0.50 | 3.90% | 77.3% |
-| Linear search | Q2 | 0.93 | 4.7% | 0.82 | 1.04% | 73.8% |
-| Linear search | Q3 | 0.95 | 4.0% | 0.87 | 0.83% | 70.2% |
-| Linear search | Q4 | 1.00 | 3.9% | 0.92 | 0.47% | 67.8% |
+| Linear search | Q1 | 0.65 | 5.3% | 0.61 | 1.17% | 80.8% |
+| Linear search | Q2 | 0.83 | 4.8% | 0.78 | 0.84% | 74.4% |
+| Linear search | Q3 | 0.95 | 5.0% | 0.89 | 1.35% | 70.0% |
+| Linear search | Q4 | 0.94 | 3.0% | 0.89 | 1.19% | 67.7% |
 | Binary search | Q1 | 0.69 | 11.3% | 0.83 | 1.07% | 83.5% |
 | Binary search | Q2 | 0.76 | 8.9% | 0.95 | 0.55% | 75.9% |
 | Binary search | Q3 | 0.91 | 6.5% | 0.96 | 0.26% | 71.0% |
@@ -748,13 +748,13 @@ Both regenerate from `diagnostics_by_point.csv` alone via `python analysis/conso
 
 ## 12. Budget compliance audit
 
-Over **all 1,326 evaluated cells** and every held-out run in them:
+Over **all 1,105 evaluated cells** and every held-out run in them:
 
 | | |
 |---|---:|
 | trials spending more than the nominal budget | **0** |
 | worst per-trial spend observed | **1.000000x** the cap |
-| mean spend across cells | 0.9996x |
+| mean spend across cells | 0.9997x |
 | median unused budget | 0.00% |
 
 **A mean spend of 1.0000x does not by itself certify compliance** — it can average over trials that overspend and trials that underspend. That is why the per-trial *maximum* and an explicit *violation count* are reported per cell, in `budget_audit.csv`, alongside the mean, median and p90. Violations are counted, never clipped away after the fact.
@@ -775,7 +775,7 @@ Each winner row carries: both per-block tuning rates, their mean, the runner-up 
 
 | algorithm | median margin over runner-up | p90 | max |
 |---|---:|---:|---:|
-| Linear search | 0.09 pp | 0.28 pp | 0.57 pp |
+| Linear search | 0.08 pp | 0.24 pp | 0.56 pp |
 | Binary search | 0.00 pp | 0.12 pp | 0.50 pp |
 | Reverse engineering | 0.04 pp | 0.19 pp | 0.64 pp |
 
@@ -787,18 +787,20 @@ These margins are small — the objective is flat near its optimum. That is exac
 
 | algorithm | axis | share of live tuned cells | verdict |
 |---|---|---:|---|
-| Linear search | `inc` (max) | 3/144 = 2.1% | negligible |
+| Linear search | `mean_window` (min) | 12/144 = 8.3% | negligible |
+| Linear search | `inc` (max) | 8/144 = 5.6% | negligible |
+| Linear search | `mean_window` (max) | 1/144 = 0.7% | negligible |
 | Binary search | `conf` (max) | 1/144 = 0.7% | negligible |
 
 **Pins at an axis MINIMUM** — physical floors, not defects (`m' = 1` is one shot, `inc = 1` one step, `safeguard = 0` no decrement, `lookback_window = 1` a single look back, `conf = 0.5` the point at which the normal quantile vanishes and the branch rule becomes a plain comparison against the reference estimate):
 
 | algorithm | axis | share of live tuned cells |
 |---|---|---:|
-| Linear search | `inc` | 100/144 = 69.4% |
+| Linear search | `inc` | 117/144 = 81.2% |
 | Binary search | `conf` | 82/144 = 56.9% |
-| Linear search | `safeguard` | 49/144 = 34.0% |
-| Linear search | `lookback_window` | 22/144 = 15.3% |
-| Linear search | `m_exploration` | 16/144 = 11.1% |
+| Linear search | `safeguard` | 62/144 = 43.1% |
+| Linear search | `m_exploration` | 36/144 = 25.0% |
+| Linear search | `lookback_window` | 6/144 = 4.2% |
 
 ### 13.3 Selected parameter values
 
@@ -806,10 +808,11 @@ Distribution of the frozen winners over live cells — showing whether the widen
 
 **Linear search**
 
-* `m_exploration`: 110 distinct values, 1 .. 72,814,862 (median 108)
-* `lookback_window`: 1x22, 2x8, 3x7, 4x10, 5x5, 6x20, 8x32, 12x40
-* `safeguard`: 0x49, 1x50, 2x19, 3x11, 4x4, 6x4, 8x2, 12x5
-* `inc`: 1x100, 2x25, 3x13, 5x3, 8x3
+* `m_exploration`: 92 distinct values, 1 .. 43,212,199 (median 92)
+* `lookback_window`: 1x6, 2x26, 3x17, 4x6, 5x17, 6x39, 8x23, 12x10
+* `safeguard`: 0x62, 1x50, 2x11, 3x9, 4x5, 6x5, 8x2
+* `inc`: 1x117, 2x11, 3x4, 5x4, 8x8
+* `mean_window`: 0x12, 1x46, 2x25, 3x26, 4x23, 6x5, 8x6, 12x1
 
 **Binary search**
 

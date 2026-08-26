@@ -1,0 +1,6 @@
+scenario_id,purpose,budget,m,N_min,N_second,second_probe_min_budget,second_probe_fits
+narrow_e3,Table 4.1,10000,114,15,86,11514,0
+narrow_e3,near B90,29173,289,15,86,29189,0
+narrow_e4,near B90,2917365,334,15,86,33734,1
+small_e4,near B90,394843,391,157,863,398820,0
+wide_e4,near B90,2059436,2635,15,792,2126445,0

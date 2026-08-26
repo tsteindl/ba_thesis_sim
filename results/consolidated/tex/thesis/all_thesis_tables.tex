@@ -20,8 +20,8 @@ A.~\ref{alg:brute-force}: Brute force baseline
 & 56.09\%
 & 45{,}900 \\
 A.~\ref{alg:linear-search}: Linear search
-& 57.34\%
-& 42{,}500 \\
+& 64.10\%
+& 35{,}500 \\
 A.~\ref{alg:binary-search}: Binary search
 & 65.07\%
 & 32{,}400 \\
@@ -58,8 +58,8 @@ A.~\ref{alg:brute-force}: Brute force baseline
 & 56.09\% \newline {\scriptsize [55.66, 56.53]}
 & 45{,}900 \newline {\scriptsize [45{,}300, 46{,}500]} \\
 A.~\ref{alg:linear-search}: Linear search
-& 57.34\% \newline {\scriptsize [56.91, 57.78]}
-& 42{,}500 \newline {\scriptsize [41{,}600, 43{,}200]} \\
+& 64.10\% \newline {\scriptsize [63.68, 64.52]}
+& 35{,}500 \newline {\scriptsize [34{,}900, 36{,}000]} \\
 A.~\ref{alg:binary-search}: Binary search
 & 65.07\% \newline {\scriptsize [64.65, 65.49]}
 & 32{,}400 \newline {\scriptsize [32{,}000, 32{,}900]} \\
@@ -96,10 +96,10 @@ Oracle ($N_\text{opt}$)
 & \makecell{$\phi \sim \mathcal{U}(0.001,0.1)$ \\ $\epsilon = 10^{-4}$} \\
 \midrule
 A.~\ref{alg:linear-search}: LS
-& \makecell{1.08\texttimes{\scriptsize (1.74\texttimes\ oracle)}}
+& \makecell{1.29\texttimes{\scriptsize (1.45\texttimes\ oracle)}}
 & \makecell{1.56\texttimes{\scriptsize (1.19\texttimes\ oracle)}}
-& \makecell{1.17\texttimes{\scriptsize (1.57\texttimes\ oracle)}}
-& \makecell{1.30\texttimes{\scriptsize (1.52\texttimes\ oracle)}} \\
+& \makecell{1.36\texttimes{\scriptsize (1.36\texttimes\ oracle)}}
+& \makecell{1.42\texttimes{\scriptsize (1.40\texttimes\ oracle)}} \\
 A.~\ref{alg:binary-search}: BS
 & \makecell{1.42\texttimes{\scriptsize (1.33\texttimes\ oracle)}}
 & \makecell{1.60\texttimes{\scriptsize (1.16\texttimes\ oracle)}}
@@ -143,10 +143,10 @@ A.~\ref{alg:brute-force}: BF
 & 441
 & 4{,}520 \\
 A.~\ref{alg:linear-search}: LS
-& 42.5
+& 35.5
 & 2{,}910
-& 377
-& 3{,}480 \\
+& 325
+& 3{,}190 \\
 A.~\ref{alg:binary-search}: BS
 & 32.4
 & 2{,}830
@@ -196,10 +196,10 @@ A.~\ref{alg:brute-force}: BF
 & 441 \newline {\scriptsize [436, 447]}
 & 4{,}520 \newline {\scriptsize [4{,}460, 4{,}580]} \\
 A.~\ref{alg:linear-search}: LS
-& 42.5 \newline {\scriptsize [41.6, 43.2]}
+& 35.5 \newline {\scriptsize [34.9, 36]}
 & 2{,}910 \newline {\scriptsize [2{,}860, 2{,}960]}
-& 377 \newline {\scriptsize [374, 382]}
-& 3{,}480 \newline {\scriptsize [3{,}440, 3{,}530]} \\
+& 325 \newline {\scriptsize [321, 329]}
+& 3{,}190 \newline {\scriptsize [3{,}150, 3{,}240]} \\
 A.~\ref{alg:binary-search}: BS
 & 32.4 \newline {\scriptsize [32, 32.9]}
 & 2{,}830 \newline {\scriptsize [2{,}800, 2{,}870]}
@@ -244,7 +244,7 @@ Precision $\epsilon$
 & Oracle ($N_\text{opt}$) \\
 \midrule
 $10^{-3}$
-& 1.08\texttimes
+& 1.29\texttimes
 & 1.42\texttimes
 & 1.54\texttimes
 & 1.88\texttimes \\
@@ -254,22 +254,22 @@ $10^{-4}$
 & 1.74\texttimes
 & 1.85\texttimes \\
 $10^{-5}$
-& 1.57\texttimes
+& 1.64\texttimes
 & 1.75\texttimes
 & 1.80\texttimes
 & 1.85\texttimes \\
 $10^{-6}$
-& 1.63\texttimes
+& 1.65\texttimes
 & 1.78\texttimes
 & 1.80\texttimes
 & 1.85\texttimes \\
 $10^{-7}$
-& 1.65\texttimes
+& 1.67\texttimes
 & 1.79\texttimes
 & 1.81\texttimes
 & 1.85\texttimes \\
 $10^{-8}$
-& 1.62\texttimes
+& 1.66\texttimes
 & 1.77\texttimes
 & 1.82\texttimes
 & 1.85\texttimes \\
@@ -295,7 +295,7 @@ Precision $\epsilon$
 & Oracle ($N_\text{opt}$) \\
 \midrule
 $10^{-3}$
-& 1.08\texttimes \newline {\scriptsize [1.06, 1.11]}
+& 1.29\texttimes \newline {\scriptsize [1.27, 1.32]}
 & 1.42\texttimes \newline {\scriptsize [1.39, 1.44]}
 & 1.54\texttimes \newline {\scriptsize [1.51, 1.58]}
 & 1.88\texttimes \\
@@ -305,22 +305,22 @@ $10^{-4}$
 & 1.74\texttimes \newline {\scriptsize [1.71, 1.78]}
 & 1.85\texttimes \\
 $10^{-5}$
-& 1.57\texttimes \newline {\scriptsize [1.53, 1.60]}
+& 1.64\texttimes \newline {\scriptsize [1.60, 1.67]}
 & 1.75\texttimes \newline {\scriptsize [1.72, 1.79]}
 & 1.80\texttimes \newline {\scriptsize [1.76, 1.83]}
 & 1.85\texttimes \\
 $10^{-6}$
-& 1.63\texttimes \newline {\scriptsize [1.60, 1.67]}
+& 1.65\texttimes \newline {\scriptsize [1.62, 1.69]}
 & 1.78\texttimes \newline {\scriptsize [1.75, 1.81]}
 & 1.80\texttimes \newline {\scriptsize [1.77, 1.83]}
 & 1.85\texttimes \\
 $10^{-7}$
-& 1.65\texttimes \newline {\scriptsize [1.62, 1.68]}
+& 1.67\texttimes \newline {\scriptsize [1.64, 1.70]}
 & 1.79\texttimes \newline {\scriptsize [1.76, 1.83]}
 & 1.81\texttimes \newline {\scriptsize [1.78, 1.84]}
 & 1.85\texttimes \\
 $10^{-8}$
-& 1.62\texttimes \newline {\scriptsize [1.59, 1.65]}
+& 1.66\texttimes \newline {\scriptsize [1.62, 1.69]}
 & 1.77\texttimes \newline {\scriptsize [1.74, 1.80]}
 & 1.82\texttimes \newline {\scriptsize [1.78, 1.85]}
 & 1.85\texttimes \\
@@ -348,103 +348,103 @@ Budget $C=N\cdot m$
 \midrule
 3{,}000
 & 8.8\%
-& 10.4\%
+& 11.3\%
 & \textbf{12.1\%}
 & 11.9\%
 & 14.6\% \\
 4{,}088
 & 10.2\%
-& 12.3\%
+& 13.4\%
 & \textbf{14.5\%}
 & 14.3\%
 & 16.9\% \\
 5{,}572
 & 12.0\%
-& 14.2\%
+& 15.7\%
 & \textbf{17.1\%}
 & 16.8\%
 & 19.6\% \\
 7{,}595
 & 14.1\%
-& 16.6\%
+& 17.9\%
 & \textbf{20.2\%}
 & 19.6\%
 & 22.6\% \\
 10{,}351
 & 16.4\%
-& 19.4\%
+& 21.0\%
 & \textbf{23.4\%}
 & 23.2\%
 & 25.9\% \\
 14{,}108
 & 19.2\%
-& 22.5\%
+& 24.5\%
 & \textbf{27.3\%}
 & 27.2\%
 & 29.7\% \\
 19{,}228
 & 22.2\%
-& 25.7\%
+& 28.4\%
 & 31.9\%
 & \textbf{31.9\%}
 & 33.9\% \\
 26{,}207
 & 25.4\%
-& 29.7\%
+& 32.4\%
 & 36.4\%
 & \textbf{36.4\%}
 & 38.5\% \\
 35{,}718
 & 29.5\%
-& 34.2\%
+& 35.5\%
 & \textbf{41.9\%}
 & 41.8\%
 & 43.5\% \\
 48{,}681
 & 34.2\%
-& 40.4\%
+& 41.7\%
 & \textbf{47.3\%}
 & 47.3\%
 & 48.9\% \\
 66{,}349
 & 39.4\%
-& 46.1\%
+& 46.3\%
 & \textbf{53.3\%}
 & 53.1\%
 & 54.7\% \\
 90{,}429
 & 45.3\%
-& 52.0\%
+& 52.2\%
 & \textbf{59.3\%}
 & 59.2\%
 & 60.7\% \\
 123{,}248
 & 51.9\%
-& 58.7\%
+& 59.7\%
 & \textbf{65.7\%}
 & 65.5\%
 & 66.8\% \\
 167{,}979
 & 58.8\%
-& 65.8\%
+& 65.6\%
 & \textbf{72.1\%}
 & 71.9\%
 & 72.9\% \\
 228{,}942
 & 66.3\%
-& 72.0\%
+& 72.2\%
 & \textbf{78.1\%}
 & 77.9\%
 & 78.7\% \\
 312{,}031
 & 73.7\%
-& 78.4\%
+& 78.5\%
 & \textbf{83.6\%}
 & 83.6\%
 & 84.2\% \\
 425{,}275
 & 81.1\%
-& 84.3\%
+& 84.7\%
 & \textbf{88.7\%}
 & 88.6\%
 & 89.0\% \\
@@ -456,13 +456,13 @@ Budget $C=N\cdot m$
 & 93.0\% \\
 789{,}977
 & 92.6\%
-& 93.8\%
+& 93.9\%
 & \textbf{95.9\%}
 & 95.7\%
 & 96.0\% \\
 1{,}076{,}679
 & 96.2\%
-& 96.6\%
+& 97.0\%
 & 97.1\%
 & \textbf{97.9\%}
 & 98.0\% \\
@@ -490,109 +490,109 @@ Budget $C=N\cdot m$
 \midrule
 3{,}000
 & 12.4\%
-& 12.8\%
+& 15.3\%
 & \textbf{17.1\%}
 & 16.7\%
 & 20.6\% \\
 4{,}088
 & 14.3\%
-& 15.7\%
+& 16.6\%
 & \textbf{20.3\%}
 & 19.9\%
 & 23.7\% \\
 5{,}572
 & 16.7\%
-& 18.1\%
+& 20.6\%
 & \textbf{23.5\%}
 & 23.2\%
 & 27.4\% \\
 7{,}595
 & 19.3\%
-& 21.3\%
+& 24.4\%
 & \textbf{27.9\%}
 & 27.6\%
 & 31.4\% \\
 10{,}351
 & 22.8\%
-& 24.9\%
+& 27.6\%
 & \textbf{32.5\%}
 & 32.3\%
 & 35.9\% \\
 14{,}108
 & 26.4\%
-& 28.7\%
+& 32.0\%
 & \textbf{37.9\%}
 & 37.8\%
 & 40.8\% \\
 19{,}228
 & 30.8\%
-& 33.5\%
+& 34.9\%
 & \textbf{43.4\%}
 & 43.4\%
 & 46.1\% \\
 26{,}207
 & 35.5\%
-& 38.5\%
+& 42.1\%
 & 49.2\%
 & \textbf{49.3\%}
 & 51.8\% \\
 35{,}718
 & 40.7\%
-& 44.9\%
+& 47.4\%
 & \textbf{55.7\%}
 & 55.5\%
 & 57.8\% \\
 48{,}681
 & 46.9\%
-& 52.0\%
+& 53.0\%
 & 62.0\%
 & \textbf{62.1\%}
 & 64.0\% \\
 66{,}349
 & 53.4\%
-& 58.8\%
+& 61.0\%
 & \textbf{68.4\%}
 & 68.4\%
 & 70.2\% \\
 90{,}429
 & 60.5\%
-& 65.4\%
+& 67.5\%
 & 74.9\%
 & \textbf{75.1\%}
 & 76.3\% \\
 123{,}248
 & 68.0\%
-& 72.9\%
+& 74.9\%
 & \textbf{81.0\%}
 & 81.0\%
 & 82.0\% \\
 167{,}979
 & 75.4\%
-& 79.4\%
+& 81.3\%
 & 86.2\%
 & \textbf{86.3\%}
 & 87.1\% \\
 228{,}942
 & 82.7\%
-& 85.7\%
+& 87.1\%
 & \textbf{90.8\%}
 & 90.6\%
 & 91.5\% \\
 312{,}031
 & 88.7\%
-& 90.3\%
+& 91.6\%
 & 94.5\%
 & \textbf{94.5\%}
 & 94.9\% \\
 425{,}275
 & 93.6\%
-& 94.5\%
+& 95.1\%
 & 97.0\%
 & \textbf{97.0\%}
 & 97.3\% \\
 579{,}619
 & 96.8\%
-& 97.2\%
+& 97.5\%
 & 98.7\%
 & \textbf{98.7\%}
 & 98.8\% \\
@@ -677,7 +677,7 @@ Scenario
 % ---- tab_opt_param_first.tex -------------------------------------
 \begin{table}[ht]
 \centering
-\caption{Parameter configurations selected for Table~\ref{tab:summary-low-prec-ci} at fixed budget $10{,}000$ ($\epsilon=10^{-3}$, $\phi\sim\mathcal{U}(0.01,0.1)$). For Reverse Engineering, the planned one-pilot exploration share is $m'N_{\min}/B$; realized shares including pilot retries are reported in Table~\ref{tab:diag-downstream}.}
+\caption{Parameter configurations selected for Table~\ref{tab:summary-low-prec-ci} at fixed budget $10{,}000$ ($\epsilon=10^{-3}$, $\phi\sim\mathcal{U}(0.01,0.1)$). For Reverse Engineering, the planned exploration-shot count is additionally reported as the fraction $m'/B$. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.}
 \label{tab:opt-param-first-tab}
 \begin{tabular}{ll}
 \toprule
@@ -685,11 +685,11 @@ Algorithm
 & Selected parameters \\
 \midrule
 Linear search
-& \texttt{m\_exploration=2, lookback\_window=4, safeguard=1, inc=1} \\
+& \texttt{m\_exploration=1, lookback\_window=6, safeguard=0, inc=1, mean\_window=4} \\
 Binary search
 & \texttt{m\_exploration=114, conf=0.5} \\
 Reverse engineering
-& \texttt{m\_exploration=44}, planned $B_{\mathrm{expl}}/B=6.60\%$ \\
+& \texttt{m\_exploration=44}, planned $m'/B=0.44\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -699,8 +699,9 @@ Reverse engineering
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Parameter configurations selected near the $90\%$-convergence budget. A budget crossing is interpolated between tested budgets; parameter dictionaries are not. Each entry is therefore the selected configuration at the nearest tested budget, not a configuration evaluated at the interpolated $B_{90}$. For Reverse Engineering, the planned one-pilot exploration share is $m'N_{\min}/B$ at that tested budget; realized shares including retries are reported in Table~\ref{tab:diag-downstream}.}
+\caption{Parameter configurations selected near the $90\%$-convergence budget. A budget crossing is interpolated between tested budgets; parameter dictionaries are not. Each entry is therefore the selected configuration at the nearest tested budget, not a configuration evaluated at the interpolated $B_{90}$. For Reverse Engineering, the planned exploration-shot count is additionally reported as $m'/B$ at that tested budget. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.}
 \label{tab:opt-param-second-tab}
+\setlength{\tabcolsep}{2pt}
 \begin{tabular}{lllll}
 \toprule
 Algorithm
@@ -710,10 +711,10 @@ Algorithm
 & \makecell{$\phi \sim \mathcal{U}(0.001,0.1)$, \\ $\epsilon=10^{-4}$} \\
 \midrule
 LS
-& \makecell{\texttt{m\_exploration=15}, \\ \texttt{lookback\_window=3}, \\ \texttt{safeguard=2}, \\ \texttt{inc=2}, \\ {\scriptsize $B=41{,}326$}}
-& \makecell{\texttt{m\_exploration=176}, \\ \texttt{lookback\_window=8}, \\ \texttt{safeguard=1}, \\ \texttt{inc=1}, \\ {\scriptsize $B=2{,}917{,}365$}}
-& \makecell{\texttt{m\_exploration=1}, \\ \texttt{lookback\_window=12}, \\ \texttt{safeguard=12}, \\ \texttt{inc=1}, \\ {\scriptsize $B=394{,}843$}}
-& \makecell{\texttt{m\_exploration=472}, \\ \texttt{lookback\_window=4}, \\ \texttt{safeguard=1}, \\ \texttt{inc=2}, \\ {\scriptsize $B=4{,}132{,}694$}} \\
+& \makecell{\texttt{m\_exploration=1}, \\ \texttt{lookback\_window=4}, \\ \texttt{safeguard=1}, \\ \texttt{inc=1}, \\ \texttt{mean\_window=3}, \\ {\scriptsize $B=41{,}326$}}
+& \makecell{\texttt{m\_exploration=176}, \\ \texttt{lookback\_window=8}, \\ \texttt{safeguard=1}, \\ \texttt{inc=1}, \\ \texttt{mean\_window=0}, \\ {\scriptsize $B=2{,}917{,}365$}}
+& \makecell{\texttt{m\_exploration=1}, \\ \texttt{lookback\_window=12}, \\ \texttt{safeguard=3}, \\ \texttt{inc=3}, \\ \texttt{mean\_window=6}, \\ {\scriptsize $B=278{,}729$}}
+& \makecell{\texttt{m\_exploration=1}, \\ \texttt{lookback\_window=4}, \\ \texttt{safeguard=0}, \\ \texttt{inc=1}, \\ \texttt{mean\_window=2}, \\ {\scriptsize $B=2{,}917{,}365$}} \\
 \midrule
 BS
 & \makecell{\texttt{m\_exploration=289}, \\ \texttt{conf=0.5}, \\ {\scriptsize $B=29{,}173$}}
@@ -722,10 +723,52 @@ BS
 & \makecell{\texttt{m\_exploration=2635}, \\ \texttt{conf=0.5}, \\ {\scriptsize $B=2{,}059{,}436$}} \\
 \midrule
 RE
-& \makecell{\texttt{m\_exploration=91}, \\ {\scriptsize $B=29{,}173$}, \\ {\scriptsize planned $B_{\mathrm{expl}}/B=4.68\%$}}
-& \makecell{\texttt{m\_exploration=1286}, \\ {\scriptsize $B=2{,}917{,}365$}, \\ {\scriptsize planned $B_{\mathrm{expl}}/B=0.66\%$}}
-& \makecell{\texttt{m\_exploration=116}, \\ {\scriptsize $B=278{,}729$}, \\ {\scriptsize planned $B_{\mathrm{expl}}/B=6.53\%$}}
-& \makecell{\texttt{m\_exploration=2288}, \\ {\scriptsize $B=2{,}059{,}436$}, \\ {\scriptsize planned $B_{\mathrm{expl}}/B=1.67\%$}} \\
+& \makecell{\texttt{m\_exploration=91}, \\ {\scriptsize $B=29{,}173$}, \\ {\scriptsize planned $m'/B=0.31\%$}}
+& \makecell{\texttt{m\_exploration=1286}, \\ {\scriptsize $B=2{,}917{,}365$}, \\ {\scriptsize planned $m'/B=0.04\%$}}
+& \makecell{\texttt{m\_exploration=116}, \\ {\scriptsize $B=278{,}729$}, \\ {\scriptsize planned $m'/B=0.04\%$}}
+& \makecell{\texttt{m\_exploration=2288}, \\ {\scriptsize $B=2{,}059{,}436$}, \\ {\scriptsize planned $m'/B=0.11\%$}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+% ---- tab_diag_search.tex -----------------------------------------
+\begin{table}[ht]
+\centering
+\small
+\caption{Exploration quality, cost, and overshoot-detector errors, aggregated over the 144 informative operating points. $N_{\mathrm{guess}}$ is recorded before the safeguard and $N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the largest non-aliasing phase-gate count. False-alarm and miss rates are trial-level: they indicate whether at least one such event occurred during a run. Reverse engineering has no overshoot detector, so these rates are not applicable.}
+\label{tab:diag-search}
+\begin{tabular}{lcccccc}
+\toprule
+Algorithm
+& \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}
+& \makecell{Within \\ $10\%$}
+& \makecell{Guess \\ overshoot}
+& \makecell{Probes \\ per trial}
+& \makecell{Median expl. \\ budget share}
+& \makecell{False alarm \\ / miss} \\
+\midrule
+A.~\ref{alg:linear-search}: LS
+& 1.00
+& 61.1\%
+& 6.6\%
+& 22.8
+& 0.83\%
+& 53.8\% / 6.6\% \\
+A.~\ref{alg:binary-search}: BS
+& 0.93
+& 45.7\%
+& 4.1\%
+& 4.4
+& 2.70\%
+& 22.8\% / 4.1\% \\
+A.~\ref{alg:reverse-engineering}: RE
+& 1.00
+& 86.8\%
+& 19.3\%
+& 1.0
+& 1.33\%
+& -- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -735,7 +778,7 @@ RE
 \begin{table}[ht]
 \centering
 \small
-\caption{Quality of the value of $N$ returned by exploration, before any safeguard is applied. $N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{which value of $N$ should be used for exploitation}; $N_{\mathrm{opt}}=\lfloor \pi/2\phi \rfloor$ is the largest non-aliasing value. Brute force is absent because it does not search: its $N_{\mathrm{guess}}$ is undefined, not zero. Broad-prior scenarios are excluded; the values aggregate the remaining 106 informative operating points.}
+\caption{Quality of the value of $N$ returned by exploration, before any safeguard is applied. $N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{which value of $N$ should be used for exploitation}; $N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the largest non-aliasing value. Brute force is absent because it does not search: its $N_{\mathrm{guess}}$ is undefined, not zero. Broad-prior scenarios are excluded; the values aggregate the remaining 106 informative operating points.}
 \label{tab:diag-exploration}
 \begin{tabular}{lcccccc}
 \toprule
@@ -749,11 +792,11 @@ Algorithm
 \midrule
 A.~\ref{alg:linear-search}: LS
 & 0.99
-& 0.12
-& 35.0\%
-& 71.1\%
-& 7.2\%
-& 29.5 \\
+& 0.13
+& 30.0\%
+& 61.8\%
+& 5.5\%
+& 28.9 \\
 A.~\ref{alg:binary-search}: BS
 & 0.90
 & 0.25
@@ -770,8 +813,6 @@ A.~\ref{alg:reverse-engineering}: RE
 & 1.0 \\
 \bottomrule
 \end{tabular}
-\\[2pt]
-\footnotesize Per-point values with 95\% intervals and eligible denominators: \texttt{diagnostics\_by\_point.csv}.
 \end{table}
 
 
@@ -779,45 +820,43 @@ A.~\ref{alg:reverse-engineering}: RE
 \begin{table}[ht]
 \centering
 \small
-\caption{From the exploration's guess to the value of $N$ actually used. $N_*$ is the exploitation value after the safeguard; \emph{unsafe-guess rescue} is $P(N_* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how often the safeguard pulls an aliasing guess back to safety. A median $N_*/N_{\mathrm{opt}}$ below one is intended: the rule maximises $P(\text{no overshoot})\times P(\text{converge})$ and deliberately backs off from the aliasing cliff.}
+\caption{From the exploration's guess to the value of $N$ actually used, aggregated over the 144 informative operating points. $N^*$ is the exploitation value after the safeguard; \emph{unsafe-guess rescue} is $P(N^* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how often the safeguard pulls an aliasing guess back to safety. For the statistical safeguard, a median $N^*/N_{\mathrm{opt}}$ below one may be intentional: it maximizes $P(\text{no overshoot})\times P(\text{converge})$ and deliberately backs off from the aliasing cliff. \emph{Converged given safe $N^*$} is $P(|\hat\phi-\phi|<\epsilon\mid N^*\leq N_{\mathrm{opt}})$. Brute force performs no search, so its fixed $N_{\mathrm{guess}}=N_{\min}$ is reported.}
 \label{tab:diag-downstream}
 \begin{tabular}{lccccc}
 \toprule
 Algorithm
 & \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}
-& \makecell{Median \\ $N_*/N_{\mathrm{opt}}$}
+& \makecell{Median \\ $N^*/N_{\mathrm{opt}}$}
 & \makecell{Final \\ overshoot}
 & \makecell{Unsafe-guess \\ rescue}
-& \makecell{Median expl. \\ budget share} \\
+& \makecell{Converged \\ given safe $N^*$} \\
 \midrule
 A.~\ref{alg:brute-force}: BF
-& --
+& 0.54
 & 0.54
 & 0.00\%
 & --
-& 0.00\% \\
+& 51.3\% \\
 A.~\ref{alg:linear-search}: LS
 & 1.00
 & 0.95
-& 2.35\%
-& 49.5\%
-& 1.78\% \\
+& 1.72\%
+& 44.6\%
+& 59.7\% \\
 A.~\ref{alg:binary-search}: BS
 & 0.93
 & 1.00
 & 0.74\%
 & 96.4\%
-& 2.70\% \\
+& 61.3\% \\
 A.~\ref{alg:reverse-engineering}: RE
 & 1.00
 & 1.00
 & 0.47\%
 & 97.3\%
-& 1.33\% \\
+& 61.7\% \\
 \bottomrule
 \end{tabular}
-\\[2pt]
-\footnotesize These are overlapping stage flags and conditional rates, \emph{not} a mutually exclusive decomposition of why trials fail.
 \end{table}
 
 
@@ -825,8 +864,9 @@ A.~\ref{alg:reverse-engineering}: RE
 \begin{table}[ht]
 \centering
 \small
-\caption{How well each search's own overshoot decision matches the simulation truth $N_i > N_{\mathrm{opt}}$. Rates are \emph{trial-level}: a run is a false alarm if at least one safe probe was declared an overshoot, and a miss if at least one overshooting probe was accepted. Trial-level is the correct unit because probes within a run are dependent; the probe-level counts are supporting telemetry only. Reverse engineering and brute force have no detector and are omitted rather than scored as zero. Reverse engineering's $N_{\mathrm{guess}}$ and the safeguard's correction to $N_*$ are instead evaluated in Tables~\ref{tab:diag-exploration} and \ref{tab:diag-downstream}. Linear search makes no per-probe declaration, so its classification is the backtracking decision of its own stopping rule.}
+\caption{How well each search's own overshoot decision matches the simulation truth $N_i > N_{\mathrm{opt}}$, aggregated over the 144 informative operating points. Rates are \emph{trial-level}: a run is a false alarm if at least one safe probe was declared an overshoot, and a miss if at least one overshooting probe was accepted. Trial-level is the correct unit because probes within a run are dependent; the probe-level counts are supporting telemetry only. Reverse engineering and brute force have no detector and are omitted rather than scored as zero. Reverse engineering's $N_{\mathrm{guess}}$ and the safeguard's correction to $N^*$ are instead evaluated in Tables~\ref{tab:diag-exploration}--\ref{tab:diag-exploration-priors} and \ref{tab:diag-downstream}. Linear search makes no per-probe declaration, so its classification is the backtracking decision of its own stopping rule.}
 \label{tab:diag-detector}
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccccc}
 \toprule
 Algorithm
@@ -837,17 +877,75 @@ Algorithm
 & \makecell{Probe-level \\ TN / FN} \\
 \midrule
 A.~\ref{alg:linear-search}: LS
-& 45.3\%
-& 7.7\%
-& 23.4
-& 39{,}858{,}860 / 8{,}624{,}168
-& 119{,}238{,}860 / 1{,}116{,}350 \\
+& 53.8\%
+& 6.6\%
+& 22.8
+& 26{,}034{,}339 / 11{,}647{,}285
+& 125{,}047{,}269 / 1{,}230{,}018 \\
 A.~\ref{alg:binary-search}: BS
 & 22.8\%
 & 4.1\%
 & 4.4
 & 14{,}367{,}412 / 4{,}664{,}659
 & 12{,}323{,}125 / 335{,}727 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+% ---- tab_linear_detector.tex -------------------------------------
+\begin{table}[ht]
+\centering
+\small
+\caption{Linear search under alternative stopping rules. Every rule replaces only the \emph{overshoot verdict} of Algorithm~\ref{alg:linear-search}; the scan, the backtracking and the safeguard are unchanged, and each rule is tuned over the same $(m', \mathrm{inc}, s)$ grids on the same two tuning blocks before being scored on the same 50{,}000 held-out trials. The first row is the configuration the sweep froze, and the second is the same cumulative-mean rule re-tuned here, so the gap between them is what better tuning alone is worth and the rows below it are what changing the rule is worth. Convergence is the exact probability $P(|\hat\phi-\phi|<\epsilon)$ of the depth each run selects, averaged over trials, which removes the exploitation coin flip from the comparison. Bold marks an improvement over the better of those two cumulative-mean rows by more than two standard errors of the paired difference. False-alarm rates are trial-level, as in Table~\ref{tab:diag-detector}.}
+\label{tab:linear-detector}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcccccc}
+\toprule
+Stopping rule
+& \multicolumn{2}{c}{$\epsilon = 10^{-3}$,\ $B = 10{,}000$}
+& \multicolumn{2}{c}{$\epsilon = 10^{-3}$,\ $B = 41{,}326$}
+& \multicolumn{2}{c}{$\epsilon = 10^{-4}$,\ $B = 2{,}917{,}365$}
+\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+& Converged & False alarm & Converged & False alarm & Converged & False alarm \\
+\midrule
+cumulative mean, as published & 57.49\% & 77.7\% & 89.69\% & 52.1\% & 90.27\% & 30.2\% \\
+cumulative mean, re-tuned & 58.00\% & 77.7\% & 89.50\% & 42.7\% & 90.24\% & 30.4\% \\
+\midrule
+moving window of width $w$ & \textbf{64.68\%} & 93.9\% & \textbf{92.65\%} & 96.5\% & 88.92\% & 37.0\% \\
+pre/post windows, noise threshold & \textbf{62.28\%} & 76.5\% & \textbf{92.91\%} & 86.9\% & 89.63\% & 96.6\% \\
+Eq.~(\ref{eq:overshoot-threshold}) at lag $w$ & \textbf{64.50\%} & 90.1\% & \textbf{92.84\%} & 35.8\% & 89.95\% & 18.5\% \\
+Eq.~(\ref{eq:overshoot-threshold}) vs.\ pooled reference & \textbf{61.31\%} & 42.8\% & \textbf{92.33\%} & 45.0\% & \textbf{90.95\%} & 46.8\% \\
+CUSUM on the pooled reference & \textbf{59.77\%} & 19.9\% & \textbf{91.27\%} & 43.8\% & 90.16\% & 26.2\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+% ---- tab_overshoot_operating.tex ---------------------------------
+\begin{table}[ht]
+\centering
+\small
+\caption{The overshoot rule of Equation~(\ref{eq:overshoot-threshold}) needs no normality assumption: because $\hat\phi_N = \arccos(\sqrt{K/m'})/N$ is strictly decreasing in $K$, the event $\{\hat\phi_N < \phi_1\}$ is \emph{identical} to $\{K > m'\cos^2(N\phi_1)\}$, so the rule is a one-sided binomial test on the count and its false-alarm probability is an exact binomial tail under $K\sim\mathrm{Bin}(m',\cos^2(N\phi))$. The normal law is used only to place the critical count, which affects the test's size but not its validity. The table reports that size, computed exactly and ranged over admissible depths $N\phi\in[0.3,1.5]$, against the nominal $\alpha$; the reference is set to the true $\phi$ so that the normal placement is isolated from the separate effect of substituting a noisy $\hat\phi_{\mathrm{acc}}$. The size approaches the nominal level as $m'$ grows and is conservative at the ends of the range, where one of the two outcome counts becomes small.}
+\label{tab:overshoot-operating}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{llccccc}
+\toprule
+\multicolumn{2}{l}{Nominal level}
+& \multicolumn{5}{c}{Exact size at $m'$ exploration shots} \\
+\cmidrule(lr){1-2}\cmidrule(lr){3-7}
+$\mathrm{conf}$ & $\alpha$
+& 50
+& 114
+& 200
+& 400
+& 800
+\\
+\midrule
+0.50 & 0.50 & 0.222--0.630 & 0.321--0.610 & 0.265--0.558 & 0.324--0.541 & 0.372--0.529 \\
+0.66 & 0.34 & 0.164--0.459 & 0.170--0.435 & 0.228--0.391 & 0.235--0.381 & 0.269--0.372 \\
+0.95 & 0.05 & 0.008--0.116 & 0.015--0.086 & 0.017--0.070 & 0.022--0.063 & 0.036--0.058 \\
 \bottomrule
 \end{tabular}
 \end{table}

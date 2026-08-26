@@ -89,15 +89,27 @@ def find_phi_fixed_budget_brute_force(rng, phi, phi_max, phi_min, budget, trace=
 
 # Linear search (Algorithm 4): scan N upward, detect overshoot via lookback
 def _linear_search_explore(rng, phi, phi_max, phi_min, m_exploration, budget, lookback_window, inc,
-                           trace=None):
-    """Exploration scan of Algorithm 4 — probe N = N_min, N_min+inc, ... until the running mean of
-    the estimates falls `lookback_window` times in a row (the overshoot verdict).
+                           mean_window=0, trace=None):
+    """Exploration scan of Algorithm 4 — probe N = N_min, N_min+inc, ... until the mean of the
+    estimates falls `lookback_window` times in a row (the overshoot verdict).
+
+    `mean_window` is the width of that mean: 0 (the default) averages every estimate collected so
+    far, which is the cumulative mean of the published algorithm; w > 0 averages only the last w.
+    The cumulative rule is the w -> infinity member of the same family, so the parameter is a strict
+    generalisation and w = 0 reproduces the published scan exactly, RNG draw for RNG draw
+    (tests/test_consolidated.py::test_linear_mean_window_default_is_cumulative).
+
+    Why the width matters: for a full window the two consecutive means differ only in the element
+    that enters and the one that leaves, so the test "the window mean fell" is identically
+    phi_hat_k < phi_hat_{k-w}. A finite window therefore compares each probe with one a fixed depth
+    behind it, while the cumulative mean compares against a reference whose effective lag keeps
+    growing as the scan approaches the aliasing boundary. See results/consolidated/LINEAR_SEARCH.md.
 
     Returns (phi_hats, Ns, budget_used, overshot) or None if the first probe already exceeds the
     budget. Consumes the RNG in exactly the same order as the published algorithm, so the constant-`s`
     and statistical-safeguard variants stay paired trial-by-trial.
 
-    `trace` records every probe. The scan's verdict is a TRIAL-level statement (the running mean fell
+    `trace` records every probe. The scan's verdict is a TRIAL-level statement (the mean fell
     `lookback_window` times), so the per-probe classification is assigned afterwards by
     `_mark_linear_probes`: the probes the algorithm backtracks over are the ones it declares
     overshoots, the retained ones are the ones it accepts.
@@ -124,7 +136,7 @@ def _linear_search_explore(rng, phi, phi_max, phi_min, m_exploration, budget, lo
         if trace is not None:
             trace.probe(N, m_exploration, phi_hat)
 
-        r_mean_new = np.mean(phi_hat_list)
+        r_mean_new = np.mean(phi_hat_list[-mean_window:] if mean_window else phi_hat_list)
         if len(phi_hat_list) >= 2 and r_mean_new < r_mean:
             counter += 1
         else:
@@ -159,14 +171,124 @@ def _mark_linear_probes(trace, overshot, lookback_window):
 
 
 def find_phi_fixed_budget_linear_search(rng, phi, phi_max, phi_min, m_exploration, budget,
-                                        lookback_window=5, safeguard=1, inc=1, trace=None):
+                                        lookback_window=5, safeguard=1, inc=1, mean_window=0,
+                                        trace=None):
     """Algorithm 4. N_guess is the depth the scan returns after its lookback backtracking and BEFORE
     the safeguard decrement `s`; N_star = max(1, N_guess - s) is what the exploitation actually runs
-    at (ALGORITHM_DIAGNOSTICS_HANDOFF.md, "Minimal thesis-facing definitions")."""
+    at (ALGORITHM_DIAGNOSTICS_HANDOFF.md, "Minimal thesis-facing definitions").
+
+    `mean_window` is the width of the mean the stopping rule tests; 0 is the cumulative mean the
+    algorithm was first published with, and is the default so that every earlier call site keeps its
+    behaviour. It is a tuned parameter of the manifest grid."""
     if trace is not None:
         trace.nominal_budget = float(budget)
     out = _linear_search_explore(rng, phi, phi_max, phi_min, m_exploration, budget,
-                                 lookback_window, inc, trace=trace)
+                                 lookback_window, inc, mean_window=mean_window, trace=trace)
+    if out is None:
+        if trace is not None:
+            trace.set_exploration(0.0, status="refused_pilot_unaffordable")
+        return np.inf, budget
+    phi_hat_list, N_list, budget_used, overshot = out
+    N = N_list[-1] - lookback_window * inc if overshot else N_list[-1]
+    _mark_linear_probes(trace, overshot, lookback_window)
+    if trace is not None:
+        trace.set_exploration(budget_used, N_guess=int(N),
+                              status="detector_fired" if overshot else "scan_exhausted")
+
+    remaining_budget = budget - budget_used
+    if remaining_budget <= 0:
+        idx = max(0, len(phi_hat_list) - lookback_window)
+        if trace is not None:
+            trace.status = "no_exploitation_budget_exhausted"
+        return phi_hat_list[idx], budget_used
+
+    N = max(1, N - safeguard)
+    m = int(remaining_budget / N)
+    phi_hat = simulate_errors(rng, phi, m, N)
+    budget_used += m * N
+    if trace is not None:
+        trace.set_exploitation(N, m)
+    return phi_hat, budget_used
+
+
+def _linear_search_explore_lagged(rng, phi, phi_max, phi_min, m_exploration, budget,
+                                  lookback_window, inc, lag, conf, trace=None):
+    """Exploration scan of Algorithm 4 with the CUMULATIVE-MEAN stopping rule replaced by the
+    overshoot criterion of Eq. (3.6), applied against the probe `lag` steps back.
+
+    Declare a fall at probe k when
+
+        phi_hat_k < phi_hat_{k-lag} + z_{1-conf} / (2 N_k sqrt(m')),
+
+    and stop after `lookback_window` consecutive falls, exactly as the published scan does.
+
+    Two special cases place this inside the existing thesis:
+      conf = 0.5   the normal quantile vanishes and the rule is phi_hat_k < phi_hat_{k-lag}, which
+                   (analysis/consolidated/linear_detector_study.py) is identically the
+                   "moving window of width `lag`" rule, because a trailing window mean falls exactly
+                   when its entering element is below its leaving one;
+      lag = 1      the reference is the deepest probe not yet declared an overshoot, i.e. Algorithm
+                   5's criterion evaluated in Algorithm 4's search order.
+
+    The loop is duplicated from `_linear_search_explore` rather than factored out of it: the
+    published scan is a reported result and is deliberately left untouched.
+    """
+    N_min = max(np.pi // (2 * phi_max), 1)
+    N_max = max(np.pi // (2 * phi_min), 1)
+    N = max(1, N_min)
+
+    if m_exploration * N > budget:
+        return None
+
+    z = norm.ppf(1 - conf)
+    phi_hat_list, N_list = [], []
+    counter = 0
+    budget_used = 0
+    done = False
+    while not done:
+        if budget_used + N * m_exploration > budget:
+            break  # this probe does not fit — stop *before* spending, not after
+        phi_hat = simulate_errors(rng, phi, m_exploration, N)
+        budget_used += N * m_exploration
+        phi_hat_list.append(phi_hat)
+        N_list.append(N)
+        if trace is not None:
+            trace.probe(N, m_exploration, phi_hat)
+
+        if len(phi_hat_list) > lag:
+            threshold = phi_hat_list[-1 - lag] + z / (2 * N * np.sqrt(m_exploration))
+            counter = counter + 1 if phi_hat < threshold else 0
+        else:
+            counter = 0
+
+        if counter >= lookback_window:
+            done = True
+        elif N >= N_max or budget_used >= budget:
+            done = True
+        else:
+            N += inc
+
+    return phi_hat_list, N_list, budget_used, counter >= lookback_window
+
+
+def find_phi_fixed_budget_linear_search_lagged(rng, phi, phi_max, phi_min, m_exploration, budget,
+                                               lookback_window=4, safeguard=1, inc=1, lag=3,
+                                               conf=0.5, trace=None):
+    """NOT A REPORTED ALGORITHM (yet). Algorithm 4 with the lagged Eq. (3.6) stopping rule.
+
+    Everything except the overshoot verdict is Algorithm 4: the same upward scan, the same
+    backtracking by `lookback_window * inc`, the same safeguard N* = max(1, N_guess - s).
+
+    It exists so that the alternative measured in
+    results/consolidated/LINEAR_SEARCH.md can be swept end to end without editing the published
+    algorithm. To report it, give it a manifest entry with a tuning grid over
+    (m_exploration, lookback_window, safeguard, inc, lag, conf) and add its key to
+    qmetrology.manifest.ORDER -- nothing else in the pipeline needs to change.
+    """
+    if trace is not None:
+        trace.nominal_budget = float(budget)
+    out = _linear_search_explore_lagged(rng, phi, phi_max, phi_min, m_exploration, budget,
+                                        lookback_window, inc, lag, conf, trace=trace)
     if out is None:
         if trace is not None:
             trace.set_exploration(0.0, status="refused_pilot_unaffordable")
@@ -720,6 +842,7 @@ FIXED_BUDGET = {
     "binary_post": find_phi_fixed_budget_binary_search_post,
     "reverse_eng_post": find_phi_fixed_budget_reverse_engineering_post,
     "linear_post": find_phi_fixed_budget_linear_search_post,
+    "linear_lagged": find_phi_fixed_budget_linear_search_lagged,
 }
 
 # linear_risk is deliberately absent: it is a diagnostic, not a reported variant (see its docstring)

@@ -1,7 +1,7 @@
 \begin{table}[ht]
 \centering
 \small
-\caption{Quality of the value of $N$ returned by exploration, before any safeguard is applied. $N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{which value of $N$ should be used for exploitation}; $N_{\mathrm{opt}}=\lfloor \pi/2\phi \rfloor$ is the largest non-aliasing value. Brute force is absent because it does not search: its $N_{\mathrm{guess}}$ is undefined, not zero. Broad-prior scenarios are excluded; the values aggregate the remaining 106 informative operating points.}
+\caption{Quality of the value of $N$ returned by exploration, before any safeguard is applied. $N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{which value of $N$ should be used for exploitation}; $N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the largest non-aliasing value. Brute force is absent because it does not search: its $N_{\mathrm{guess}}$ is undefined, not zero. Broad-prior scenarios are excluded; the values aggregate the remaining 106 informative operating points.}
 \label{tab:diag-exploration}
 \begin{tabular}{lcccccc}
 \toprule
@@ -15,11 +15,11 @@ Algorithm
 \midrule
 A.~\ref{alg:linear-search}: LS
 & 0.99
-& 0.12
-& 35.0\%
-& 71.1\%
-& 7.2\%
-& 29.5 \\
+& 0.13
+& 30.0\%
+& 61.8\%
+& 5.5\%
+& 28.9 \\
 A.~\ref{alg:binary-search}: BS
 & 0.90
 & 0.25
@@ -36,6 +36,4 @@ A.~\ref{alg:reverse-engineering}: RE
 & 1.0 \\
 \bottomrule
 \end{tabular}
-\\[2pt]
-\footnotesize Per-point values with 95\% intervals and eligible denominators: \texttt{diagnostics\_by\_point.csv}.
 \end{table}

@@ -1,0 +1,268 @@
+wrote /home/tsteindl/Programming/ba_thesis_sim/results/consolidated/algorithm_code_audit.md
+
+=== U(0.01,0.1), eps=1e-03  [narrow_e3]  N_min=15 N_max=157  23 budgets 896..1,344,800 ===
+   B=               896  bru  17.52  lin  17.94  bin  19.70  rev  18.75
+   B=             1,270  bru  21.12  lin  23.73  bin  24.00  rev  23.56
+   B=             1,799  bru  25.35  lin  28.72  bin  29.10  rev  29.08
+   B=             2,548  bru  30.41  lin  34.47  bin  35.32  rev  35.49
+   B=             3,610  bru  35.68  lin  40.63  bin  41.86  rev  42.28
+   B=             5,114  bru  41.84  lin  48.90  bin  49.68  rev  50.08
+   B=             7,244  bru  48.89  lin  56.41  bin  57.57  rev  58.12
+   B=            10,000  bru  56.09  lin  64.10  bin  65.07  rev  66.21
+   B=            10,262  bru  56.79  lin  64.84  bin  66.04  rev  66.58
+   B=            14,538  bru  65.11  lin  73.55  bin  73.96  rev  75.33
+   B=            20,594  bru  73.41  lin  80.63  bin  81.93  rev  83.26
+   B=            29,173  bru  81.48  lin  87.57  bin  88.49  rev  89.71
+   B=            41,326  bru  88.31  lin  91.88  bin  93.43  rev  94.44
+   B=            58,543  bru  93.87  lin  96.09  bin  94.96  rev  97.40
+   B=            82,931  bru  97.48  lin  98.26  bin  98.62  rev  99.08
+   B=           117,479  bru  99.18  lin  99.42  bin  99.51  rev  99.75
+   B=           166,419  bru  99.83  lin  99.80  bin  99.93  rev  99.93
+   B=           235,746  bru 100.00  lin  99.99  bin 100.00  rev  99.99
+   B=           333,954  bru 100.00  lin 100.00  bin  99.97  rev 100.00
+   B=           473,075  bru 100.00  lin 100.00  bin  99.98  rev 100.00
+   B=           670,151  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=           949,325  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=         1,344,800  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   traces written for 4 budgets
+
+=== U(0.01,0.1), eps=1e-04  [narrow_e4]  N_min=15 N_max=157  22 budgets 89,653..134,480,000 ===
+   B=            89,653  bru  18.59  lin  21.76  bin  22.64  rev  25.48
+   B=           127,001  bru  22.06  lin  27.23  bin  27.62  rev  30.52
+   B=           179,908  bru  25.87  lin  33.02  bin  32.50  rev  36.02
+   B=           254,855  bru  30.59  lin  38.73  bin  38.70  rev  42.50
+   B=           361,024  bru  35.93  lin  44.54  bin  46.22  rev  49.11
+   B=           511,421  bru  42.15  lin  52.26  bin  53.74  rev  56.60
+   B=           724,471  bru  49.18  lin  60.91  bin  61.65  rev  64.05
+   B=         1,026,274  bru  56.81  lin  69.11  bin  69.75  rev  72.50
+   B=         1,453,804  bru  65.15  lin  77.20  bin  77.41  rev  79.68
+   B=         2,059,436  bru  73.41  lin  84.47  bin  84.44  rev  86.40
+   B=         2,917,365  bru  81.68  lin  90.06  bin  90.51  rev  91.80
+   B=         4,132,694  bru  88.57  lin  94.58  bin  94.74  rev  95.25
+   B=         5,854,310  bru  94.01  lin  97.39  bin  97.68  rev  97.92
+   B=         8,293,124  bru  97.44  lin  98.72  bin  99.17  rev  99.24
+   B=        11,747,910  bru  99.26  lin  99.65  bin  99.74  rev  99.79
+   B=        16,641,905  bru  99.85  lin  99.84  bin  99.91  rev  99.96
+   B=        23,574,663  bru  99.99  lin  99.98  bin  99.96  rev  99.99
+   B=        33,395,498  bru 100.00  lin 100.00  bin  99.95  rev 100.00
+   B=        47,307,541  bru 100.00  lin 100.00  bin  99.95  rev 100.00
+   B=        67,015,122  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=        94,932,574  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=       134,480,000  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.01,0.1), eps=1e-05  [narrow_e5]  N_min=15 N_max=157  22 budgets 8,965,333..13,447,999,999 ===
+   B=         8,965,333  bru  18.69  lin  25.19  bin  25.85  rev  27.27
+   B=        12,700,150  bru  22.10  lin  29.61  bin  31.48  rev  32.05
+   B=        17,990,835  bru  25.98  lin  35.18  bin  36.49  rev  37.92
+   B=        25,485,535  bru  30.74  lin  41.38  bin  43.04  rev  44.16
+   B=        36,102,410  bru  36.02  lin  49.22  bin  50.01  rev  51.10
+   B=        51,142,110  bru  42.19  lin  55.53  bin  57.59  rev  58.46
+   B=        72,447,113  bru  49.21  lin  63.90  bin  64.66  rev  65.95
+   B=       102,627,447  bru  56.78  lin  71.48  bin  72.65  rev  73.64
+   B=       145,380,436  bru  65.22  lin  78.63  bin  80.33  rev  80.70
+   B=       205,943,651  bru  73.51  lin  85.48  bin  86.70  rev  87.04
+   B=       291,736,555  bru  81.69  lin  90.88  bin  91.86  rev  92.29
+   B=       413,269,439  bru  88.66  lin  94.84  bin  95.77  rev  95.90
+   B=       585,431,022  bru  94.04  lin  97.38  bin  98.03  rev  97.94
+   B=       829,312,426  bru  97.45  lin  98.88  bin  99.36  rev  99.19
+   B=     1,174,791,008  bru  99.27  lin  99.72  bin  99.82  rev  99.79
+   B=     1,664,190,563  bru  99.85  lin  99.96  bin  99.93  rev  99.95
+   B=     2,357,466,314  bru  99.99  lin  99.98  bin  99.97  rev  99.99
+   B=     3,339,549,897  bru 100.00  lin 100.00  bin  99.95  rev 100.00
+   B=     4,730,754,135  bru 100.00  lin 100.00  bin  99.95  rev 100.00
+   B=     6,701,512,293  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=     9,493,257,466  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=    13,447,999,999  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.01,0.1), eps=1e-06  [narrow_e6]  N_min=15 N_max=157  22 budgets 896,533,333..1,344,800,000,000 ===
+   B=       896,533,333  bru  18.70  lin  26.62  bin  27.20  rev  27.63
+   B=     1,270,015,093  bru  22.10  lin  31.01  bin  32.58  rev  32.52
+   B=     1,799,083,511  bru  25.92  lin  36.89  bin  37.57  rev  38.23
+   B=     2,548,553,554  bru  30.74  lin  42.78  bin  44.14  rev  44.16
+   B=     3,610,241,091  bru  36.02  lin  49.45  bin  50.66  rev  51.38
+   B=     5,114,211,046  bru  42.22  lin  56.88  bin  58.49  rev  58.47
+   B=     7,244,711,353  bru  49.24  lin  63.40  bin  65.80  rev  66.18
+   B=    10,262,744,755  bru  56.81  lin  72.07  bin  73.68  rev  73.65
+   B=    14,538,043,655  bru  65.23  lin  79.55  bin  80.26  rev  80.80
+   B=    20,594,365,186  bru  73.51  lin  85.80  bin  86.98  rev  87.12
+   B=    29,173,655,514  bru  81.70  lin  90.99  bin  92.03  rev  92.23
+   B=    41,326,943,964  bru  88.63  lin  94.87  bin  95.89  rev  95.94
+   B=    58,543,102,238  bru  94.04  lin  97.57  bin  98.17  rev  97.97
+   B=    82,931,242,693  bru  97.45  lin  99.00  bin  99.41  rev  99.22
+   B=   117,479,100,897  bru  99.27  lin  99.58  bin  99.83  rev  99.79
+   B=   166,419,056,310  bru  99.85  lin  99.90  bin  99.79  rev  99.96
+   B=   235,746,631,456  bru  99.99  lin  99.98  bin  99.97  rev  99.99
+   B=   333,954,989,743  bru 100.00  lin 100.00  bin  99.98  rev 100.00
+   B=   473,075,413,571  bru 100.00  lin 100.00  bin  99.95  rev 100.00
+   B=   670,151,229,355  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=   949,325,746,642  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B= 1,344,800,000,000  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.01,0.1), eps=1e-07  [narrow_e7]  N_min=15 N_max=157  22 budgets 89,653,333,333..134,480,000,000,000 ===
+   B=    89,653,333,333  bru  18.69  lin  26.00  bin  27.61  rev  27.75
+   B=   127,001,509,327  bru  22.12  lin  31.09  bin  32.76  rev  32.60
+   B=   179,908,351,108  bru  25.93  lin  37.13  bin  37.53  rev  38.27
+   B=   254,855,355,420  bru  30.75  lin  42.89  bin  44.46  rev  44.23
+   B=   361,024,109,144  bru  36.03  lin  49.91  bin  50.96  rev  51.20
+   B=   511,421,104,605  bru  42.22  lin  58.18  bin  58.38  rev  58.55
+   B=   724,471,135,335  bru  49.25  lin  65.87  bin  66.19  rev  66.19
+   B= 1,026,274,475,590  bru  56.82  lin  73.45  bin  73.99  rev  73.69
+   B= 1,453,804,365,525  bru  65.23  lin  80.12  bin  80.68  rev  80.87
+   B= 2,059,436,518,680  bru  73.52  lin  86.06  bin  87.10  rev  87.12
+   B= 2,917,365,551,411  bru  81.70  lin  91.12  bin  92.15  rev  92.39
+   B= 4,132,694,396,433  bru  88.63  lin  94.43  bin  95.89  rev  95.85
+   B= 5,854,310,223,842  bru  94.04  lin  97.77  bin  98.16  rev  97.83
+   B= 8,293,124,269,377  bru  97.45  lin  98.88  bin  99.32  rev  99.21
+   B=11,747,910,089,773  bru  99.27  lin  99.59  bin  99.83  rev  99.79
+   B=16,641,905,631,032  bru  99.85  lin  99.89  bin  99.88  rev  99.95
+   B=23,574,663,145,682  bru  99.99  lin  99.98  bin  99.96  rev  99.99
+   B=33,395,498,974,351  bru 100.00  lin 100.00  bin  99.98  rev 100.00
+   B=47,307,541,357,178  bru 100.00  lin 100.00  bin  99.95  rev 100.00
+   B=67,015,122,935,579  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=94,932,574,664,214  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=134,480,000,000,000  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.01,0.1), eps=1e-08  [narrow_e8]  N_min=15 N_max=157  22 budgets 8,965,333,333,333..13,447,999,999,999,998 ===
+   B= 8,965,333,333,333  bru  18.70  lin  26.49  bin  27.43  rev  27.74
+   B=12,700,150,932,713  bru  22.12  lin  31.29  bin  32.00  rev  32.57
+   B=17,990,835,110,839  bru  25.93  lin  37.45  bin  37.38  rev  38.27
+   B=25,485,535,542,077  bru  30.75  lin  43.40  bin  44.40  rev  44.27
+   B=36,102,410,914,495  bru  36.03  lin  49.77  bin  50.95  rev  51.19
+   B=51,142,110,460,546  bru  42.22  lin  57.09  bin  58.74  rev  58.58
+   B=72,447,113,533,589  bru  49.24  lin  65.87  bin  66.27  rev  66.26
+   B=102,627,447,559,047  bru  56.82  lin  73.32  bin  73.68  rev  73.69
+   B=145,380,436,552,546  bru  65.23  lin  80.06  bin  80.80  rev  80.78
+   B=205,943,651,868,068  bru  73.52  lin  85.57  bin  86.51  rev  87.23
+   B=291,736,555,141,147  bru  81.70  lin  91.10  bin  92.16  rev  92.39
+   B=413,269,439,643,361  bru  88.63  lin  94.49  bin  95.92  rev  95.91
+   B=585,431,022,384,237  bru  94.04  lin  97.45  bin  98.21  rev  97.93
+   B=829,312,426,937,782  bru  97.45  lin  98.89  bin  99.36  rev  99.22
+   B=1,174,791,008,977,376  bru  99.27  lin  99.59  bin  99.82  rev  99.78
+   B=1,664,190,563,103,208  bru  99.85  lin  99.88  bin  99.91  rev  99.95
+   B=2,357,466,314,568,226  bru  99.99  lin  99.98  bin  99.96  rev  99.99
+   B=3,339,549,897,435,170  bru 100.00  lin 100.00  bin  99.98  rev 100.00
+   B=4,730,754,135,717,893  bru 100.00  lin 100.00  bin  99.95  rev 100.00
+   B=6,701,512,293,557,939  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=9,493,257,466,421,480  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=13,447,999,999,999,998  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.001,0.01), eps=1e-04  [small_e4]  N_min=157 N_max=1570  22 budgets 8,565..12,848,407 ===
+   B=             8,565  bru  17.49  lin  17.17  bin  19.45  rev  18.41
+   B=            12,133  bru  21.09  lin  21.27  bin  23.82  rev  22.60
+   B=            17,188  bru  25.30  lin  25.23  bin  28.96  rev  28.47
+   B=            24,349  bru  30.05  lin  31.48  bin  34.43  rev  34.45
+   B=            34,492  bru  35.54  lin  37.63  bin  41.05  rev  41.32
+   B=            48,861  bru  41.75  lin  45.52  bin  48.51  rev  48.55
+   B=            69,216  bru  48.68  lin  54.26  bin  56.48  rev  57.06
+   B=            98,051  bru  56.43  lin  63.96  bin  64.68  rev  65.51
+   B=           138,898  bru  64.81  lin  72.84  bin  73.14  rev  74.20
+   B=           196,761  bru  73.21  lin  80.58  bin  80.72  rev  81.98
+   B=           278,729  bru  81.23  lin  87.66  bin  87.22  rev  88.84
+   B=           394,843  bru  88.22  lin  92.96  bin  92.54  rev  93.80
+   B=           559,329  bru  93.79  lin  96.55  bin  96.15  rev  97.12
+   B=           792,336  bru  97.38  lin  98.51  bin  98.31  rev  98.85
+   B=         1,122,411  bru  99.16  lin  99.47  bin  99.16  rev  99.66
+   B=         1,589,990  bru  99.80  lin  99.82  bin  99.65  rev  99.93
+   B=         2,252,356  bru  99.98  lin  99.98  bin  99.88  rev  99.98
+   B=         3,190,652  bru 100.00  lin 100.00  bin  99.97  rev 100.00
+   B=         4,519,828  bru 100.00  lin 100.00  bin  99.97  rev 100.00
+   B=         6,402,718  bru 100.00  lin 100.00  bin  99.99  rev 100.00
+   B=         9,069,991  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=        12,848,407  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.001,0.1), eps=1e-04  [wide_e4]  N_min=15 N_max=1570  22 budgets 89,653..134,480,000 ===
+   B=            89,653  bru  18.52  lin  25.62  bin  27.95  rev  27.73
+   B=           127,001  bru  21.97  lin  30.30  bin  33.42  rev  33.30
+   B=           179,908  bru  25.83  lin  36.04  bin  39.42  rev  39.34
+   B=           254,855  bru  30.52  lin  42.44  bin  45.85  rev  45.76
+   B=           361,024  bru  35.85  lin  48.07  bin  52.65  rev  52.29
+   B=           511,421  bru  42.13  lin  55.16  bin  59.77  rev  59.72
+   B=           724,471  bru  49.23  lin  62.33  bin  67.45  rev  67.13
+   B=         1,026,274  bru  56.85  lin  69.40  bin  74.80  rev  74.80
+   B=         1,453,804  bru  65.23  lin  76.80  bin  81.74  rev  81.74
+   B=         2,059,436  bru  73.41  lin  82.88  bin  87.54  rev  87.44
+   B=         2,917,365  bru  81.71  lin  88.72  bin  92.45  rev  92.56
+   B=         4,132,694  bru  88.60  lin  93.64  bin  95.85  rev  95.73
+   B=         5,854,310  bru  94.01  lin  96.78  bin  98.12  rev  98.04
+   B=         8,293,124  bru  97.43  lin  98.61  bin  99.33  rev  99.28
+   B=        11,747,910  bru  99.26  lin  99.52  bin  99.81  rev  99.83
+   B=        16,641,905  bru  99.85  lin  99.89  bin  99.88  rev  99.96
+   B=        23,574,663  bru  99.99  lin  99.99  bin  99.95  rev  99.99
+   B=        33,395,498  bru 100.00  lin 100.00  bin  99.98  rev 100.00
+   B=        47,307,541  bru 100.00  lin 100.00  bin  99.98  rev 100.00
+   B=        67,015,122  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=        94,932,574  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   B=       134,480,000  bru 100.00  lin 100.00  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.01,pi/4), eps=1e-03  [broad_pi4_e3]  N_min=2 N_max=157  22 budgets 3,000..2,000,000 ===
+   B=             3,000  bru  12.42  lin  15.33  bin  17.10  rev  16.71
+   B=             4,088  bru  14.32  lin  16.63  bin  20.32  rev  19.92
+   B=             5,572  bru  16.72  lin  20.61  bin  23.47  rev  23.24
+   B=             7,595  bru  19.27  lin  24.41  bin  27.86  rev  27.57
+   B=            10,351  bru  22.78  lin  27.58  bin  32.54  rev  32.32
+   B=            14,108  bru  26.43  lin  31.96  bin  37.89  rev  37.81
+   B=            19,228  bru  30.75  lin  34.93  bin  43.36  rev  43.36
+   B=            26,207  bru  35.46  lin  42.11  bin  49.18  rev  49.28
+   B=            35,718  bru  40.71  lin  47.35  bin  55.70  rev  55.54
+   B=            48,681  bru  46.87  lin  53.00  bin  61.99  rev  62.08
+   B=            66,349  bru  53.42  lin  61.03  bin  68.45  rev  68.40
+   B=            90,429  bru  60.55  lin  67.50  bin  74.92  rev  75.08
+   B=           123,248  bru  67.95  lin  74.91  bin  81.03  rev  81.02
+   B=           167,979  bru  75.43  lin  81.27  bin  86.23  rev  86.32
+   B=           228,942  bru  82.65  lin  87.15  bin  90.83  rev  90.60
+   B=           312,031  bru  88.69  lin  91.63  bin  94.48  rev  94.50
+   B=           425,275  bru  93.61  lin  95.06  bin  96.96  rev  96.97
+   B=           579,619  bru  96.84  lin  97.53  bin  98.68  rev  98.69
+   B=           789,977  bru  98.83  lin  98.79  bin  99.51  rev  99.49
+   B=         1,076,679  bru  99.69  lin  99.64  bin  99.85  rev  99.86
+   B=         1,467,432  bru  99.94  lin  99.94  bin  99.90  rev  99.96
+   B=         2,000,000  bru 100.00  lin  99.80  bin  99.99  rev  99.99
+   traces written for 3 budgets
+
+=== U(0.01,pi/2), eps=1e-03  [broad_pi2_e3]  N_min=1 N_max=157  22 budgets 3,000..2,000,000 ===
+   B=             3,000  bru   8.79  lin  11.26  bin  12.14  rev  11.91
+   B=             4,088  bru  10.22  lin  13.37  bin  14.53  rev  14.25
+   B=             5,572  bru  11.96  lin  15.70  bin  17.12  rev  16.83
+   B=             7,595  bru  14.09  lin  17.86  bin  20.22  rev  19.62
+   B=            10,351  bru  16.44  lin  20.97  bin  23.41  rev  23.21
+   B=            14,108  bru  19.18  lin  24.49  bin  27.34  rev  27.23
+   B=            19,228  bru  22.15  lin  28.45  bin  31.88  rev  31.90
+   B=            26,207  bru  25.43  lin  32.39  bin  36.37  rev  36.37
+   B=            35,718  bru  29.53  lin  35.53  bin  41.89  rev  41.85
+   B=            48,681  bru  34.17  lin  41.68  bin  47.32  rev  47.30
+   B=            66,349  bru  39.40  lin  46.27  bin  53.25  rev  53.08
+   B=            90,429  bru  45.35  lin  52.23  bin  59.31  rev  59.16
+   B=           123,248  bru  51.88  lin  59.70  bin  65.70  rev  65.48
+   B=           167,979  bru  58.81  lin  65.59  bin  72.12  rev  71.88
+   B=           228,942  bru  66.31  lin  72.24  bin  78.11  rev  77.90
+   B=           312,031  bru  73.67  lin  78.47  bin  83.62  rev  83.61
+   B=           425,275  bru  81.05  lin  84.71  bin  88.67  rev  88.65
+   B=           579,619  bru  87.35  lin  89.64  bin  92.70  rev  92.56
+   B=           789,977  bru  92.56  lin  93.86  bin  95.86  rev  95.66
+   B=         1,076,679  bru  96.19  lin  96.98  bin  97.07  rev  97.86
+   B=         1,467,432  bru  98.45  lin  98.71  bin  98.81  rev  99.09
+   B=         2,000,000  bru  99.58  lin  99.54  bin  99.76  rev  99.71
+   traces written for 3 budgets
+
+sweep finished in 1477.3 min
+  broad_pi2_e3   22 budgets
+  broad_pi4_e3   22 budgets
+  narrow_e3      23 budgets
+  narrow_e4      22 budgets
+  narrow_e5      22 budgets
+  narrow_e6      22 budgets
+  narrow_e7      22 budgets
+  narrow_e8      22 budgets
+  small_e4       22 budgets
+  wide_e4        22 budgets
+
+updated 442 performance rows (221 separable, 221 analytic oracle) in 5.8 min
+wrote /home/tsteindl/Programming/ba_thesis_sim/results/consolidated/fig_diagnostics_vs_budget.png and /home/tsteindl/Programming/ba_thesis_sim/results/consolidated/fig_guess_vs_final_depth.png
+wrote /home/tsteindl/Programming/ba_thesis_sim/results/consolidated/REPORT.md + budget_crossings.csv, optimal_params.csv, diagnostics_headline.csv, tex/

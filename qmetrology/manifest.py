@@ -18,7 +18,7 @@ Scenario families (all four are Chapter 4 families already in use, not new exper
 REPORTED ALGORITHMS. Exactly the four that are settled:
 
   brute             Algorithm 3, parameter-free.
-  linear            Algorithm 4, tuned (m', lookback_window, s, inc).
+  linear            Algorithm 4, tuned (m', lookback_window, s, inc, mean_window).
   binary_deep       Algorithm 5 + statistical safeguard fed by the DEEPEST accepted probe; tuned
                     (m', conf).
   reverse_eng_risk  Algorithm 6 + statistical safeguard; tuned (m').
@@ -152,9 +152,16 @@ ALGORITHMS = {
         # small_e4, where N_min = 157: `s` is an ABSOLUTE depth decrement, so the useful range grows
         # with N and a grid tuned for N_min = 15 cannot serve N_min = 157. lookback_window and inc
         # keep 1 as their physical minimum.
+        # mean_window is the width of the mean the stopping rule tests. 0 is the cumulative mean
+        # the algorithm was published with, so the grid CONTAINS the previous rule and the tuner
+        # can never do worse than it; w > 0 averages only the last w probes. The axis was added
+        # after results/consolidated/LINEAR_SEARCH.md measured a moving window to be worth up to
+        # +7 pp at tight budgets and about -1 pp at eps = 1e-4, i.e. neither rule dominates and the
+        # choice belongs in the tuning grid rather than in the algorithm.
         discrete=dict(lookback_window=[1, 2, 3, 4, 5, 6, 8, 12, 20],
                       safeguard=[0, 1, 2, 3, 4, 6, 8, 12, 16, 24],
-                      inc=[1, 2, 3, 5, 8])),
+                      inc=[1, 2, 3, 5, 8],
+                      mean_window=[0, 1, 2, 3, 4, 6, 8, 12])),
     "binary_deep": dict(
         fn=find_phi_fixed_budget_binary_search_deep,
         variant="qmetrology.algorithms.find_phi_fixed_budget_binary_search_deep",

@@ -1,0 +1,25 @@
+\begin{table}[ht]
+\centering
+\small
+\caption{The overshoot rule of Equation~(\ref{eq:overshoot-threshold}) needs no normality assumption: because $\hat\phi_N = \arccos(\sqrt{K/m'})/N$ is strictly decreasing in $K$, the event $\{\hat\phi_N < \phi_1\}$ is \emph{identical} to $\{K > m'\cos^2(N\phi_1)\}$, so the rule is a one-sided binomial test on the count and its false-alarm probability is an exact binomial tail under $K\sim\mathrm{Bin}(m',\cos^2(N\phi))$. The normal law is used only to place the critical count, which affects the test's size but not its validity. The table reports that size, computed exactly and ranged over admissible depths $N\phi\in[0.3,1.5]$, against the nominal $\alpha$; the reference is set to the true $\phi$ so that the normal placement is isolated from the separate effect of substituting a noisy $\hat\phi_{\mathrm{acc}}$. The size approaches the nominal level as $m'$ grows and is conservative at the ends of the range, where one of the two outcome counts becomes small.}
+\label{tab:overshoot-operating}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{llccccc}
+\toprule
+\multicolumn{2}{l}{Nominal level}
+& \multicolumn{5}{c}{Exact size at $m'$ exploration shots} \\
+\cmidrule(lr){1-2}\cmidrule(lr){3-7}
+$\mathrm{conf}$ & $\alpha$
+& 50
+& 114
+& 200
+& 400
+& 800
+\\
+\midrule
+0.50 & 0.50 & 0.222--0.630 & 0.321--0.610 & 0.265--0.558 & 0.324--0.541 & 0.372--0.529 \\
+0.66 & 0.34 & 0.164--0.459 & 0.170--0.435 & 0.228--0.391 & 0.235--0.381 & 0.269--0.372 \\
+0.95 & 0.05 & 0.008--0.116 & 0.015--0.086 & 0.017--0.070 & 0.022--0.063 & 0.036--0.058 \\
+\bottomrule
+\end{tabular}
+\end{table}

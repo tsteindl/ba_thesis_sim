@@ -20,6 +20,8 @@ Figures (written to results/consolidated/):
     fig_phi_hat_density density of final estimates at the headline fixed budget
     fig_broad           convergence vs budget under the broad priors
     fig_algorithm_diagnostics exploration cost and final overshoot near 90% convergence
+    fig_overshoot_criterion   exact operating characteristic of the overshoot rule (Sec. 3.2.2)
+    fig_linear_detector       linear search under alternative stopping rules (Sec. 4.5)
 
 Every panel is annotated with the R it was produced at, read from the data rather than hard-coded,
 so a figure can never silently disagree with the tables.
@@ -237,7 +239,7 @@ def fig_precision(d):
     sweep = [s for s in sweep if s in d.scen]
     sweep.sort(key=lambda k: -f(d.scen[k]["eps"]))
     eps = [f(d.scen[k]["eps"]) for k in sweep]
-    fig, ax = plt.subplots(figsize=(6.4, 3.8))
+    fig, ax = plt.subplots(figsize=(6.6, 3.9))
     for a in ORDER:
         if a in ("brute", "separable"):
             continue
@@ -654,6 +656,249 @@ def fig_broad(d):
     plt.close(fig)
     return "fig_broad.png"
 
+
+def _overshoot_curves():
+    """(m, alpha, reference) -> (x grid, power). Analytic, from overshoot_criterion.py."""
+    out = {}
+    for row in load("overshoot_power.csv"):
+        key = (int(f(row["m_exploration"])), f(row["alpha"]), row["reference"])
+        out.setdefault(key, ([], []))
+        out[key][0].append(f(row["x"]))
+        out[key][1].append(f(row["power"]))
+    return {k: (np.asarray(v[0]), np.asarray(v[1])) for k, v in out.items()}
+
+
+def fig_overshoot_criterion(d, m=200, alpha=0.5):
+    """How reliably the overshoot rule fires, as a function of how deep the probe is.
+
+    Exact, not simulated: probe and reference each have m'+1 possible outcomes, so the probability
+    is a sum over all (m'+1)^2 pairs.
+    """
+    cur = _overshoot_curves()
+    if not cur:
+        return None
+    SPEC = [("perfect", "#000000", "--", r"perfect reference"),
+            ("late", "#1f77b4", "-", r"late probe ($\rho = 1.05$)"),
+            ("first", "#d62728", "-", r"first probe ($\rho = 5.7$)")]
+    fig, ax = plt.subplots(figsize=(6.6, 3.9))
+    for ref, col, ls, lab in SPEC:
+        key = (m, alpha, ref)
+        if key not in cur:
+            continue
+        x, pw = cur[key]
+        ax.plot(x, pw, color=col, ls=ls, lw=1.3 if ls == "--" else 1.9, label=lab)
+    ax.axvline(1.0, color="0.25", lw=1.0, ls=":")
+    ax.axvspan(0.8, 1.0, color="#2ca02c", alpha=0.07, lw=0)
+    ax.set_xlim(0.8, 1.4)
+    ax.set_ylim(-0.02, 1.02)
+    ax.set_xlabel(r"probe depth $N / N_{\mathrm{opt}}$")
+    ax.set_ylabel("P(rule declares an overshoot)")
+    ax.text(0.9, 1.005, "$N$ is safe", ha="center", va="bottom", fontsize=8.5, color="#2ca02c")
+    ax.text(1.2, 1.005, "$N$ has overshot", ha="center", va="bottom", fontsize=8.5, color="#555555")
+    ax.legend(fontsize=8, loc="lower left", framealpha=0.95, frameon=True,
+              edgecolor="none", facecolor="white")
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
+    fig.text(0.005, 0.005,
+             rf"Exact, at $m' = {m}$ shots and $\alpha = {alpha:g}$. Past $N_{{\mathrm{{opt}}}}$ a "
+             r"probe always reads below $\phi$, so with a perfect reference the rule never misses; "
+             "the gap" "\n" r"between the curves is the cost of comparing against a noisy "
+             r"$\hat\phi_{\mathrm{acc}}$ instead. Ripple on the dashed curve is the estimator's "
+             r"discreteness.",
+             fontsize=6.5, color="#555555", ha="left", va="bottom")
+    fig.savefig(out_path("fig_overshoot_criterion.png"), bbox_inches="tight")
+    fig.savefig(out_path("fig_overshoot_criterion.pdf"), bbox_inches="tight")
+    plt.close(fig)
+    return "fig_overshoot_criterion.png"
+
+
+# ---------------------------------------------------------- linear search: alternative stop rules
+RULE_COL = {"cumulative": "#2ca02c", "window": "#d62728", "prepost": "#9467bd",
+            "threshold": "#1f77b4", "pooled": "#ff7f0e", "cusum": "#8c564b",
+            "published": "#555555"}
+RULE_NICE = {"cumulative": "cumulative mean (re-tuned)", "window": "moving window",
+             "prepost": "pre/post windows", "threshold": "Eq. (3.6) at lag $w$",
+             "pooled": "Eq. (3.6) vs. pooled ref.", "cusum": "CUSUM",
+             "published": "published configuration"}
+RULE_MARK = {"cumulative": "o", "window": "^", "prepost": "v", "threshold": "D",
+             "pooled": "s", "cusum": "P", "published": "x"}
+
+
+def fig_linear_detector(d):
+    """What Algorithm 4 would do with a different stopping rule -- the study that led to the
+    `mean_window` parameter (results/consolidated/LINEAR_SEARCH.md).
+
+    (a) Held-out convergence of each candidate rule relative to the cumulative-mean rule re-tuned by
+    the same tuner, so the curves isolate the RULE rather than the tuning. (b) How often the
+    cumulative rule stops before the aliasing boundary is ever reached, measured against the
+    "l consecutive falls is roughly 2^-l" argument. (c) The exploration-size profile, the control
+    against "the alternative simply prefers a different m'". (d) The convergence curve and the
+    90%-reliability crossing that follow.
+
+    Reads the bake-off CSVs, which record the sweep as it stood BEFORE `mean_window` existed; the
+    "published configuration" row is that sweep's frozen Algorithm 4.
+    """
+    bake = load("linear_detector_bakeoff.csv")
+    if not bake:
+        return None
+    streaks, profile = load("linear_detector_streaks.csv"), load("linear_detector_profile.csv")
+    matched = load("linear_detector_matched.csv")
+
+    fig, axes = plt.subplots(2, 2, figsize=(11.6, 8.0))
+    (axa, axb), (axc, axd) = axes
+
+    # -- (a) what the stopping rule is worth, at the six diagnostic points ---------------------
+    pts, seen = [], set()
+    for r in bake:
+        k = (r["scenario_id"], int(f(r["budget"])))
+        if k in seen or "crossing sweep" in r.get("point_tag", ""):
+            continue
+        seen.add(k)
+        pts.append(k)
+    x = np.arange(len(pts))
+    for rule in ("window", "threshold", "prepost", "pooled", "cusum", "published"):
+        rs = {(r["scenario_id"], int(f(r["budget"]))): r for r in bake if r["rule"] == rule}
+        if not rs:
+            continue
+        y = np.array([f(rs[k]["delta_vs_cumulative_pp"]) if k in rs else np.nan for k in pts])
+        e = np.array([1.96 * f(rs[k]["delta_se_pp"], 0.0) if k in rs else np.nan for k in pts])
+        # window and threshold coincide wherever the tuner picks alpha = 0.5, which is most of the
+        # time -- threshold is dashed so the overlap reads as an overlap, not as one curve
+        axa.errorbar(x, y, yerr=e, marker=RULE_MARK[rule], color=RULE_COL[rule],
+                     lw=1.6 if rule != "published" else 1.0,
+                     ls={"published": ":", "threshold": "--"}.get(rule, "-"), capsize=2,
+                     label=RULE_NICE[rule], zorder=3 if rule == "window" else 2)
+    mrate = {(r["scenario_id"], int(f(r["budget"])), r["rule"]): f(r["rate"]) for r in matched}
+    cm = np.array([mrate.get((sid, b, "cumulative"), np.nan) for sid, b in pts])
+    wm = np.array([mrate.get((sid, b, "window"), np.nan) for sid, b in pts])
+    if np.isfinite(cm).any():
+        axa.plot(x, 100 * (wm - cm), marker="^", ms=5, mfc="none", ls="-.", lw=1.1,
+                 color=RULE_COL["window"], label="moving window, $m'$ and inc pinned")
+    axa.axhline(0, color="0.3", lw=1.0)
+    axa.set_xticks(x)
+    axa.set_xticklabels([f"{sid}\n$B$ = {b:,}" for sid, b in pts], fontsize=6.5)
+    axa.set_ylabel("convergence vs. cumulative-mean rule (pp)")
+    axa.set_title("(a) what the stopping rule is worth", fontsize=10, loc="left")
+    axa.legend(fontsize=6.6, loc="best")
+
+    # -- (b) the premature-stop probability against the 2^-l argument --------------------------
+    by_pt = {}
+    for r in streaks:
+        by_pt.setdefault((r["scenario_id"], int(f(r["budget"]))), []).append(r)
+    want = [k for k in (("narrow_e3", 10_000), ("narrow_e3", 41_326),
+                        ("narrow_e4", 2_917_365)) if k in by_pt] or sorted(by_pt)[:3]
+    for i, key in enumerate(want[:3]):
+        rows = sorted(by_pt[key], key=lambda r: int(f(r["lookback_window"])))
+        ls = ["-", "--", ":"][i]
+        l = [int(f(r["lookback_window"])) for r in rows]
+        axb.plot(l, [100 * f(r["premature_stop_measured"]) for r in rows], ls, marker="o", ms=3.5,
+                 color="#d62728", lw=1.7, label=f"measured: {key[0]}, $B$ = {key[1]:,}")
+        axb.plot(l, [100 * f(r["premature_stop_coin_flip"]) for r in rows], ls, color="#1f77b4",
+                 lw=1.2, label=r"$1-(1-2^{-l})^{T-l+1}$" if i == 0 else None)
+        axb.plot(l, [100 * f(r["premature_stop_indep_q"]) for r in rows], ls, color="#7f7f7f",
+                 lw=1.2, label="the same with the measured $q$" if i == 0 else None)
+    axb.set_xlabel("lookback window $l$")
+    axb.set_ylabel(r"$P($stop before $N_{\mathrm{opt}}$ is reached$)$  (%)")
+    axb.set_ylim(-2, 102)
+    axb.set_title("(b) the false-alarm argument, measured", fontsize=10, loc="left")
+    axb.legend(fontsize=6.6, loc="upper right")
+
+    # -- (c) the exploration-size profile at the headline point --------------------------------
+    head = pts[0] if pts else None
+    prof = [r for r in profile
+            if head and r["scenario_id"] == head[0] and int(f(r["budget"])) == head[1]]
+    top = max([f(r["best_tune_mean"]) for r in prof], default=1.0)
+    for rule in ("cumulative", "window", "threshold", "pooled"):
+        rs = sorted([r for r in prof if r["rule"] == rule],
+                    key=lambda r: int(f(r["m_exploration"])))
+        # drop the tail where the budget no longer affords a scan at all: the collapse to zero is a
+        # budget constraint, not a property of the rule, and it flattens everything else
+        rs = [r for r in rs if f(r["best_tune_mean"]) > 0.5 * top]
+        if not rs:
+            continue
+        axc.plot([int(f(r["m_exploration"])) for r in rs],
+                 [100 * f(r["best_tune_mean"]) for r in rs], marker=RULE_MARK[rule],
+                 color=RULE_COL[rule], lw=1.6, ms=3.5,
+                 ls="--" if rule == "threshold" else "-", label=RULE_NICE[rule])
+    axc.set_xscale("log")
+    axc.set_xlabel(r"exploration shots per probe $m'$")
+    axc.set_ylabel("best convergence at that $m'$ (%)")
+    if head:
+        axc.set_title(f"(c) exploration size is not the explanation\n"
+                      f"      ({head[0]}, $B$ = {head[1]:,})", fontsize=10, loc="left")
+    axc.legend(fontsize=7, loc="lower left")
+
+    # -- (d) the convergence curve and the 90% crossing ----------------------------------------
+    sid_c = "narrow_e3"
+    curves = {}
+    for r in bake:
+        if r["scenario_id"] != sid_c:
+            continue
+        curves.setdefault(r["rule"], []).append((int(f(r["budget"])), f(r["rate"])))
+    best = None
+    for rule in ("window", "threshold", "prepost", "pooled"):
+        v = curves.get(rule)
+        if v and (best is None or max(y for _, y in v) > best[1]):
+            best = (rule, max(y for _, y in v))
+    drawn = False
+    for rule in [r for r in ("published", "cumulative", best[0] if best else None) if r]:
+        v = sorted(curves.get(rule, []))
+        if len(v) < 3:
+            continue
+        drawn = True
+        axd.plot([b for b, _ in v], [100 * y for _, y in v], marker=RULE_MARK[rule],
+                 color=RULE_COL[rule], lw=1.7, ms=4,
+                 ls=":" if rule == "published" else "-", label=RULE_NICE[rule])
+    if drawn:
+        swept = [b for v in curves.values() for b, _ in v]
+        lo_b, hi_b = 0.7 * min(swept), 1.4 * max(swept)
+        for algo, col in (("brute", COL["brute"]), ("binary_deep", COL["binary_deep"]),
+                          ("reverse_eng_risk", COL["reverse_eng_risk"])):
+            ref = sorted([(int(f(r["budget"])), 100 * f(r["rate"]))
+                          for r in load("performance_curves.csv")
+                          if r["scenario_id"] == sid_c and r["algorithm"] == algo
+                          and lo_b <= int(f(r["budget"])) <= hi_b])
+            if ref:
+                axd.plot([b for b, _ in ref], [y for _, y in ref], color=col, lw=1.1, alpha=0.75,
+                         ls="--", label=NICE[algo], zorder=1)
+    axd.axhline(90, color="0.35", lw=1.0, ls=":")
+    cross = {r["rule"]: f(r["budget_to_reach"]) for r in load("linear_detector_crossings.csv")
+             if r["scenario_id"] == sid_c}
+    for rule, dy in (("published", -13), (best[0] if best else "published", 9)):
+        b90 = cross.get(rule, float("nan"))
+        if np.isfinite(b90):
+            axd.plot([b90], [90], marker="v", ms=7, color=RULE_COL[rule], zorder=5, clip_on=False)
+            axd.annotate(f"$B_{{90}}$ = {b90:,.0f}", (b90, 90), textcoords="offset points",
+                         xytext=(0, dy), ha="center", fontsize=6.8, color=RULE_COL[rule], zorder=5)
+    axd.set_xscale("log")
+    axd.set_ylim(40, 100)
+    if drawn:
+        axd.set_xlim(0.8 * min(swept), 1.25 * max(swept))
+    axd.set_xlabel("budget $B$")
+    axd.set_ylabel("converged (%)")
+    axd.set_title("(d) the curve that follows, and the 90% crossing\n"
+                  f"      ({sid_c})", fontsize=10, loc="left")
+    if drawn:
+        axd.legend(fontsize=6.6, loc="lower right")
+    else:   # run without --curve: too few budgets to draw a convergence curve
+        axd.text(0.5, 0.5, "run with --curve", transform=axd.transAxes, ha="center", va="center",
+                 fontsize=9, color="#999999")
+
+    R = int(f(bake[0].get("R"), 0))
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    fig.text(0.005, 0.006,
+             f"Held-out evaluation at R = {R:,} trials per point, on the seed the production sweep "
+             "holds out. Every rule is tuned over the same (m', inc, s) axes on the same two tuning "
+             "blocks and scored by the exact convergence probability of the depth it selects, so "
+             "the comparison isolates the stopping rule. Error bars are 95% intervals on the "
+             "paired difference. In (d) the dashed reference curves are the production sweep's own "
+             "simulated rates for the other protocols.",
+             fontsize=6.5, color="#555555", ha="left", va="bottom")
+    fig.savefig(out_path("fig_linear_detector.png"), bbox_inches="tight")
+    fig.savefig(out_path("fig_linear_detector.pdf"), bbox_inches="tight")
+    plt.close(fig)
+    return "fig_linear_detector.png"
+
+
 def main():
     only = None
     if "--only" in sys.argv:
@@ -673,7 +918,9 @@ def main():
                         ("error_density", lambda: fig_error_density(d)),
                         ("signed_error_density", lambda: fig_signed_error_density(d)),
                         ("phi_hat_density", lambda: fig_phi_hat_density(d)),
-                        ("broad", lambda: fig_broad(d))):
+                        ("broad", lambda: fig_broad(d)),
+                        ("overshoot", lambda: fig_overshoot_criterion(d)),
+                        ("linear_detector", lambda: fig_linear_detector(d))):
             if only and tag not in only:
                 continue
             n = fn()

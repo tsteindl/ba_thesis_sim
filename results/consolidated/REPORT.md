@@ -11,27 +11,27 @@ Reported algorithms: `brute` (Brute force), `linear` (Linear search), `binary_de
 | algorithm | mean convergence over all points | median | points won |
 |---|---:|---:|---:|
 | Brute force | 51.30% | 49.04% | 0/144 |
-| Linear search | 57.59% | 57.10% | 0/144 |
+| Linear search | 59.03% | 58.94% | 0/144 |
 | Binary search (stat. safeguard, deepest probe) | 61.17% | 61.82% | 63/144 |
 | Reverse engineering (stat. safeguard) | 61.56% | 63.06% | 81/144 |
 
-**Every aggregate in this report is over the 144 LIVE operating points** of 221 — those where the best algorithm converges between 3% and 99%. At a saturated point every configuration ties, so the tuner's argmax, and therefore every diagnostic measured at that argmax, is Monte-Carlo noise rather than a property of the algorithm; at a floored point nothing converges at any depth. The per-point CSVs keep all 161 points and `operating_points.csv` carries the `regime` label to join on. Means and medians here mix scenarios and budgets, so they summarise the table rather than making a headline claim.
+**Every aggregate in this report is over the 144 LIVE operating points** of 221 â€” those where the best algorithm converges between 3% and 99%. At a saturated point every configuration ties, so the tuner's argmax, and therefore every diagnostic measured at that argmax, is Monte-Carlo noise rather than a property of the algorithm; at a floored point nothing converges at any depth. The per-point CSVs keep all 161 points and `operating_points.csv` carries the `regime` label to join on. Means and medians here mix scenarios and budgets, so they summarise the table rather than making a headline claim.
 
 Budget to reach 90% convergence, relative to brute force (>1 means the algorithm needs less budget):
 
 | algorithm | median ratio | min | max | scenarios with a 90% crossing |
 |---|---:|---:|---:|---:|
-| Linear search | 1.43 | 1.08 | 1.65 | 10 |
+| Linear search | 1.49 | 1.14 | 1.67 | 10 |
 | Binary search (stat. safeguard, deepest probe) | 1.68 | 1.32 | 1.84 | 10 |
 | Reverse engineering (stat. safeguard) | 1.77 | 1.43 | 1.85 | 10 |
 
 Crossing rule: log-linear interpolation of the convergence-vs-budget curve (qmetrology.uncertainty.crossing). Intervals are 95% percentile intervals from a parametric bootstrap (2000 replicates, seed 12345) of the convergence curve; full rows in `budget_crossings.csv`.
 
-## 2. Exploration phase — `N_guess / N_opt`
+## 2. Exploration phase â€” `N_guess / N_opt`
 
 | algorithm | median ratio (over points) | mean abs. rel. error | signed rel. error | exact hit | within 10% | guess overshoot | median expl. budget share | mean probes |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Linear search | 1.00 | 0.14 | -0.12 | 41.4% | 68.6% | 7.7% | 1.78% | 23.4 |
+| Linear search | 1.00 | 0.16 | -0.11 | 37.3% | 61.1% | 6.6% | 0.83% | 22.8 |
 | Binary search (stat. safeguard, deepest probe) | 0.93 | 0.29 | -0.28 | 31.0% | 45.7% | 4.1% | 2.70% | 4.4 |
 | Reverse engineering (stat. safeguard) | 1.00 | 0.05 | +0.00 | 59.1% | 86.8% | 19.3% | 1.33% | 1.0 |
 
@@ -53,12 +53,12 @@ The precision-sweep scenarios (`U(0.01, 0.1)`, eps from 1e-3 to 1e-8) hold the p
 | Brute force | 1e-06 | 0.00% | -- | 0.54 | 0.00% | 52.7% |
 | Brute force | 1e-07 | 0.00% | -- | 0.54 | 0.00% | 52.7% |
 | Brute force | 1e-08 | 0.00% | -- | 0.54 | 0.00% | 52.7% |
-| Linear search | 1e-03 | 4.03% | 0.83 | 0.76 | 5.35% | 53.5% |
-| Linear search | 1e-04 | 3.17% | 1.00 | 0.92 | 2.37% | 60.6% |
-| Linear search | 1e-05 | 0.81% | 1.00 | 0.95 | 0.75% | 63.1% |
-| Linear search | 1e-06 | 0.17% | 1.00 | 0.95 | 0.66% | 63.4% |
-| Linear search | 1e-07 | 0.01% | 1.00 | 1.00 | 0.67% | 63.7% |
-| Linear search | 1e-08 | 0.00% | 1.00 | 1.00 | 0.64% | 63.7% |
+| Linear search | 1e-03 | 2.68% | 0.72 | 0.71 | 2.17% | 57.8% |
+| Linear search | 1e-04 | 2.88% | 1.00 | 0.92 | 2.36% | 60.9% |
+| Linear search | 1e-05 | 1.18% | 1.00 | 0.95 | 0.79% | 63.0% |
+| Linear search | 1e-06 | 0.34% | 1.00 | 0.95 | 0.45% | 63.7% |
+| Linear search | 1e-07 | 0.06% | 1.00 | 1.00 | 0.49% | 64.2% |
+| Linear search | 1e-08 | 0.00% | 1.00 | 0.99 | 0.41% | 64.1% |
 | Binary search (stat. safeguard, deepest probe) | 1e-03 | 15.56% | 0.54 | 0.87 | 1.56% | 58.7% |
 | Binary search (stat. safeguard, deepest probe) | 1e-04 | 5.44% | 0.97 | 0.92 | 1.71% | 61.4% |
 | Binary search (stat. safeguard, deepest probe) | 1e-05 | 1.57% | 0.98 | 0.97 | 0.27% | 64.2% |
@@ -78,9 +78,9 @@ Live operating points split into terciles of budget *within each scenario*, so t
 
 | algorithm | budget tercile | median expl. share | median `N_guess/N_opt` | guess overshoot | mean probes | only the opening probe |
 |---|---|---:|---:|---:|---:|---:|
-| Linear search | low | 1.01% | 1.00 | 9.9% | 20.2 | 0.0% |
-| Linear search | mid | 2.29% | 1.00 | 7.9% | 24.8 | 0.0% |
-| Linear search | high | 1.51% | 1.00 | 4.7% | 25.9 | 0.0% |
+| Linear search | low | 0.54% | 1.00 | 9.2% | 20.3 | 0.0% |
+| Linear search | mid | 0.87% | 1.00 | 7.1% | 22.7 | 0.0% |
+| Linear search | high | 1.22% | 1.00 | 2.8% | 25.8 | 0.0% |
 | Binary search (stat. safeguard, deepest probe) | low | 5.58% | 0.97 | 6.2% | 4.4 | 52.8% |
 | Binary search (stat. safeguard, deepest probe) | mid | 2.69% | 0.94 | 3.0% | 4.1 | 57.4% |
 | Binary search (stat. safeguard, deepest probe) | high | 2.33% | 0.88 | 2.8% | 4.7 | 50.0% |
@@ -88,22 +88,22 @@ Live operating points split into terciles of budget *within each scenario*, so t
 | Reverse engineering (stat. safeguard) | mid | 1.43% | 1.00 | 20.1% | 1.0 | 99.1% |
 | Reverse engineering (stat. safeguard) | high | 0.13% | 1.00 | 19.9% | 1.0 | 99.5% |
 
-## 3. Safeguard and final depth — `N_star / N_opt`
+## 3. Safeguard and final depth â€” `N_star / N_opt`
 
 | algorithm | median `N*/N_opt` | final overshoot | converged given a safe depth | unsafe-guess rescue | median `N*/N_guess` |
 |---|---:|---:|---:|---:|---:|
 | Brute force | 0.54 | 0.00% | 51.3% | -- | -- |
-| Linear search | 0.95 | 2.35% | 58.2% | 49.5% | 0.96 |
+| Linear search | 0.95 | 1.72% | 59.7% | 44.6% | 0.98 |
 | Binary search (stat. safeguard, deepest probe) | 1.00 | 0.74% | 61.3% | 96.4% | 1.05 |
 | Reverse engineering (stat. safeguard) | 1.00 | 0.47% | 61.7% | 97.3% | 0.99 |
 
-The safeguard's target is `N_opt`, and it deliberately backs off from the aliasing cliff, so a median below 1 is the intended behaviour rather than a miss. Early stopping, final overshoot and ordinary shot noise are reported here as overlapping stage flags and conditional rates, **not** as a mutually exclusive failure decomposition — no priority or counterfactual rule is defined that would justify one.
+The safeguard's target is `N_opt`, and it deliberately backs off from the aliasing cliff, so a median below 1 is the intended behaviour rather than a miss. Early stopping, final overshoot and ordinary shot noise are reported here as overlapping stage flags and conditional rates, **not** as a mutually exclusive failure decomposition â€” no priority or counterfactual rule is defined that would justify one.
 
 ### Detector quality (linear and binary search only)
 
 | algorithm | trial-level false alarm | trial-level miss | probe TP | FP | TN | FN | eligible runs |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Linear search | 57.7% | 5.6% | 42,454,782 | 12,572,340 | 136,843,632 | 1,230,524 | 11,050,000 |
+| Linear search | 64.1% | 4.5% | 28,454,612 | 15,875,339 | 144,992,180 | 1,266,210 | 11,050,000 |
 | Binary search (stat. safeguard, deepest probe) | 34.6% | 8.4% | 30,414,776 | 12,966,029 | 18,569,847 | 1,247,715 | 11,050,000 |
 
 The rates are trial-level (at least one safe probe declared an overshoot / at least one overshooting probe accepted) with Wilson intervals at the row's own R, because probes inside one run are dependent. The probe-level confusion counts are supporting telemetry only. Reverse engineering and brute force have no detector and are recorded as N/A, not as zero.
@@ -115,11 +115,11 @@ The rates are trial-level (at least one safe probe declared an overshoot / at le
 * Continuous diagnostics: median with an exact order-statistic bootstrap percentile interval, plus the mean with a run-level percentile bootstrap (2000 replicates, seed 12345).
 * Budget crossings and ratios: parametric bootstrap of the convergence curve, same replicate count and seed.
 
-Budget-grid discretisation: re-deriving each crossing from the two half-density subgrids moves it by a median of 2.58% and at most 13.14%. Log-linear interpolation error is O(h^2) in the grid log-spacing, so the full-grid contribution is about a quarter of that.
+Budget-grid discretisation: re-deriving each crossing from the two half-density subgrids moves it by a median of 2.59% and at most 13.14%. Log-linear interpolation error is O(h^2) in the grid log-spacing, so the full-grid contribution is about a quarter of that.
 
 **Budget compliance.** Over every held-out run of every point, 0 trial(s) spent more than the nominal budget; the worst per-trial spend observed is 1.0000x the cap. Per-point rows are in `budget_audit.csv` (mean, median, p90, max and unused share). A mean spend of 1.0000x does not by itself certify compliance, which is why the per-trial maximum and the violation count are reported.
 
-**Tuning provenance.** 663 tuned cells; every held-out row points to exactly one frozen winner in `winners.csv`, with its per-block tuning rates, the runner-up and the selection margin. The exploration-size grid spans [1, B // N_min], which cannot bind: 74/663 winners sit on an endpoint and each such row carries `at_m_min` / `at_m_max` so the case is visible rather than silent.
+**Tuning provenance.** 663 tuned cells; every held-out row points to exactly one frozen winner in `winners.csv`, with its per-block tuning rates, the runner-up and the selection margin. The exploration-size grid spans [1, B // N_min], which cannot bind: 135/663 winners sit on an endpoint and each such row carries `at_m_min` / `at_m_max` so the case is visible rather than silent.
 
 ## 5. Code/thesis mismatches and limitations
 
@@ -135,12 +135,14 @@ Budget-grid discretisation: re-deriving each crossing from the two half-density 
 
 ## Figures
 
-`fig_diagnostics_vs_budget.png` — exploration budget share, median `N_guess/N_opt` and final overshoot against the available budget (normalised per scenario). `fig_guess_vs_final_depth.png` — what the safeguard does to the exploration's guess, and how the final depth maps onto convergence. Both are regenerated by `python analysis/consolidated/figures.py` from `diagnostics_by_point.csv` alone.
+`fig_diagnostics_vs_budget.png` â€” exploration budget share, median `N_guess/N_opt` and final overshoot against the available budget (normalised per scenario). `fig_guess_vs_final_depth.png` â€” what the safeguard does to the exploration's guess, and how the final depth maps onto convergence. Both are regenerated by `python analysis/consolidated/figures.py` from `diagnostics_by_point.csv` alone.
 
 ## Files
 
 ```
 FULL_RESULTS.md
+LINEAR_SEARCH.md
+OVERSHOOT_CRITERION.md
 REPORT.md
 algorithm_code_audit.md
 budget_audit.csv
@@ -151,18 +153,42 @@ diagnostics_by_point.csv
 diagnostics_headline.csv
 error_curves.csv
 experiment_manifest.json
+fig_algorithm_diagnostics.png
 fig_broad.png
 fig_diagnostics_vs_budget.png
 fig_error.png
+fig_error_density.png
+fig_error_variance.png
 fig_guess_vs_final_depth.png
+fig_linear_detector.pdf
+fig_linear_detector.png
+fig_overshoot_criterion.pdf
+fig_overshoot_criterion.png
 fig_pareto.png
+fig_phi_hat_density.png
 fig_precision.png
+fig_signed_error_density.png
 fig_story.png
 fig_story_small.png
+fig_variance.png
+linear_degenerate_zone.csv
+linear_detector_bakeoff.csv
+linear_detector_crossings.csv
+linear_detector_grid.csv
+linear_detector_matched.csv
+linear_detector_profile.csv
+linear_detector_streaks.csv
+linear_detector_validation.csv
+linear_search_claims.csv
 operating_points.csv
 optimal_params.csv
+overshoot_bracket_walk.csv
+overshoot_operating.csv
+overshoot_power.csv
 performance_curves.csv
 tex
+thesis_code
 traces
+variance_curves.csv
 winners.csv
 ```
