@@ -505,7 +505,7 @@ def _params_cell(params, budget=None, shot_fraction=None):
         B = f"{int(budget):,}".replace(",", "{,}")
         lines.append(r"{\scriptsize $B=" + B + "$}")
     if shot_fraction is not None:
-        lines.append(r"{\scriptsize planned $m'/B="
+        lines.append(r"{\scriptsize $m'/B="
                      + f"{100*shot_fraction:.2f}" + r"\%$}")
     return r"\makecell{" + r", \\ ".join(lines) + "}"
 
@@ -514,7 +514,7 @@ def _params_inline(params, shot_fraction=None):
     items = _parameter_items(params)
     out = r"\texttt{" + ", ".join(items) + "}" if items else "--"
     if shot_fraction is not None:
-        out += (r", planned $m'/B="
+        out += (r", $m'/B="
                 + f"{100*shot_fraction:.2f}" + r"\%$")
     return out
 
@@ -738,7 +738,7 @@ def tab_diag_downstream(D):
            r"exploitation value after the safeguard; \emph{unsafe-guess rescue} is "
            r"$P(N^* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how "
            r"often the safeguard pulls an aliasing guess back to safety. For the statistical "
-           r"safeguard, a median $N^*/N_{\mathrm{opt}}$ below one may be intentional: it maximizes "
+           r"safeguard, a selected $N^*/N_{\mathrm{opt}}$ below one may be intentional: it maximizes "
            r"$P(\text{no overshoot})\times P(\text{converge})$ and deliberately backs off from the "
            r"aliasing cliff. \emph{Converged given safe $N^*$} is "
            r"$P(|\hat\phi-\phi|<\epsilon\mid N^*\leq N_{\mathrm{opt}})$. "
