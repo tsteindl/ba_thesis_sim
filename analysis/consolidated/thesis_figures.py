@@ -658,17 +658,17 @@ def fig_broad(d):
 
 
 def _overshoot_curves():
-    """(m, alpha, reference) -> (x grid, power). Analytic, from overshoot_criterion.py."""
+    """(m, conf, reference) -> (x grid, power). Analytic, from overshoot_criterion.py."""
     out = {}
     for row in load("overshoot_power.csv"):
-        key = (int(f(row["m_exploration"])), f(row["alpha"]), row["reference"])
+        key = (int(f(row["m_exploration"])), f(row["conf"]), row["reference"])
         out.setdefault(key, ([], []))
         out[key][0].append(f(row["x"]))
         out[key][1].append(f(row["power"]))
     return {k: (np.asarray(v[0]), np.asarray(v[1])) for k, v in out.items()}
 
 
-def fig_overshoot_criterion(d, m=200, alpha=0.5):
+def fig_overshoot_criterion(d, m=200, conf=0.5):
     """How reliably the overshoot rule fires, as a function of how deep the probe is.
 
     Exact, not simulated: probe and reference each have m'+1 possible outcomes, so the probability
@@ -682,7 +682,7 @@ def fig_overshoot_criterion(d, m=200, alpha=0.5):
             ("first", "#d62728", "-", r"first probe ($\rho = 5.7$)")]
     fig, ax = plt.subplots(figsize=(6.6, 3.9))
     for ref, col, ls, lab in SPEC:
-        key = (m, alpha, ref)
+        key = (m, conf, ref)
         if key not in cur:
             continue
         x, pw = cur[key]
@@ -699,7 +699,7 @@ def fig_overshoot_criterion(d, m=200, alpha=0.5):
               edgecolor="none", facecolor="white")
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     fig.text(0.005, 0.005,
-             rf"Exact, at $m' = {m}$ shots and $\alpha = {alpha:g}$. Past $N_{{\mathrm{{opt}}}}$ a "
+             rf"Exact, at $m' = {m}$ shots and conf $= {conf:g}$. Past $N_{{\mathrm{{opt}}}}$ a "
              r"probe always reads below $\phi$, so with a perfect reference the rule never misses; "
              "the gap" "\n" r"between the curves is the cost of comparing against a noisy "
              r"$\hat\phi_{\mathrm{acc}}$ instead. Ripple on the dashed curve is the estimator's "

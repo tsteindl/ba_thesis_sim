@@ -1,39 +1,45 @@
-"""Why binary search's overshoot criterion is theoretically justified (Section 3.2.2).
+"""Theoretical justification of binary search's one-shot overshoot criterion (Section 3.2.2).
 
-The rule declares an overshoot when a probe at N reads below a threshold built from the deepest
-accepted estimate:
+The rule, exactly as implemented in qmetrology/algorithms.py:
 
-    declare overshoot   <=>   phi_hat_N  <  phi_1,     phi_1 = phi_hat_acc + z_alpha /(2 N sqrt(m')).
+    phi_1 = norm.ppf(1 - conf, phi_hat_acc, 1/(2 N sqrt(m')))     # threshold from the reference
+    declare overshoot   <=>   phi_hat_N < phi_1
 
-THE CENTRAL POINT: this needs no Gaussian assumption at all, because it is *exactly* a one-sided
-binomial test on the raw count. Since phi_hat = arccos(sqrt(K/m'))/N is strictly DECREASING in K,
+The question is what justifies calling a probe "significantly below" the reference. The answer here
+is that the rule does NOT need the Gaussian assumption to be valid -- it needs it only to place the
+threshold, and that use is checkable against an exact calculation.
 
-    { phi_hat_N < phi_1 }   ==   { K > m' cos^2(N phi_1) }          (exact, every outcome)
+THREE SEPARATE CLAIMS, only the third of which involves a normal approximation.
 
-so the rule fires precisely when the number of "0" outcomes exceeds a critical count
-k* = m' cos^2(N phi_1). Its false-alarm probability is therefore an exact binomial tail under
-K ~ Bin(m', cos^2(N phi)) -- Equation (2.41) of the thesis, which is exact, not an approximation.
+1. VALIDITY -- the rule is exactly a one-sided binomial test, no approximation involved.
+   phi_hat = arccos(sqrt(K/m'))/N is strictly decreasing in K, so for any threshold phi_1 in the
+   estimator's range,
 
-What the normal law is used for is ONLY placing k*: z_alpha converts a nominal level into a
-threshold. Misplacing k* changes the test's SIZE, not its VALIDITY -- the rule remains a legitimate
-monotone test on K whichever critical value is used. So the criterion does not rest on Gaussianity;
-Gaussianity is a computational shortcut for a quantity that has an exact binomial expression, and
-this module measures how good that shortcut is.
+       phi_hat_N < phi_1     <=>     K > m' cos^2(N phi_1).
 
-A second, purely deterministic fact bounds the misses. arccos returns a value in [0, pi/2], so
-every estimate obeys N phi_hat <= pi/2, while overshooting means N phi > pi/2. Hence at ANY
-overshooting N and for EVERY outcome,
+   The rule is therefore a cut on the raw count. Under the null "N is safe and the phase is phi",
+   K ~ Bin(m', cos^2(N phi)), so the rule's size is a binomial tail probability -- exact, in closed
+   form, with no distributional assumption anywhere. verify_equivalence() checks this identity.
 
-    phi_hat  <=  pi/(2N)  <  phi,
+2. POWER -- guaranteed by an exact inequality, not by a limit.
+   arccos returns a value in [0, pi/2], so every estimate obeys N phi_hat <= pi/2, while overshooting
+   means N phi > pi/2. Hence at ANY overshooting N and for EVERY outcome K,
 
-i.e. an overshooting probe always reads below the truth. Against a known phi the rule could never
-miss; it misses only because phi_hat_acc is itself noisy, and at alpha = 0.5 that is the only
-source of misses.
+       phi_hat <= pi/(2N) < phi,
+
+   i.e. an overshooting probe always reads below the truth. This replaces the asymptotic
+   "phi_hat -> 0" identity with a statement that holds at the finite N where the rule actually
+   fires. verify_power_bound() checks it.
+
+3. CALIBRATION -- the only place the normal approximation is used, and it is quantified.
+   The normal quantile chooses where to put the cut. exact_size() computes what size that cut
+   actually achieves, from the binomial. Inside the two-sided regularity region
+   m' min(p0, 1-p0) >= 10 the achieved size tracks the nominal one closely; outside it, at the
+   shallow end where p0 -> 1, it can drift, and near the aliasing boundary it errs conservatively.
 
     python analysis/consolidated/overshoot_criterion.py
 
-Writes overshoot_size.csv (the justification), overshoot_power.csv, overshoot_operating.csv and
-overshoot_bracket_walk.csv.
+Writes overshoot_size.csv, overshoot_power.csv and overshoot_bracket_walk.csv.
 """
 import csv
 import os
@@ -45,129 +51,203 @@ from scipy.stats import binom, norm
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pipeline_io import path
 
-# A round, illustrative shot count -- deliberately NOT one of the sweep's tuned values, which
-# Chapter 3 has not introduced yet.
+PHI = 0.05                       # only fixes the scale; every result depends on N only via N/N_opt
 SHOTS = (50, 200, 800)
-MAIN_SHOTS = 200
-
-# The reference qualities binary search actually produces, from bracket_walk() below: the opening
-# comparison comes from N_min while the probe sits near the middle of the range (rho ~ 5.7); by the
-# time the bracket has closed onto N_opt the reference is a few percent shallower (rho ~ 1.05).
-REFERENCES = ((None, "perfect"), (1.05, "late"), (5.73, "first"))
-ALPHAS = (0.5, 0.05)
-X_GRID = np.round(np.linspace(0.80, 1.40, 241), 6)
+CONFS = (0.5, 0.66, 0.95)        # 0.5 and 0.66 are the values the sweep selected
+REGULARITY = 10.0                # the two-sided marker m' min(p0, 1-p0) >= 10
+SAFE_GRID = np.linspace(0.05, 0.999, 400)
 
 
-# --------------------------------------------------------------------------- exact binomial view
-def critical_count(m, N, phi_1):
-    """k* such that {phi_hat_N < phi_1} == {K > k*}. Exact, from monotonicity of arccos."""
-    return m * np.cos(N * phi_1) ** 2
-
-
-def verify_equivalence(trials=200_000, seed=3):
-    """Check {phi_hat < phi_1} == {K > k*} on random (m, N, phi_1, K). Returns the mismatch count."""
+# --------------------------------------------------------------------------- claim 1: validity
+def verify_equivalence(n=300_000, seed=3):
+    """{phi_hat_N < phi_1} and {K > m' cos^2(N phi_1)} are the same event. Returns #disagreements."""
     rng = np.random.default_rng(seed)
     bad = 0
-    for _ in range(trials):
+    for _ in range(n):
         m = int(rng.integers(2, 600))
-        N = int(rng.integers(2, 200))
-        phi_1 = rng.uniform(0.0, np.pi / (2 * N))
+        N = int(rng.integers(1, 200))
+        phi_1 = rng.uniform(0, np.pi / (2 * N))
         k = int(rng.integers(0, m + 1))
-        if (np.arccos(np.sqrt(k / m)) / N < phi_1) != (k > critical_count(m, N, phi_1)):
+        if (np.arccos(np.sqrt(k / m)) / N < phi_1) != (k > m * np.cos(N * phi_1) ** 2):
             bad += 1
     return bad
 
 
-def exact_size(m, theta, alpha, N=80):
-    """Exact false-alarm probability of the implemented test at a safe depth.
+def cut(m, N, phi_1):
+    """The count above which the rule fires: k* = m' cos^2(N phi_1)."""
+    return m * np.cos(N * phi_1) ** 2
 
-    The reference is set to the truth, which isolates the normal law's placement of the critical
-    value from the separate error of plugging in a noisy phi_hat_acc. Returns None where the
-    normal threshold falls outside the estimator's range [0, pi/(2N)], where the test is vacuous.
+
+def exact_size(m, x, conf, phi=PHI):
+    """Exact P(rule fires) at a SAFE depth x = N/N_opt, against a perfect reference.
+
+    This is the rule's true false-alarm rate: a binomial tail, with no normal approximation.
     """
-    phi = theta / N
-    phi_1 = norm.ppf(alpha, phi, 1.0 / (2 * N * np.sqrt(m)))
-    if not (0.0 <= N * phi_1 <= np.pi / 2):
+    theta = x * np.pi / 2
+    N = theta / phi
+    phi_1 = phi + norm.ppf(1 - conf) / (2 * N * np.sqrt(m))
+    return float(1 - binom.cdf(np.floor(cut(m, N, phi_1)), m, np.cos(theta) ** 2))
+
+
+# --------------------------------------------------------------------------- claim 2: power
+def verify_power_bound(n=200_000, seed=7):
+    """At any overshooting N, phi_hat < phi for every outcome. Returns max(phi_hat - phi)."""
+    rng = np.random.default_rng(seed)
+    worst = -np.inf
+    for _ in range(n):
+        phi = rng.uniform(0.001, 0.5)
+        N = int(rng.uniform(1.0001, 4.0) * (np.pi / (2 * phi))) + 1
+        if N * phi <= np.pi / 2:
+            continue
+        m = int(rng.integers(1, 500))
+        k = rng.binomial(m, np.cos(N * phi) ** 2)
+        worst = max(worst, np.arccos(np.sqrt(k / m)) / N - phi)
+    return float(worst)
+
+
+# --------------------------------------------------------------------------- claim 3: calibration
+def regular(m, x, thresh=REGULARITY):
+    p0 = np.cos(x * np.pi / 2) ** 2
+    return m * min(p0, 1 - p0) >= thresh
+
+
+def size_summary(m, conf, grid=SAFE_GRID):
+    """Achieved size across the safe region, split by the regularity marker."""
+    vals = np.array([exact_size(m, float(x), conf) for x in grid])
+    keep = np.array([regular(m, float(x)) for x in grid])
+    nominal = 1 - conf
+    out = dict(m_exploration=m, conf=conf, nominal_alpha=round(nominal, 4),
+               n_regular=int(keep.sum()))
+    if keep.any():
+        v = vals[keep]
+        out.update(size_min=round(float(v.min()), 4), size_max=round(float(v.max()), 4),
+                   max_deviation=round(float(np.abs(v - nominal).max()), 4))
+    else:
+        out.update(size_min=float("nan"), size_max=float("nan"), max_deviation=float("nan"))
+    near = grid > 0.97
+    out["size_near_boundary_max"] = round(float(vals[near].max()), 4)
+    out["size_all_max"] = round(float(vals.max()), 4)
+    return out
+
+
+
+# --------------------------------------------------------------------------- Berry-Esseen
+BE_C = 0.4748          # Shevtsova (2011), best known constant for the i.i.d. Berry-Esseen bound
+
+
+def berry_esseen(m, p):
+    """Rigorous bound on |P((K - mp)/sqrt(mpq) <= x) - Phi(x)| for K ~ Bin(m, p).
+
+    K is a sum of m i.i.d. Bernoulli(p) variables, for which the third absolute central moment is
+    rho = pq(p^2 + q^2) and sigma^2 = pq, so the classical bound C rho / (sigma^3 sqrt(m)) becomes
+
+        C (p^2 + q^2) / sqrt(m p q).
+
+    This is non-asymptotic: it holds for every m and every p, with no appeal to a limit.
+    """
+    q = 1.0 - p
+    return BE_C * (p ** 2 + q ** 2) / np.sqrt(m * p * q)
+
+
+def binomial_normal_ks(m, p):
+    """Exact sup-distance between the standardised Bin(m, p) CDF and the normal CDF."""
+    k = np.arange(m + 1)
+    w = binom.pmf(k, m, p)
+    upper = np.cumsum(w)
+    g = norm.cdf((k - m * p) / np.sqrt(m * p * (1 - p)))
+    return float(max(np.max(np.abs(upper - g)), np.max(np.abs(upper - w - g))))
+
+
+def normal_approximation_quality(m, thresh=REGULARITY, n=600):
+    """Worst-case Berry-Esseen bound and true KS distance over the regularity region."""
+    ps = np.linspace(1e-9, 0.5, n)
+    ps = ps[m * ps >= thresh]
+    if not len(ps):
         return None
-    return float(binom.sf(np.floor(critical_count(m, N, phi_1)), m, np.cos(theta) ** 2))
+    return dict(m_exploration=m,
+                be_bound_max=round(float(max(berry_esseen(m, float(p)) for p in ps)), 4),
+                true_ks_max=round(float(max(binomial_normal_ks(m, float(p)) for p in ps[::20])), 4))
 
 
-def size_table(shots=(50, 114, 200, 400, 800), confs=(0.5, 0.66, 0.95),
-               thetas=np.linspace(0.3, 1.5, 121)):
-    """Exact size of the test against its nominal level, over the admissible depths."""
-    rows = []
-    for conf in confs:
-        alpha = 1.0 - conf                       # the implementation uses norm.ppf(1 - conf, ...)
-        for m in shots:
-            sizes = [s for s in (exact_size(m, float(t), alpha) for t in thetas) if s is not None]
-            if not sizes:
-                continue
-            a = np.asarray(sizes)
-            rows.append(dict(conf=conf, alpha_nominal=round(alpha, 4), m_exploration=m,
-                             size_min=round(float(a.min()), 4),
-                             size_median=round(float(np.median(a)), 4),
-                             size_max=round(float(a.max()), 4),
-                             max_abs_deviation=round(float(np.max(np.abs(a - alpha))), 4)))
-    return rows
 
+# --------------------------------------------------------------------------- threshold map
+def threshold_offset(theta, delta):
+    """Exact displacement of the cut from m'p0, as a fraction of m'.
 
-def probe_law(m, x):
-    """Exact law of (phi_hat - phi)/sigma_N at depth x = N/N_opt, sorted increasing.
+        k*/m' - p0 = cos^2(theta + delta) - cos^2(theta) = -sin(2 theta + delta) sin(delta)
 
-    sigma_N = 1/(2 N sqrt(m')), so the standardised law depends only on (m', x).
+    from cos A - cos B = -2 sin((A+B)/2) sin((A-B)/2). No approximation.
     """
+    return -np.sin(2 * theta + delta) * np.sin(delta)
+
+
+def standardised_cut(m, z, theta):
+    """The Gaussian threshold, expressed on the count's own standardised scale.
+
+        u = (k* - m'p0)/sqrt(m' p0 q0) = -z A(m',z) B(theta, delta)
+
+    with A = 2 sqrt(m') sin(delta)/z  (the sin d ~ d error, -> 1 as m' grows) and
+    B = sin(2 theta + delta)/sin(2 theta)  (-> 1 as delta -> 0, singular as sin 2theta -> 0).
+    A perfectly placed cut would give u = -z exactly, and hence size exactly Phi(z).
+    """
+    delta = z / (2 * np.sqrt(m))
+    A = 1.0 if z == 0 else 2 * np.sqrt(m) * np.sin(delta) / z
+    B = np.sin(2 * theta + delta) / np.sin(2 * theta)
+    return -z * A * B, A, B
+
+
+def size_error_bound(m, conf, x, phi=PHI):
+    """Two-part rigorous bound on |achieved size - nominal alpha| at a safe depth x = N/N_opt.
+
+        |size - alpha|  <=  |Phi(-u) - Phi(z)|   +   BerryEsseen(m', p0)
+                            ^ threshold placement  ^ normal vs binomial
+
+    The first term is the delta method's own error, in closed form; the second is Berry-Esseen.
+    """
+    z = norm.ppf(1 - conf)
+    theta = x * np.pi / 2
+    p0 = float(np.cos(theta) ** 2)
+    u, A, B = standardised_cut(m, z, theta)
+    placement = abs(norm.cdf(-u) - norm.cdf(z))
+    be = berry_esseen(m, p0)
+    return dict(m_exploration=m, conf=conf, x=round(x, 4), p0=round(p0, 6),
+                regularity=round(m * min(p0, 1 - p0), 3),
+                nominal=round(float(norm.cdf(z)), 4),
+                achieved=round(exact_size(m, x, conf, phi), 4),
+                term_placement=round(float(placement), 4),
+                term_berry_esseen=round(float(be), 4),
+                bound=round(float(placement + be), 4),
+                A=round(float(A), 5), B=round(float(B), 5))
+
+
+# --------------------------------------------------------------------------- power vs depth
+def probe_law(m, x):
     theta = x * np.pi / 2
     k = np.arange(m + 1)
     w = binom.pmf(k, m, np.cos(theta) ** 2)
     z = 2.0 * np.sqrt(m) * (np.arccos(np.sqrt(k / m)) - theta)
-    order = np.argsort(z)
-    return z[order], w[order]
+    o = np.argsort(z)
+    return z[o], w[o]
 
 
-def power(m, x, rho, alpha):
-    """Exact P(declare overshoot) for a probe at depth x against a reference rho times shallower."""
-    z_probe, w_probe = probe_law(m, x)
-    if rho is None:                                   # phi_hat_acc = phi exactly
-        return float(w_probe[z_probe < norm.ppf(alpha)].sum())
-    z_ref, w_ref = probe_law(m, x / rho)
-    cutoffs = rho * z_ref + norm.ppf(alpha)
-    cum = np.cumsum(w_probe)
-    idx = np.searchsorted(z_probe, cutoffs, side="left")
-    return float(w_ref @ np.where(idx > 0, cum[np.clip(idx - 1, 0, None)], 0.0))
+def fire_probability(m, x, rho, conf):
+    """Exact P(rule fires) at depth x against a reference rho = N/N_acc times shallower.
 
-
-def curve(m, rho, alpha, grid=X_GRID):
-    return np.array([power(m, float(x), rho, alpha) for x in grid])
-
-
-def detect_from(grid, pw, target=0.9):
-    """Smallest depth x > 1 at which the rule fires with probability `target`."""
-    past = grid > 1.0
-    g, p = grid[past], pw[past]
-    hit = np.nonzero(p >= target)[0]
-    if len(hit) == 0:
-        return float("nan")
-    i = hit[0]
-    if i == 0:
-        return float(g[0])
-    x0, x1, y0, y1 = g[i - 1], g[i], p[i - 1], p[i]
-    return float(x0 + (target - y0) * (x1 - x0) / (y1 - y0)) if y1 > y0 else float(g[i])
-
-
-def missed_error(x):
-    """Relative error left by an undetected overshoot at depth x = N/N_opt.
-
-    phi_hat/phi = 2 N_opt/N - 1 = 2/x - 1, so the relative error is 2(1 - 1/x).
+    rho = None is the perfect reference phi_hat_acc = phi.
     """
-    return 2.0 * (1.0 - 1.0 / x)
+    zp, wp = probe_law(m, x)
+    z_alpha = norm.ppf(1 - conf)
+    if rho is None:
+        return float(wp[zp < z_alpha].sum())
+    zr, wr = probe_law(m, x / rho)
+    cut_z = rho * zr + z_alpha
+    cum = np.cumsum(wp)
+    i = np.searchsorted(zp, cut_z, side="left")
+    return float(wr @ np.where(i > 0, cum[np.clip(i - 1, 0, None)], 0.0))
 
 
 def bracket_walk(phi, n_min=15, n_max=157, steps=6):
-    """The probes Algorithm 6 takes, and the reference quality rho = N/N_acc at each.
-
-    Shows that the bracket narrows in step with the difficulty of the decision: the probes landing
-    near N_opt are the late ones, by which time the reference is only a few percent shallower.
-    """
+    """The probes Algorithm 6 takes, and the reference quality rho = N/N_acc at each."""
     n_opt = int(np.pi // (2 * phi))
     lo, hi, n_acc = n_min, n_max, n_min
     n = n_min + (n_max - n_min) // 2
@@ -198,62 +278,91 @@ def _write(name, rows):
 def main():
     os.makedirs(path(""), exist_ok=True)
 
+    print("claim 1 -- the rule is exactly a one-sided binomial test on the count K")
     bad = verify_equivalence()
-    print("EXACTNESS CHECK")
-    print(f"  {{phi_hat < phi_1}} == {{K > k*}} : {bad} mismatches in 200,000 random cases")
-    assert bad == 0, "the binomial restatement of the test does not hold"
-    print("  -> the overshoot rule is exactly a one-sided binomial test on the count K.\n")
+    print(f"  {{phi_hat < phi_1}} vs {{K > m' cos^2(N phi_1)}}: {bad} disagreements in 300,000 draws")
+    assert bad == 0, "the binomial restatement is not exact"
 
-    sizes = size_table()
-    _write("overshoot_size.csv", sizes)
-    print("EXACT SIZE of the implemented test (reference set to the truth)")
-    print("  {:>5} {:>8} {:>6} {:>22} {:>9}".format(
-        "conf", "nominal", "shots", "exact size range", "max dev"))
-    for r in sizes:
-        print(f"  {r['conf']:>5.2f} {r['alpha_nominal']:>8.2f} {r['m_exploration']:>6} "
-              f"{r['size_min']:>10.3f} - {r['size_max']:<9.3f} {r['max_abs_deviation']:>9.3f}")
-    print()
-    rows, oprows = [], []
+    print("\nclaim 2 -- an overshooting probe always reads below the truth")
+    worst = verify_power_bound()
+    print(f"  max(phi_hat - phi) over 200,000 overshooting draws = {worst:.3e} (never positive)")
+    assert worst <= 0.0, "the power bound failed"
+
+    print("\nclaim 3 -- what the normal quantile costs, measured against the exact binomial")
+    rows = [size_summary(m, c) for m in SHOTS for c in CONFS]
+    _write("overshoot_size.csv", rows)
+    print(f"  {'m':>5} {'conf':>5} {'nominal':>8} {'exact size (regular region)':>29} "
+          f"{'max dev':>8} {'near boundary':>14}")
+    for r in rows:
+        print(f"  {r['m_exploration']:>5} {r['conf']:>5.2f} {r['nominal_alpha']:>8.2f} "
+              f"{'[' + format(r['size_min'], '.3f') + ', ' + format(r['size_max'], '.3f') + ']':>29} "
+              f"{r['max_deviation']:>8.3f} {r['size_near_boundary_max']:>14.3f}")
+
+    print("\nnormal approximation to the COUNT, bounded rigorously (Berry-Esseen)")
+    bes = [normal_approximation_quality(m) for m in SHOTS]
+    bes = [b for b in bes if b]
+    print(f"  {'m':>5} {'BE bound':>10} {'true KS':>9}   (worst case over m' min(p,1-p) >= 10)")
+    for b in bes:
+        print(f"  {b['m_exploration']:>5} {b['be_bound_max']:>10.4f} {b['true_ks_max']:>9.4f}")
+        assert b["true_ks_max"] <= b["be_bound_max"], "Berry-Esseen bound violated"
+    by_m = {b["m_exploration"]: b for b in bes}
+    for r in rows:
+        b = by_m.get(r["m_exploration"])
+        if b:
+            r["be_bound_max"] = b["be_bound_max"]
+            r["true_ks_max"] = b["true_ks_max"]
+    _write("overshoot_size.csv", rows)
+
+    print("\ntwo-part error bound on the achieved size (placement + Berry-Esseen)")
+    bnd = [size_error_bound(m, c, float(x))
+           for m in SHOTS for c in CONFS
+           for x in np.linspace(0.15, 0.90, 40)]
+    bnd = [b for b in bnd if b["regularity"] >= REGULARITY]
+    _write("overshoot_error_bound.csv", bnd)
+    viol = [b for b in bnd if abs(b["achieved"] - b["nominal"]) > b["bound"] + 1e-9]
+    print(f"  {len(bnd)} points in the regularity region; bound violated at {len(viol)}")
+    assert not viol, "the two-part error bound failed"
     for m in SHOTS:
-        for alpha in ALPHAS:
-            for rho, tag in REFERENCES:
-                pw = curve(m, rho, alpha)
-                for x, p in zip(X_GRID, pw):
-                    rows.append(dict(m_exploration=m, alpha=alpha, reference=tag,
-                                     rho="" if rho is None else rho,
-                                     x=x, power=round(float(p), 6)))
-                x90 = detect_from(X_GRID, pw)
-                err = missed_error(x90) if np.isfinite(x90) else float("nan")
-                oprows.append(dict(
-                    m_exploration=m, alpha=alpha, reference=tag,
-                    rho="" if rho is None else rho,
-                    false_alarm_at_0p9=round(float(pw[np.argmin(abs(X_GRID - 0.90))]), 4),
-                    detect_from=round(x90, 4),
-                    missed_error=round(err, 4),
-                ))
-    _write("overshoot_power.csv", rows)
-    _write("overshoot_operating.csv", oprows)
+        sub = [b for b in bnd if b["m_exploration"] == m]
+        print(f"  m'={m:>4}: placement term <= {max(b['term_placement'] for b in sub):.4f}, "
+              f"Berry-Esseen term <= {max(b['term_berry_esseen'] for b in sub):.4f}, "
+              f"actual error <= {max(abs(b['achieved']-b['nominal']) for b in sub):.4f}")
+
+    print("\nerror budget: normal approximation vs reference noise (m' = 200)")
+    print(f"  {'nominal':>8} {'normal approx':>14} {'late ref':>10} {'first ref':>10}")
+    for conf in CONFS:
+        a = 1 - conf
+        e1 = max(abs(exact_size(200, float(x), conf) - a)
+                 for x in np.linspace(0.2, 0.85, 60))
+        print(f"  {a:>8.2f} {e1:>14.3f} "
+              f"{abs(fire_probability(200, 0.9, 1.05, conf) - a):>10.3f} "
+              f"{abs(fire_probability(200, 0.9, 5.73, conf) - a):>10.3f}")
+
+    print("\npower against depth (exact), for the reference qualities binary search produces")
+    grid = np.round(np.linspace(0.80, 1.40, 241), 6)
+    prows = []
+    for m in SHOTS:
+        for conf in CONFS:
+            for rho, tag in ((None, "perfect"), (1.05, "late"), (5.73, "first")):
+                for x in grid:
+                    prows.append(dict(m_exploration=m, conf=conf, reference=tag,
+                                      rho="" if rho is None else rho, x=float(x),
+                                      power=round(fire_probability(m, float(x), rho, conf), 6)))
+    _write("overshoot_power.csv", prows)
+    for tag in ("perfect", "late", "first"):
+        v = [r["power"] for r in prows
+             if r["m_exploration"] == 200 and r["conf"] == 0.5
+             and r["reference"] == tag and r["x"] > 1.0]
+        print(f"  m'=200, conf=0.50, {tag:>7} reference: min power past the boundary = {min(v):.3f}")
+
     _write("overshoot_bracket_walk.csv",
            [r for phi in (0.02, 0.05) for r in bracket_walk(phi)])
-
-    print("Correctness: at any overshooting N, phi_hat <= pi/(2N) < phi, for every outcome.")
-    print("So with a perfect reference the rule cannot miss; misses come only from reference noise.")
-    print(f"\noperating characteristic at m' = {MAIN_SHOTS}")
-    print(f"  {'alpha':>6} {'reference':>10} {'false alarms':>13} {'detects from':>13} "
-          f"{'if missed, error':>17}")
-    for o in oprows:
-        if o["m_exploration"] != MAIN_SHOTS:
-            continue
-        print(f"  {o['alpha']:>6.2f} {o['reference']:>10} "
-              f"{100*o['false_alarm_at_0p9']:>12.0f}% {o['detect_from']:>13.3f} "
-              f"{100*o['missed_error']:>16.1f}%")
-
     print("\nhow the bracket narrows (Algorithm 6, N in {15,...,157})")
     for phi in (0.02, 0.05):
         print(f"  phi={phi}:  " + "  ".join(
             f"N/N_opt={w['x']:.3f} (rho={w['rho']:.2f})" for w in bracket_walk(phi)))
-    print("  -> the probes landing near N_opt are the late ones, where rho is already ~1")
-    print(f"\nwrote overshoot_power.csv, overshoot_operating.csv, overshoot_bracket_walk.csv "
+
+    print(f"\nwrote overshoot_size.csv, overshoot_power.csv, overshoot_bracket_walk.csv "
           f"to {path('')}")
 
 

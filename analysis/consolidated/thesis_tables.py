@@ -851,50 +851,46 @@ def tab_linear_detector(D):
     return wrap(body, cap, "tab:linear-detector", size="small")
 
 
-def tab_overshoot_operating(D, confs=(0.5, 0.66, 0.95)):
-    """Exact size of the overshoot test against its nominal level (Section 3.2.2).
+def tab_overshoot_operating(D):
+    """How well the normal-placed threshold is justified, two ways: a bound and a measurement.
 
-    Analytic, from analysis/consolidated/overshoot_criterion.py. Uses no tuned parameter, so it can
-    be read before Chapter 4 introduces the grid-searched configurations.
+    Analytic, from analysis/consolidated/overshoot_criterion.py.
     """
     rows = load("overshoot_size.csv")
     if not rows:
         return None
-    shots = sorted({int(f(r["m_exploration"])) for r in rows})
-    body = [r"\setlength{\tabcolsep}{5pt}",
-            r"\begin{tabular}{ll" + "c" * len(shots) + "}", r"\toprule",
-            r"\multicolumn{2}{l}{Nominal level}",
-            r"& \multicolumn{" + str(len(shots)) + r"}{c}{Exact size at $m'$ exploration shots} \\",
-            r"\cmidrule(lr){1-2}\cmidrule(lr){3-" + str(2 + len(shots)) + "}",
-            r"$\mathrm{conf}$ & $\alpha$"]
-    for m in shots:
-        body.append(rf"& {m}")
-    body.append(r"\\")
-    body.append(r"\midrule")
-    for conf in confs:
-        sub = {int(f(r["m_exploration"])): r for r in rows if abs(f(r["conf"]) - conf) < 1e-9}
-        if not sub:
-            continue
-        alpha = f(sub[shots[0]]["alpha_nominal"])
-        line = [rf"{conf:.2f} & {alpha:.2f}"]
-        for m in shots:
-            r = sub.get(m)
-            line.append("& --" if r is None else
-                        rf"& {f(r['size_min']):.3f}--{f(r['size_max']):.3f}")
+    confs = sorted({f(r["conf"]) for r in rows})
+    ms = sorted({int(f(r["m_exploration"])) for r in rows})
+    by = {(int(f(r["m_exploration"])), f(r["conf"])): r for r in rows}
+    head = ["$m'$", r"& \makecell{Berry--Esseen \\ bound}", r"& \makecell{True distance \\ to normal}"]
+    for c in confs:
+        head.append(rf"& \makecell{{$\mathrm{{conf}} = {c:g}$ \\ ($\alpha = {1-c:g}$)}}")
+    body = [r"\setlength{\tabcolsep}{6pt}",
+            r"\begin{tabular}{r cc " + "c" * len(confs) + "}", r"\toprule",
+            " ".join(head) + r" \\",
+            rf"\cmidrule(lr){{2-3}}\cmidrule(lr){{4-{3+len(confs)}}}",
+            r"& \multicolumn{2}{c}{normal approximation to $K$}"
+            rf" & \multicolumn{{{len(confs)}}}{{c}}{{largest deviation of the achieved size}} \\",
+            r"\midrule"]
+    for m in ms:
+        anchor = by.get((m, confs[0]), {})
+        line = [str(m), rf"& {f(anchor.get('be_bound_max')):.3f}",
+                rf"& {f(anchor.get('true_ks_max')):.3f}"]
+        for c in confs:
+            line.append(rf"& {f(by[(m, c)]['max_deviation']):.3f}")
         body.append(" ".join(line) + r" \\")
-    cap = (r"The overshoot rule of Equation~(\ref{eq:overshoot-threshold}) needs no normality "
-           r"assumption: because $\hat\phi_N = \arccos(\sqrt{K/m'})/N$ is strictly decreasing in "
-           r"$K$, the event $\{\hat\phi_N < \phi_1\}$ is \emph{identical} to "
-           r"$\{K > m'\cos^2(N\phi_1)\}$, so the rule is a one-sided binomial test on the count and "
-           r"its false-alarm probability is an exact binomial tail under "
-           r"$K\sim\mathrm{Bin}(m',\cos^2(N\phi))$. The normal law is used only to place the "
-           r"critical count, which affects the test's size but not its validity. The table reports "
-           r"that size, computed exactly and ranged over admissible depths $N\phi\in[0.3,1.5]$, "
-           r"against the nominal $\alpha$; the reference is set to the true $\phi$ so that the "
-           r"normal placement is isolated from the separate effect of substituting a noisy "
-           r"$\hat\phi_{\mathrm{acc}}$. The size approaches the nominal level as $m'$ grows and is "
-           r"conservative at the ends of the range, where one of the two outcome counts becomes "
-           r"small.")
+    cap = (r"Justification of the normal quantile in Equation~(\ref{eq:overshoot-threshold}), "
+           r"restricted to the two-sided regularity region $m'\min(p_0,1-p_0)\geq 10$. Because "
+           r"$\hat\phi_N$ is strictly decreasing in the count $K$, the rule $\hat\phi_N < \phi_1$ "
+           r"is \emph{identical} to the cut $K > m'\cos^2(N\phi_1)$, so the only quantity that has "
+           r"to be Gaussian is $K$ itself, and $K$ is a sum of $m'$ i.i.d.\ Bernoulli variables. "
+           r"The Berry--Esseen theorem then bounds the error of its normal approximation by "
+           r"$C(p_0^2+(1-p_0)^2)/\sqrt{m'p_0(1-p_0)}$ with $C \leq 0.4748$, non-asymptotically and "
+           r"for every $m'$; the second column reports the worst case of that bound and the third "
+           r"the distance actually attained. The remaining columns give the largest gap between "
+           r"the size the rule achieves and its nominal level $\alpha = 1-\mathrm{conf}$, computed "
+           r"from the exact binomial over safe depths. The residual gap is the discreteness of "
+           r"$K$, not a central-limit error, which is why it does not shrink with $m'$.")
     return wrap(body, cap, "tab:overshoot-operating", size="small")
 
 
