@@ -32,6 +32,15 @@ The justification has three parts, and only the third involves an approximation:
    `0.4748 (p^2+q^2)/sqrt(m' p q)`, **non-asymptotically, for every `m'`** — no "for `m` large
    enough". Measured: the achieved size stays within 0.04–0.08 of nominal in the regularity region.
 
+   *Why `K` and not `phi_hat`?* Asymptotically the delta method does carry Gaussianity from `K` to
+   `phi_hat` — that is your Lemma 2.6.3, and it is correct. But Berry–Esseen's value is that it is
+   **finite-sample**, and finite-sample accuracy does not pass through a nonlinear map for free:
+   `phi_hat`'s distance is measured against a different normal, and bounding it would need the
+   curvature of `arccos(sqrt(p))`, which blows up at the aliasing boundary. Numerically the two
+   distances agree to within 0.6 % inside the regularity region and diverge outside it (0.49 vs
+   0.63 at `N = 0.98 N_opt`). Routing through `K` turns an empirical "close enough" into a bound.
+   Full comparison in [`BERRY_ESSEEN.md`](BERRY_ESSEEN.md) Part 2c.
+
 That is the answer to the criticism. You are no longer claiming `phi_hat` is Gaussian (which is
 false near the boundary and was never provable); you are claiming `K` is approximately Gaussian,
 which is a Bernoulli sum with a classical error bound.
@@ -48,7 +57,7 @@ the setting. Reasoning in [`BERRY_ESSEEN.md`](BERRY_ESSEEN.md) Part 6.
 
 ### EDIT 1 (required) — Chapter 2, Section 2.7
 
-**Replace** this passage:
+**Replace** this passage (LaTeX source — shown as code so you can copy it):
 
 ```latex
 Because $\arccos$ is bounded by $|\arccos(x)| \leq \pi$, the entangled estimator satisfies
@@ -103,7 +112,7 @@ Add `\label{eq:overshoot-threshold}` to Equation (3.6). Edit 3 and the table cap
 
 ### EDIT 3 (required) — Chapter 3, Section 3.2.2, immediately after Eq. (3.6)
 
-**Insert** this paragraph (126 words):
+**Insert** this paragraph (126 words) — copy into your `.tex`:
 
 ```latex
 Although \eqref{eq:overshoot-threshold} is written through a normal quantile, the underlying test is
@@ -120,6 +129,14 @@ overshooting probe always reads below the true phase.
 
 You will need a citation for Berry–Esseen. Shevtsova (2011) for the constant `C <= 0.4748`; any
 standard probability text (e.g. Durrett, *Probability: Theory and Examples*) for the theorem itself.
+
+**Define `p_0` where you first use it**, since the paragraph relies on it: `p_0 = cos^2(N phi)` is
+the true probability of reading out `0` at the candidate depth. It is unknown, which is fine and
+worth one clause: the *test* never uses it (the cut `m' cos^2(N phi_1)` involves only `N`, `m'` and
+the reference), and `p_0` enters only in stating how often the rule is wrong. The null
+`H_0: N <= N_opt` is composite, so the rejection probability is a function of the operating point
+and the test's size is its supremum over the safe range — which is what the table's interval
+reports. See [`BERRY_ESSEEN.md`](BERRY_ESSEEN.md) Part 2b.
 
 ### EDIT 4 (required) — Chapter 3, Section 3.2.2, after that paragraph
 
