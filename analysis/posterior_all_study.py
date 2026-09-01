@@ -23,7 +23,9 @@ import sys
 
 import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+from pipeline_io import live_points, path
 from qmetrology import experiments as E
 from qmetrology.algorithms import (
     find_phi_fixed_budget_brute_force as BF,
@@ -40,7 +42,7 @@ STRIDE = int(sys.argv[sys.argv.index("--stride") + 1]) if "--stride" in sys.argv
 R_TUNE = 400 if QUICK else 1500
 R_TEST = 4000 if QUICK else 30_000
 SEED_TUNE, SEED_TEST = 42, 2024
-OUT = "results/posterior_all.csv"
+OUT = path("posterior_all.csv")
 ALGOS = ["linear_s", "linear_post", "re_normal", "re_post", "binary_first", "binary_post"]
 
 
@@ -71,15 +73,7 @@ def grids(pmax, eps, budget):
     }
 
 
-def load_points():
-    pts = []
-    with open("results/story_curves.csv", newline="") as f:
-        for r in csv.DictReader(f):
-            if r["algo"] == "reverse_eng_risk" and 0.02 < float(r["rate"]) < 0.98:
-                pts.append(dict(setting=r["setting"], phi_min=float(r["phi_min"]),
-                                phi_max=float(r["phi_max"]), eps=float(r["eps"]),
-                                budget=int(r["budget"])))
-    return pts
+
 
 
 HEADER = (["setting", "phi_min", "phi_max", "eps", "budget", "brute"]
@@ -87,8 +81,7 @@ HEADER = (["setting", "phi_min", "phi_max", "eps", "budget", "brute"]
 
 
 def main():
-    os.makedirs("results", exist_ok=True)
-    pts = load_points()[::STRIDE]
+    pts = live_points("reverse_eng_risk")[::STRIDE]
     if QUICK:
         pts = pts[::30]
     with open(OUT, "w", newline="") as f:

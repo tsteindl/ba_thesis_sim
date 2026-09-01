@@ -1,4 +1,4 @@
-"""Instrumentation for the phase-search algorithms (ALGORITHM_DIAGNOSTICS_HANDOFF.md).
+"""Instrumentation for the phase-search algorithms.
 
 The algorithms keep their public `(phi_hat, budget_used)` signature. Passing `trace=Trace(...)`
 makes them *additionally* record what they did; nothing in here draws a random number, so a

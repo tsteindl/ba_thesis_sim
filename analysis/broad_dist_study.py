@@ -9,7 +9,7 @@ Two corrections relative to the published Table 3.4:
   * the exploration grid used to stop at m' = 3,000. With N_min = 1 the pilot needs *far* more shots
     than that before the inferred depth is usable, so the published "reverse engineering plateaus"
     curve was grid-limited rather than algorithmic. The grid now scales with the regime, exactly as
-    in analysis/extensive_sweep.py. The `reverse_eng_m3k` column reproduces the old cap so the
+    in analysis/run.py. The `reverse_eng_m3k` column reproduces the old cap so the
     correction stays attributable.
   * the statistical safeguard (qmetrology/safeguard.py) is reported next to the tuned constant.
 
@@ -24,14 +24,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
 from qmetrology import experiments as E
 from qmetrology.oracle import heisenberg_rate
 from qmetrology.algorithms import (
     find_phi_fixed_budget_brute_force as BF,
     find_phi_fixed_budget_linear_search as LIN,
     find_phi_fixed_budget_binary_search as BIN,
-    find_phi_fixed_budget_binary_search_anneal_m as BINA,
     find_phi_fixed_budget_reverse_engineering as RE,
     find_phi_fixed_budget_binary_search_risk as BIN_R,
     find_phi_fixed_budget_reverse_engineering_risk as RE_R,
@@ -64,7 +64,7 @@ def n_min(pmax):
 
 
 def m_grid(pmax, lo, n):
-    """Exploration-size grid scaled to the regime (same rule as analysis/extensive_sweep.py).
+    """Exploration-size grid scaled to the regime (same rule as the manifest tuning grid).
 
     The ceiling is raised to 500k here: at phi_max = pi/2 the constant-C arm tunes to the very top of
     the grid, so a lower cap would understate the baseline it is being compared against.
@@ -78,14 +78,6 @@ def best(fn, grid, pmax, b):
     return 100 * E.success_rate(fn, arg, R_TEST, PMIN, pmax, EPS, 2024)
 
 
-def best_binary(pmax, b):
-    m = m_grid(pmax, 10, 16)
-    r1 = best(BIN, {"m_exploration": m, "safeguard": [0, 1, 2], "conf": [0.5, 0.65, 0.8, 0.9, 0.95]}, pmax, b)
-    r2 = best(BINA, {"m_exploration": m, "safeguard": [0, 1, 2], "conf": [0.5, 0.8, 0.9],
-                     "max_b_steps_sub": [1, 2, 3], "delta": [2, 5]}, pmax, b)
-    return max(r1, r2)
-
-
 def sweep(pmax, budgets):
     m = m_grid(pmax, 3, 22)
     m_old = np.unique(np.geomspace(3, 3000, 20).astype(int))   # the published cap
@@ -94,7 +86,9 @@ def sweep(pmax, budgets):
         out["brute"].append(100 * E.success_rate(BF, {"budget": int(b)}, R_TEST, PMIN, pmax, EPS, 2024))
         out["linear"].append(best(LIN, {"m_exploration": m, "lookback_window": [1, 2, 3, 5],
                                         "safeguard": [0, 1, 2, 5], "inc": [1, 2, 5]}, pmax, b))
-        out["binary"].append(best_binary(pmax, b))
+        out["binary"].append(best(BIN, {"m_exploration": m_grid(pmax, 10, 16),
+                                        "safeguard": [0, 1, 2],
+                                        "conf": [0.5, 0.65, 0.8, 0.9, 0.95]}, pmax, b))
         out["binary_risk"].append(best(BIN_R, {"m_exploration": m_grid(pmax, 10, 16),
                                                "conf": [0.5, 0.65, 0.8, 0.9], "eps_target": [EPS]}, pmax, b))
         out["reverse_eng"].append(best(RE, {"m_exploration": m, "safeguard": [0.8, 0.85, 0.9, 0.95]}, pmax, b))
@@ -119,7 +113,7 @@ def main():
         data[tag] = sweep(pmax, budgets)
 
     os.makedirs("results", exist_ok=True)
-    with open("results/broad_dist.csv", "w", newline="") as f:
+    with open(os.path.join(ROOT, "results", "broad_dist.csv"), "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["phi_max", "budget"] + SERIES)
         for _pmax, tag in cases:
@@ -145,7 +139,7 @@ def main():
     fig.suptitle("Broad distributions: reverse engineering's plateau was an exploration-grid artefact",
                  fontsize=15)
     fig.tight_layout()
-    fig.savefig("results/fig_broad.png", dpi=140)
+    fig.savefig(os.path.join(ROOT, "results", "fig_broad.png"), dpi=140)
     print("wrote results/broad_dist.csv and results/fig_broad.png")
 
     for _pmax, tag in cases:

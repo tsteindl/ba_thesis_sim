@@ -1,4 +1,4 @@
-"""Tuning and held-out evaluation for the consolidated pipeline.
+"""Tuning and held-out evaluation for the results pipeline.
 
 The rule the handoff insists on: **the reported values are never maxima evaluated on the trials used
 to pick the parameters.**

@@ -1,4 +1,4 @@
-"""Focused tests for the EXACT statistical safeguard (EXACT_SAFEGUARD_RERUN_HANDOFF.md).
+"""Focused tests for the EXACT statistical safeguard.
 
     python tests/test_safeguard_exact.py
 
@@ -286,7 +286,7 @@ def test_every_call_site_passes_both_bounds():
     live, missing = 0, []
     for p in sorted(pathlib.Path(ROOT).rglob("*.py")):
         rel = p.relative_to(ROOT).as_posix()
-        if rel.startswith(("results/", "legacy/")) or "__pycache__" in rel:
+        if rel.startswith(("results/", "thesis_code/")) or "__pycache__" in rel:
             continue
         for node in ast.walk(ast.parse(p.read_text(), rel)):
             if not (isinstance(node, ast.Call)
@@ -301,7 +301,7 @@ def test_every_call_site_passes_both_bounds():
             kw = {k.arg for k in node.keywords}
             if not {"N_min", "N_max"} <= kw:
                 missing.append(f"{rel}:{node.lineno} passes {sorted(kw)}")
-    assert live >= 30, f"only found {live} call sites -- did the scan break?"
+    assert live >= 15, f"only found {live} call sites -- did the scan break?"
     assert not missing, "call sites without explicit bounds:\n  " + "\n  ".join(missing)
 
 

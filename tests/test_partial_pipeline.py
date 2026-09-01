@@ -21,12 +21,12 @@ import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
-sys.path.insert(0, os.path.join(ROOT, "analysis", "consolidated"))
+sys.path.insert(0, os.path.join(ROOT, "analysis"))
 
 from qmetrology import manifest as M
 
-RUN = os.path.join(ROOT, "analysis", "consolidated", "run.py")
-MERGE = os.path.join(ROOT, "analysis", "consolidated", "merge_partial.py")
+RUN = os.path.join(ROOT, "analysis", "run.py")
+MERGE = os.path.join(ROOT, "analysis", "merge_partial.py")
 ALGOS = "binary_deep,reverse_eng_risk"
 SCENS = "narrow_e3,small_e4"
 TABLES = ["performance_curves.csv", "winners.csv", "diagnostics_by_point.csv",
@@ -34,7 +34,7 @@ TABLES = ["performance_curves.csv", "winners.csv", "diagnostics_by_point.csv",
 
 
 def _run(out, *args, expect=0):
-    env = dict(os.environ, CONSOLIDATED_OUT=out)
+    env = dict(os.environ, RESULTS_OUT=out)
     p = subprocess.run([sys.executable, RUN, *args], env=env, capture_output=True, text=True)
     assert p.returncode == expect, f"exit {p.returncode}\n{p.stdout[-3000:]}\n{p.stderr[-3000:]}"
     return p.stdout + p.stderr
@@ -270,7 +270,7 @@ def test_merge_refuses_mismatches():
         refuse("coverage", drop_one, lambda: open(pc, "w").write(pcorig))
 
         # and the live production directory is never a legal destination
-        log = _merge(*args, "--out", os.path.join(ROOT, "results", "consolidated"), expect=1)
+        log = _merge(*args, "--out", os.path.join(ROOT, "results"), expect=1)
         assert "live production directory" in log
 
 

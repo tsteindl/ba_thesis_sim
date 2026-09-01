@@ -1,18 +1,18 @@
-"""Validation suite for the consolidated pipeline (ALGORITHM_DIAGNOSTICS_HANDOFF.md, "Tests").
+"""Validation suite for the results pipeline.
 
     python tests/test_consolidated.py            # everything except the two slow end-to-end checks
     python tests/test_consolidated.py --slow     # + smoke sweep, determinism and resume
 
 Runs standalone (no pytest needed) and is pytest-compatible if pytest is installed.
 
-Covered, in the handoff's numbering:
+Covered:
  1 trace neutrality          6 performance consistency
  2 budget compliance         7 CI consistency (row-specific R, no hard-coded 40,000/50,000)
  3 determinism               8 winner provenance
  4 definition checks         9 thesis/code parity
  5 eligibility accounting   10 quick/full modes and resume
 
-Plus the replay invariants of analysis/consolidated/linear_detector_study.py, whose whole argument
+Plus the replay invariants of analysis/linear_detector_study.py, whose whole argument
 is that replaying a recorded probe stream reproduces Algorithm 4 exactly.
 """
 import csv
@@ -26,11 +26,11 @@ import sys
 import tempfile
 
 import numpy as np
+from scipy.stats import norm
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "analysis"))
-sys.path.insert(0, os.path.join(ROOT, "analysis", "consolidated"))
 
 from qmetrology import algorithms as ALG
 from qmetrology import diagnostics as D
@@ -208,11 +208,50 @@ def test_algorithm_definitions():
                     assert all(p.declared_overshoot is None for p in tr.probes)
 
 
+def _reference_bisection(rng, phi, phi_max, phi_min, m, budget, conf):
+    """An INDEPENDENT transcription of Algorithm 5's exploration loop, deliberately written out
+    in full rather than importing qmetrology.algorithms._binary_search_explore.
+
+    test_binary_deep_matches_fine_sweep pairs it with a direct call to the reported algorithm on
+    the same seed: if the two ever disagree about the accepted pilot, one of them has drifted.
+    A reference that shared code with the implementation could not detect that.
+
+    Returns (used_budget, phi_acc, N_acc), or None if the opening probe is unaffordable.
+    """
+    N_min = max(np.pi // (2 * phi_max), 1)
+    N_max = max(np.pi // (2 * phi_min), 1)
+    N = max(1, N_min)
+    if m * N > budget:
+        return None
+    phi_hat = ALG.simulate_errors(rng, phi, m, N)
+    used = m * N
+    phi_1 = norm.ppf(1 - conf, phi_hat, np.sqrt(1 / (4 * m * N ** 2)))
+    phi_acc, N_acc = phi_hat, N
+    lb, ub = N_min, N_max
+    N += (ub - N) // 2
+    while True:
+        if used + m * N > budget:
+            break
+        phi_hat = ALG.simulate_errors(rng, phi, m, N)
+        used += m * N
+        old_N = N
+        if phi_hat < phi_1:
+            N -= (N - lb) // 2
+            ub = old_N
+        else:
+            phi_acc, N_acc = phi_hat, old_N
+            lb = old_N
+            N += (ub - N) // 2
+            phi_1 = norm.ppf(1 - conf, phi_hat, np.sqrt(1 / (4 * m * N ** 2)))
+        if old_N == N or N < N_min or N > N_max or used >= budget:
+            break
+    return used, phi_acc, N_acc
+
+
 def test_binary_deep_matches_fine_sweep():
-    """The new reported binary search must reproduce, trial for trial, the depth decision of the
-    `binary_deep` arm measured in results/fine_sweep.csv (analysis/fine_sweep.py::_bin_trial)."""
+    """The reported binary search must reproduce, trial for trial, the depth decision of the
+    independent transcription of Algorithm 5 in `_reference_bisection`."""
     from qmetrology.safeguard import pilot_sd, risk_optimal_depth
-    from binary_story_study import explore
     n = bad = 0
     for (pmin, pmax, eps, B, m, conf) in [(0.01, 0.1, 1e-3, 10_000, 100, 0.5),
                                           (0.001, 0.01, 1e-4, 1_000_000, 300, 0.8),
@@ -221,10 +260,10 @@ def test_binary_deep_matches_fine_sweep():
         for s in range(300):
             rng = np.random.default_rng(s)
             phi = float(rng.uniform(pmin, pmax))
-            o = explore(rng, phi, pmax, pmin, m, B, conf)
+            o = _reference_bisection(rng, phi, pmax, pmin, m, B, conf)
             ref = None
             if o is not None:
-                _p, _N, used, phi_acc, N_acc, _p0, _N0, _L, _U, _pr = o
+                used, phi_acc, N_acc = o
                 rem = B - used
                 if rem > 0 and np.isfinite(phi_acc):
                     N = risk_optimal_depth(phi_acc, pilot_sd(N_acc, m), rem, eps,
@@ -239,7 +278,7 @@ def test_binary_deep_matches_fine_sweep():
                 trace=tr)
             n += 1
             bad += int(tr.N_star != ref)
-    assert bad == 0, f"{bad}/{n} trials disagree with the fine_sweep reference"
+    assert bad == 0, f"{bad}/{n} trials disagree with the independent reference"
 
 
 # ---------------------------------------------------------- 3./5./6. one held-out evaluation
@@ -316,7 +355,7 @@ def test_ci_uses_row_R():
     # must read it from the manifest or from the data row. A literal R anywhere else is the bug this
     # guards against (the pre-existing scripts disagree: 50,000 / 40,000 / 30,000 / 20,000).
     consumers = ["qmetrology/diagnostics.py", "qmetrology/pipeline.py",
-                 "analysis/consolidated/run.py", "analysis/consolidated/finalize.py"]
+                 "analysis/run.py", "analysis/finalize.py"]
     for fn in consumers:
         src = open(os.path.join(ROOT, fn)).read()
         for bad in ("20000", "20_000", "30000", "30_000", "40000", "40_000",
@@ -363,8 +402,8 @@ def _read(d, name):
 
 
 def _sweep(outdir, extra=()):
-    env = dict(os.environ, CONSOLIDATED_OUT=outdir)
-    r = subprocess.run([sys.executable, os.path.join(ROOT, "analysis/consolidated/run.py"),
+    env = dict(os.environ, RESULTS_OUT=outdir)
+    r = subprocess.run([sys.executable, os.path.join(ROOT, "analysis/run.py"),
                         "--smoke", *extra], cwd=ROOT, env=env, capture_output=True, text=True)
     assert r.returncode == 0, r.stdout[-3000:] + r.stderr[-3000:]
     assert "FAILED" not in r.stdout, r.stdout[-3000:]

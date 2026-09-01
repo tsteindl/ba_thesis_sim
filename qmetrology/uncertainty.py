@@ -10,7 +10,7 @@ Every headline figure in the thesis is one of two kinds, and each carries a diff
     log-interpolating the convergence-vs-budget curve to the point where it crosses p\*. Two things
     make it uncertain: the Monte-Carlo error of the rates the curve is built from, and the finite
     spacing of the budget grid the curve is interpolated over. Both are quantified here from the data
-    already in results/story_curves.csv — no re-simulation.
+    already in results/performance_curves.csv — no re-simulation.
 
 `crossing_ci` propagates the first by parametric bootstrap: resample every curve point from
 Binomial(R, p_hat)/R, re-interpolate the crossing, and take percentiles. `grid_sensitivity` bounds
@@ -46,7 +46,7 @@ def wilson(p, n, z=Z95):
 def crossing(budgets, rates, T):
     """Log-interpolated budget at which the convergence curve first reaches rate T (nan if never).
 
-    Single definition, shared by the sweep (analysis/extensive_sweep.py) and the error bars here, so
+    Single definition, shared by the sweep (analysis/run.py) and the error bars here, so
     the interval is always built around exactly the number that is reported.
     """
     b, r = np.asarray(budgets, float), np.asarray(rates, float)

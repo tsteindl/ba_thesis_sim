@@ -1,4 +1,4 @@
-"""Figures for results/POSTERIOR.md — what the exact-posterior depth criterion does and what it buys.
+"""Figures for docs/POSTERIOR.md — what the exact-posterior depth criterion does and what it buys.
 
 Four figures, no new simulation sweeps: figures 1-2 replay ONE bisection trial to show the mechanism,
 figures 3-4 read the existing result CSVs.
@@ -16,7 +16,10 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 from scipy.special import ndtr
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, "analysis"))
+from pipeline_io import path
 from qmetrology.posterior import posterior, depth_from_posterior
 from qmetrology.safeguard import pilot_sd, risk_optimal_depth
 
@@ -80,7 +83,7 @@ def trial():
 
 
 # ------------------------------------------------------------------ fig 0: the fold the estimator applies
-def fig0(path, N=510):
+def fig0(out, N=510):
     """What phi_hat converges to as m -> infinity, as a function of the true phi.
 
     E[k]/m = cos^2(N phi) exactly, so the noiseless estimator returns
@@ -109,12 +112,12 @@ def fig0(path, N=510):
     ax.grid(axis="y")
     ax.legend(loc="upper left", fontsize=9)
     fig.tight_layout()
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(out, bbox_inches="tight")
     plt.close(fig)
 
 
 # ------------------------------------------------------------------ fig 1: the two readings of a probe
-def fig1(probes, path):
+def fig1(probes, out):
     n_opt = int(np.pi // (2 * PHI))
     phi = np.linspace(PMIN, PMAX, 4000)
 
@@ -170,13 +173,13 @@ def fig1(probes, path):
     ax.grid(axis="y")
 
     fig.tight_layout()
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(out, bbox_inches="tight")
     plt.close(fig)
     return ph0
 
 
 # ------------------------------------------------------------------ fig 2: the criterion
-def fig2(probes, used, L, path):
+def fig2(probes, used, L, out):
     rem = BUDGET - used
     n_opt = int(np.pi // (2 * PHI))
     n_sup = int(np.pi // (2 * PMIN))
@@ -208,7 +211,7 @@ def fig2(probes, used, L, path):
     ax.plot(Ns, p_post, lw=2.4, color=BLUE, label=r"$P(\varphi<\pi/2N\mid\mathrm{all\ probes})$, exact")
     ax.plot(Ns, p_norm, lw=2.2, ls="--", color=ORANGE,
             label=r"$\Phi\left((\pi/2N-\hat\varphi_0)/\sigma\right)$, normal")
-    ax.plot(Ns, p_conv, lw=2.0, color=AQUA, label=r"$2\Phi(2\varepsilon\N\sqrt{\lfloor B'/N\rfloor})-1$, precision")
+    ax.plot(Ns, p_conv, lw=2.0, color=AQUA, label=r"$2\Phi(2\varepsilon N\sqrt{\lfloor B'/N\rfloor})-1$, precision")
     ax.axvline(n_opt, lw=1.4, ls="--", color=INK2)
     ax.text(n_opt * 1.02, 0.5, r"$N_{\rm opt}$", color=INK2, fontsize=9)
     ax.set_xlabel("exploitation depth $N$")
@@ -241,14 +244,14 @@ def fig2(probes, used, L, path):
     ax.legend(loc="lower left", fontsize=9)
 
     fig.tight_layout()
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(out, bbox_inches="tight")
     plt.close(fig)
     return N_post, N_norm, n_opt, rem
 
 
 # ------------------------------------------------------------------ fig 3: what it buys
-def fig3(path):
-    rows = list(csv.DictReader(open("results/posterior_all.csv")))
+def fig3(out):
+    rows = list(csv.DictReader(open(path("posterior_all.csv"))))
     pairs = [("linear_s", "linear_post", "linear search"),
              ("re_normal", "re_post", "reverse engineering"),
              ("binary_first", "binary_post", "binary search")]
@@ -273,13 +276,13 @@ def fig3(path):
     ax.spines["left"].set_visible(False)
     ax.grid(axis="x")
     fig.tight_layout()
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(out, bbox_inches="tight")
     plt.close(fig)
 
 
 # ------------------------------------------------------------------ fig 4: cost of the bisection's cap
-def fig4(path):
-    rows = list(csv.DictReader(open("results/binary_rescue.csv")))
+def fig4(out):
+    rows = list(csv.DictReader(open(path("binary_rescue.csv"))))
     g = lambda r, a: float(r[a + "_rate"])
     base = np.array([g(r, "first") for r in rows])
     series = [("post", BLUE, "posterior, capped only by the prior support"),
@@ -301,7 +304,7 @@ def fig4(path):
     ax.legend(loc="lower right", fontsize=9)
     ax.set_xlim(0, 108)
     fig.tight_layout()
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(out, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -310,13 +313,13 @@ def main():
     probes, used, L = trial()
     print("trial: phi=%.5f  N_opt=%d  probes=%s  used=%d  L=%d"
           % (PHI, int(np.pi // (2 * PHI)), [(N, h, k) for N, h, k in probes], used, L))
-    fig0("results/fig_posterior_fold.png")
-    ph0 = fig1(probes, "results/fig_posterior_mechanism.png")
-    N_post, N_norm, n_opt, rem = fig2(probes, used, L, "results/fig_posterior_criterion.png")
+    fig0(path("fig_posterior_fold.png"))
+    ph0 = fig1(probes, path("fig_posterior_mechanism.png"))
+    N_post, N_norm, n_opt, rem = fig2(probes, used, L, path("fig_posterior_criterion.png"))
     print("phi_hat_0=%.5f  N*_post=%d  N*_norm=%d  N_opt=%d  L=%d  rem=%d"
           % (ph0, N_post, N_norm, n_opt, L, rem))
-    fig3("results/fig_posterior_gain.png")
-    fig4("results/fig_binary_cap_cost.png")
+    fig3(path("fig_posterior_gain.png"))
+    fig4(path("fig_binary_cap_cost.png"))
     print("wrote 4 figures to results/")
 
 
@@ -325,7 +328,7 @@ if __name__ == "__main__":
 
 
 # ------------------------------------------------------------------ numbers quoted in POSTERIOR.md
-def grid_resolution_check(out_csv="results/posterior_grid_check.csv", R=300, n_grid=4096):
+def grid_resolution_check(out_csv=path("posterior_grid_check.csv"), R=300, n_grid=4096):
     """Is the 4096-point grid fine enough to resolve the sharpest ridge the exploration can produce?
 
     A probe of m shots at depth N reading k ~ 0 hits contributes sin^{2m}(N phi). Writing
@@ -338,7 +341,7 @@ def grid_resolution_check(out_csv="results/posterior_grid_check.csv", R=300, n_g
     tuned (m', conf), and reports the DEEPEST probe actually taken (95th percentile over trials).
     pts_per_ridge is grid points per ridge SD.
     """
-    rows = list(csv.DictReader(open("results/binary_rescue.csv")))
+    rows = list(csv.DictReader(open(path("binary_rescue.csv"))))
     seen, out = set(), []
     for r in rows:
         key = (r["setting"], r["budget"])

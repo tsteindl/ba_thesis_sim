@@ -2,17 +2,17 @@
 under resource constraints".
 
   sim.py          circuit simulation + estimator
-  algorithms.py   the fixed-budget phase-search algorithms (+ RE-lite for Table 3.1)
-  safeguard.py    exploitation depth derived from the asymptotic law (replaces tuned C / s)
-  experiments.py  parallel Monte-Carlo evaluator
-  config.py       seeds, settings, params, grids, published values
-  tables.py       the Chapter-3 %-converged tables (3.1, 3.3)
+  algorithms.py   the fixed-budget phase-search algorithms (Chapter 3)
+  safeguard.py    exploitation depth derived from the asymptotic law (docs/SAFEGUARD_DERIVATION.md)
+  posterior.py    the exact-posterior depth criterion (docs/POSTERIOR.md)
+  oracle.py       the analytic omniscient ceilings
+  manifest.py     scenarios, budget grids, tuning grids, seeds and trial counts -- one source
+  pipeline.py     tune -> freeze -> held-out evaluation, in parallel
+  experiments.py  the Monte-Carlo evaluator the pipeline and the side studies share
+  diagnostics.py  exploration / safeguard / detector telemetry
+  trace.py        the neutral per-probe instrumentation the diagnostics read
+  uncertainty.py  Wilson + bootstrap intervals and the curve crossing
+  ladder.py       phase-unwrapping ladder, a protocol beyond the thesis (results/LADDER.md)
 
-The budget-to-target results (Table 3.2 and the follow-up study) come from
-analysis/extensive_sweep.py. Entry point: python -m qmetrology.reproduce.
+Entry point for every reported number: python analysis/run.py --max
 """
-from . import algorithms, config, experiments, safeguard, sim, tables
-from .experiments import grid_search_max, rate_and_budget, success_rate, wilson
-
-__all__ = ["sim", "algorithms", "experiments", "config", "safeguard", "tables",
-           "success_rate", "grid_search_max", "rate_and_budget", "wilson"]

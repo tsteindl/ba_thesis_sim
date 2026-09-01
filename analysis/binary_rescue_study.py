@@ -30,7 +30,9 @@ from itertools import product
 import numpy as np
 from scipy.stats import norm
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+from pipeline_io import live_points, path
 from qmetrology import experiments as E
 from qmetrology.posterior import depth_from_posterior
 from qmetrology.safeguard import pilot_sd, risk_optimal_depth
@@ -44,7 +46,7 @@ R_TEST = 4000 if QUICK else 30_000
 SEED_TUNE, SEED_TEST = 42, 2024
 S_VALUES = [0, 1, 2, 3, 5]
 ARMS = ["first", "deep", "post", "postL"] + [f"L{s}" for s in S_VALUES]
-OUT = "results/binary_rescue.csv"
+OUT = path("binary_rescue.csv")
 
 
 def explore(rng, phi, phi_max, phi_min, m, budget, conf):
@@ -181,15 +183,7 @@ def grid_for(pmax, eps):
             for m, c in product(m_b, [0.5, 0.8, 0.95])]
 
 
-def load_points():
-    pts = []
-    with open("results/story_curves.csv", newline="") as f:
-        for r in csv.DictReader(f):
-            if r["algo"] == "binary_risk" and 0.02 < float(r["rate"]) < 0.98:
-                pts.append(dict(setting=r["setting"], phi_min=float(r["phi_min"]),
-                                phi_max=float(r["phi_max"]), eps=float(r["eps"]),
-                                budget=int(r["budget"])))
-    return pts
+
 
 
 HEADER = (["setting", "phi_min", "phi_max", "eps", "budget", "re_rate"]
@@ -197,8 +191,7 @@ HEADER = (["setting", "phi_min", "phi_max", "eps", "budget", "re_rate"]
 
 
 def main():
-    os.makedirs("results", exist_ok=True)
-    pts = load_points()[::STRIDE]
+    pts = live_points("binary_deep")[::STRIDE]
     if QUICK:
         pts = pts[::30]
     with open(OUT, "w", newline="") as f:

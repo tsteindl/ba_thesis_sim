@@ -1,1 +1,4 @@
-*.json filter=lfs diff=lfs merge=lfs -text
+# results/traces/*.jsonl.gz are the only large generated artefacts; everything else is text.
+# (The former `*.json filter=lfs` rule is gone: the sole tracked JSON is the 14 KB experiment
+#  manifest, and routing it through LFS is what grew .git/lfs into the gigabytes.)
+*.jsonl.gz -text

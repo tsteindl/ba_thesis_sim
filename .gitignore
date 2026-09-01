@@ -5,6 +5,7 @@ venv
 
 *.pdf
 
-AGENTS.MD
-qmetrology/__init__.pyc
-qmetrology/algorithms.pyc
+# isolated output directories for partial reruns (analysis/run.py --algorithms/--scenarios)
+results_partial/
+results_staging/
+sweep.log

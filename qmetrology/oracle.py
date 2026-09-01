@@ -1,29 +1,19 @@
 """Oracle calculations for the fixed-budget phase-estimation comparison.
 
-The consolidated thesis results use one simple reference: the oracle is handed
+The thesis results use one simple reference: the oracle is handed
 N_opt = floor(pi/(2 phi)), takes m = floor(B/N_opt) whole shots, and its convergence probability is
 computed from the asymptotic normal law that saturates the QCRB. `oracle_rate` averages that law
 exactly over the discrete N_opt distribution of a uniform prior, and `oracle_budget_for_rate` finds
 the smallest integer budget reaching a requested convergence probability. Neither function draws
 artificial estimator errors.
 
-The exact-binomial depth search and older analytic variants below are retained for legacy analyses,
-but they are not the oracle reported by the consolidated pipeline.
+`convergence_prob` is the exact-binomial probability at one depth, used by the linear-search
+detector study; `ceiling_rate` and `heisenberg_rate` are the looser analytic ceilings the broad-prior
+study plots.
 """
 import numpy as np
 from scipy.special import ndtr, ndtri   # standard normal CDF and inverse CDF, vectorised
 from scipy.stats import binom
-
-_EXHAUSTIVE_MAX = 4096   # scan every admissible depth when there are at most this many
-_N_SEARCH = 256          # candidates per refinement round, beyond that
-_N_ROUNDS = 3            # geometric refinement rounds before the final integer scan
-_TOP_WINDOW = 2048       # depths below the aliasing bound always scanned exactly
-
-
-def alias_depth(phi, budget):
-    """Largest non-aliasing depth, N = floor(pi/(2 phi)), capped so that m = budget/N >= 1."""
-    n = max(int(np.pi // (2.0 * phi)), 1)
-    return max(min(n, int(budget)), 1)
 
 
 def convergence_prob(N, phi, budget, eps):
@@ -58,73 +48,12 @@ def convergence_prob(N, phi, budget, eps):
     return np.where(feasible, np.clip(p, 0.0, 1.0), 0.0)
 
 
-def expected_hits(N, phi, budget):
-    """m * p0 — the expected number of 0-outcomes at depth N with m = floor(budget/N) shots.
-
-    The single quantity that decides whether the measurement carries information. When it drops
-    below ~1 the readout is deterministic (K = 0 every time) and phi_hat collapses to the constant
-    pi/(2N), which is not an estimate at all; above ~30 the estimator is in its regular regime and
-    the exact binomial probability agrees with the asymptotic law of Eq. (3.4) to about 1%.
-    """
-    N = np.atleast_1d(np.asarray(N, dtype=np.int64))
-    return (np.asarray(budget, dtype=np.int64) // N) * np.cos(N * np.asarray(phi, float)) ** 2
 
 
-def _argmax_over(cand, phi, budget, eps, min_hits=0.0):
-    p = convergence_prob(cand, phi, budget, eps)
-    if min_hits > 0:
-        # discard depths where the readout is deterministic: there phi_hat = pi/(2N) regardless of
-        # the data, so a high "convergence probability" only reflects that N was chosen from phi
-        p = np.where(expected_hits(cand, phi, budget) >= min_hits, p, -1.0)
-    return int(cand[int(np.argmax(p))])
 
 
-def optimal_depth(phi, budget, eps, N_max=None, min_hits=0.0):
-    """N* = argmax_N P(|phi_hat - phi| < eps) — the depth an omniscient protocol would choose.
-
-    The admissible range is 1 <= N <= N_hi, with N_hi the largest depth whose convergence window is
-    non-empty. Whenever that range holds at most `_EXHAUSTIVE_MAX` depths — which covers every prior
-    used in the thesis, since N_hi ~ pi/(2 phi_min) — **every** depth is evaluated, so the returned
-    depth is the exact maximiser and the oracle really is an upper bound.
-
-    The objective is not perfectly unimodal (m = floor(budget/N) and the discreteness of the binomial
-    put small kinks in it), so a purely geometric search can settle on a local maximum: measured
-    against an exhaustive scan it missed the true argmax in ~2% of draws, by up to 4 percentage
-    points of convergence probability. Refinement is therefore used only for the very wide priors
-    (phi_min <~ 1e-4) where an exhaustive scan is too costly, and even then it is combined with an
-    exact scan of the `_TOP_WINDOW` depths below the aliasing bound, where the maximum sits unless
-    the budget is too small to resolve phi at all.
-    """
-    budget = int(budget)
-    if budget < 1 or eps <= 0 or not np.isfinite(phi) or phi <= 0:
-        return 1
-    hi = budget
-    if phi > eps:                                # beyond this every reading aliases -> P = 0
-        hi = min(hi, int(np.pi / (2.0 * (phi - eps))) + 1)
-    if N_max is not None:
-        hi = min(hi, int(N_max))
-    hi = max(int(hi), 1)
-
-    if hi <= _EXHAUSTIVE_MAX:                    # exact
-        return max(_argmax_over(np.arange(1, hi + 1, dtype=np.int64), phi, budget, eps, min_hits), 1)
-
-    lo = 1
-    best = [_argmax_over(np.arange(max(hi - _TOP_WINDOW, 1), hi + 1, dtype=np.int64),
-                         phi, budget, eps, min_hits)]
-    for _ in range(_N_ROUNDS):
-        if hi - lo <= 1:
-            break
-        cand = np.unique(np.geomspace(lo, hi, _N_SEARCH).astype(np.int64))
-        i = cand.tolist().index(_argmax_over(cand, phi, budget, eps, min_hits))
-        best.append(int(cand[i]))
-        lo, hi = int(cand[max(i - 1, 0)]), int(cand[min(i + 1, len(cand) - 1)])
-    best.append(_argmax_over(np.arange(lo, hi + 1, dtype=np.int64), phi, budget, eps, min_hits))
-    return max(_argmax_over(np.array(best, dtype=np.int64), phi, budget, eps, min_hits), 1)
 
 
-def best_convergence_prob(phi, budget, eps, N_max=None):
-    """P(converge) at the optimal depth — the per-phi ceiling, without simulating anything."""
-    return float(convergence_prob(optimal_depth(phi, budget, eps, N_max), phi, budget, eps)[0])
 
 
 # --------------------------------------------------------------------------------------------
@@ -211,28 +140,6 @@ def ceiling_prob(phi, budget, eps, n_max=None):
     return np.clip(2.0 * ndtr(2.0 * eps * g[n_opt - 1]) - 1.0, 0.0, 1.0)
 
 
-def ceiling_prob_at_nopt(phi, budget, eps):
-    """P(converge) at N = N_opt with whole shots -- the REPORTED ceiling.
-
-        N = floor(pi/(2 phi))                    the Oracle's known N_opt
-        m = floor(budget / N)                    maximum affordable number of whole shots
-        P = 2 Phi( 2 eps N sqrt(m) ) - 1         Eq. (3.4) at that depth
-
-    Exact: nothing is sampled, so there is no Monte-Carlo error and no interval to report. The
-    convergence probability given phi is known in closed form, and the reported rate is that
-    probability averaged over the prior (`ceiling_rate_at_nopt`).
-
-    This fixes N at N_opt rather than maximising over admissible depths. Because m is an integer,
-    N_opt occasionally wastes budget to the floor and a slightly shallower depth would do better
-    (see `_depth_factor`), so this is the ceiling for *the depth an omniscient protocol would name*,
-    not the supremum over all depths -- `ceiling_rate` gives the latter, at most 0.27 pp higher.
-    Measured against every algorithm at all 221 operating points, no implementable algorithm exceeds
-    this by more than Monte-Carlo noise.
-    """
-    phi = np.asarray(phi, dtype=float)
-    N = np.maximum(np.floor(np.pi / (2.0 * phi)), 1.0)
-    m = np.floor(float(budget) / N)
-    return np.clip(2.0 * ndtr(2.0 * eps * N * np.sqrt(np.maximum(m, 0.0))) - 1.0, 0.0, 1.0)
 
 
 def oracle_shots_for_rate(target, eps, N):
@@ -366,9 +273,6 @@ def oracle_budget_for_rate(target, eps, phi_min, phi_max):
     return lo
 
 
-def ceiling_rate_at_nopt(budget, eps, phi_min, phi_max, n_grid=None):
-    """Backward-compatible name for `oracle_rate`; ``n_grid`` is ignored."""
-    return oracle_rate(budget, eps, phi_min, phi_max)
 
 
 def ceiling_rate(budget, eps, phi_min, phi_max, n_grid=20001):
@@ -387,12 +291,3 @@ def ceiling_rate(budget, eps, phi_min, phi_max, n_grid=20001):
                  / (phi_max - phi_min))
 
 
-def degeneracy_share(eps, phi_min, phi_max):
-    """Share of the prior where the exact oracle can answer from the aliasing constant alone.
-
-    That is where 2 phi^2 / pi < eps. Reported next to the exact oracle so a reader can see at a
-    glance whether its number means anything in a given scenario.
-    """
-    phi_star = np.sqrt(np.pi * eps / 2.0)
-    lo, hi = float(phi_min), float(phi_max)
-    return float(np.clip((min(phi_star, hi) - lo) / (hi - lo), 0.0, 1.0))
