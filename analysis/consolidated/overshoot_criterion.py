@@ -170,6 +170,40 @@ def normal_approximation_quality(m, thresh=REGULARITY, n=600):
 
 
 
+
+def ks_phi_hat(m, x):
+    """Exact KS distance between phi_hat's law at depth x = N/N_opt and its delta-method normal."""
+    theta = x * np.pi / 2
+    k = np.arange(m + 1)
+    w = binom.pmf(k, m, np.cos(theta) ** 2)
+    z = 2.0 * np.sqrt(m) * (np.arccos(np.sqrt(k / m)) - theta)
+    o = np.argsort(z)
+    z, w = z[o], w[o]
+    upper = np.cumsum(w)
+    g = norm.cdf(z)
+    return float(max(np.max(np.abs(upper - g)), np.max(np.abs(upper - w - g))))
+
+
+def transfer_check(ms=SHOTS, xs=(0.2, 0.4, 0.5, 0.6, 0.8, 0.88)):
+    """Does 'K is nearly Gaussian' carry over to 'phi_hat is nearly Gaussian' at finite m'?
+
+    Berry-Esseen bounds the distance for the COUNT. phi_hat's distance is measured against a
+    different normal (the delta-method one), so the two are formally distinct quantities. This
+    reports both, plus the bound, so the gap can be seen rather than assumed.
+    """
+    rows = []
+    for m in ms:
+        for x in xs:
+            theta = x * np.pi / 2
+            p0 = float(np.cos(theta) ** 2)
+            rows.append(dict(m_exploration=m, x=x, p0=round(p0, 6),
+                             regularity=round(m * min(p0, 1 - p0), 3),
+                             ks_count=round(binomial_normal_ks(m, p0), 5),
+                             ks_phi_hat=round(ks_phi_hat(m, x), 5),
+                             be_bound=round(berry_esseen(m, p0), 5)))
+    return rows
+
+
 # --------------------------------------------------------------------------- threshold map
 def threshold_offset(theta, delta):
     """Exact displacement of the cut from m'p0, as a fraction of m'.
@@ -312,6 +346,20 @@ def main():
             r["be_bound_max"] = b["be_bound_max"]
             r["true_ks_max"] = b["true_ks_max"]
     _write("overshoot_size.csv", rows)
+
+    print("\ndoes Gaussianity of K carry over to phi_hat? (delta method, at finite m')")
+    tr = [r for r in transfer_check() if r["regularity"] >= REGULARITY]
+    _write("overshoot_transfer.csv", tr)
+    ratio = max(r["ks_phi_hat"] / r["ks_count"] for r in tr)
+    covered = sum(r["ks_phi_hat"] <= r["be_bound"] for r in tr)
+    print(f"  inside the regularity region: max KS(phi_hat)/KS(K) = {ratio:.3f}, "
+          f"Berry-Esseen covers phi_hat at {covered}/{len(tr)} points")
+    print("  outside it, they separate:")
+    for x in (0.90, 0.95, 0.98):
+        theta = x * np.pi / 2
+        p0 = float(np.cos(theta) ** 2)
+        print(f"    m'=200, N/N_opt={x:.2f} (m*min={200*min(p0,1-p0):5.2f}): "
+              f"KS(K)={binomial_normal_ks(200, p0):.4f}  KS(phi_hat)={ks_phi_hat(200, x):.4f}")
 
     print("\ntwo-part error bound on the achieved size (placement + Berry-Esseen)")
     bnd = [size_error_bound(m, c, float(x))
