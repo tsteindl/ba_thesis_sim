@@ -10,10 +10,10 @@ Output: results/consolidated/tex/thesis/*.tex  and  all_thesis_tables.tex
     python analysis/consolidated/thesis_tables.py --long     # per-scenario detail, for an appendix
     python analysis/consolidated/thesis_tables.py --out DIR  # write somewhere else
 
-SHORT is what fits a thesis page: the diagnostics collapse to one row per algorithm, the
-budget table shows the four selected prior/eps settings, and the broad-prior tables list only
-budgets in the informative band. LONG expands each of those to every scenario / every budget and is
-meant for an appendix. Both are generated from the same CSVs, so the numbers agree by construction.
+SHORT is what fits a thesis page: the diagnostics collapse to one row per algorithm and the
+budget table shows the four selected prior/eps settings. LONG expands these to every active
+non-broad scenario and is meant for an appendix. Both are generated from the same CSVs, so the
+numbers agree by construction.
 
 Nothing here simulates. Every number is read from results/consolidated/*.csv, so these tables cannot
 drift from the data or from FULL_RESULTS.md.
@@ -97,6 +97,12 @@ ALG_REF, SHORT = LABEL, LABEL_NARROW
 ROWS = ["brute", "linear", "binary_deep", "reverse_eng_risk", "separable", "oracle_hl"]
 
 
+def active_sids(D):
+    """Scenario ids retained in the thesis after removal of the broad-prior study."""
+    return {sid for sid, s in D.scen.items()
+            if "broad_prior" not in s.get("families", ())}
+
+
 def f(x, d=float("nan")):
     try:
         return float(x)
@@ -141,14 +147,17 @@ def prior_tex(s):
 
 FOOT = (r"\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds "
         r"42 and 43 and the frozen winner is re-validated on the independent seed 2024 at "
-        r"$R=%s$ trials. The oracle is exact and can be calculated analytically for each $\phi$."
-        r" Thus it carries no confidence interval.")
+        r"$R=%s$ trials. The oracle value is evaluated deterministically using the large-$m$ "
+        r"normal approximation in Lemma~\ref{lemma:asymp-dist-est}, and thus carries no confidence "
+        r"interval.")
 
 
-def wrap(body, caption, label, size=None, foot=None):
+def wrap(body, caption, label, size=None, foot=None, tabcolsep=None):
     L = [r"\begin{table}[ht]", r"\centering"]
     if size:
         L.append("\\" + size)
+    if tabcolsep:
+        L.append(rf"\setlength{{\tabcolsep}}{{{tabcolsep}}}")
     body = [b for b in body if b != ""] if body and body[-1] == "" else body
     L += [rf"\caption{{{caption}}}", rf"\label{{{label}}}"] + body + [r"\bottomrule",
                                                                      r"\end{tabular}"]
@@ -241,10 +250,11 @@ def tab_summary_low_prec(D, ci=False):
            r"and the budget required to achieve \(>90\%\) convergence. Improvement factors "
            r"relative to the baseline are collected in Table~\ref{tab:ratios}. The "
            r"Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true "
-           r"$N_\text{opt}$ and is evaluated analytically using the asymptotic QCRB law.")
+           r"$N_\text{opt}$ and is evaluated deterministically using the large-$m$ normal "
+           r"approximation in Lemma~\ref{lemma:asymp-dist-est}.")
     if ci:
         cap += (r" Brackets give 95\% intervals (Wilson for rates, bootstrap for budgets); the "
-                r"oracle is exact and carries none.")
+                r"deterministic oracle reference carries none.")
     return wrap(body, cap, "tab:summary-low-prec" + ("-ci" if ci else ""),
                 foot=FOOT % f"{D.R:,}".replace(",", "{,}"))
 
@@ -305,18 +315,14 @@ def tab_ratios(D):
                      if np.isfinite(Bb) and np.isfinite(Bc) else "& --")
     cells[-1] += r" \\"
     body += [r"Oracle ($N_\text{opt}$)"] + cells
-    cap = (r"Budget to reach $90\%$ convergence, expressed two ways. \textbf{First number:} "
-           r"$B_{\mathrm{brute}}/B_{\mathrm{alg}}$, the factor less budget than the baseline "
-           r"($>1$ is better). \textbf{Second number:} "
-           r"$B_{\mathrm{alg}}/B_{\mathrm{oracle}}$, the algorithm's budget relative to the "
-           r"oracle reference ($1.00\texttimes$ means equal budget). The second number is what "
-           r"makes the first interpretable: it shows directly how far the algorithm remains from "
-           r"the oracle reference. The two "
-           r"multiply to the oracle's own factor in the last row. The separable protocol is "
-           r"omitted -- it is slower than the baseline; its raw budget is in "
+    cap = (r"Budget ratios at $90\%$ convergence. \textbf{First:} "
+           r"$B_{\mathrm{brute}}/B_{\mathrm{alg}}$ ($>1$ is better). \textbf{Second:} "
+           r"$B_{\mathrm{alg}}/B_{\mathrm{oracle}}$ ($1.00\times$ means equal budget). "
+           r"Their product is $B_{\mathrm{brute}}/B_{\mathrm{oracle}}$. The separable protocol "
+           r"is omitted; its raw budget is in "
            r"Table~\ref{tab:summary-all-ci}.")
     return wrap(body, cap, "tab:ratios", size="small",
-                foot=FOOT % f"{D.R:,}".replace(",", "{,}"))
+                foot=FOOT % f"{D.R:,}".replace(",", "{,}"), tabcolsep="3pt")
 
 
 # ============================================================ Table 2: budgets across settings
@@ -324,7 +330,8 @@ ALL_COLS = [("narrow_e3", None), ("narrow_e4", None), ("small_e4", None), ("wide
 
 
 def tab_summary_all(D, ci=False):
-    cols = ([s["id"] for s in M.SCENARIOS if s["id"] in D.scen] if LONG
+    active = active_sids(D)
+    cols = ([s["id"] for s in M.SCENARIOS if s["id"] in active] if LONG
             else [c for c, _ in ALL_COLS if c in D.scen])
     head = ["Algorithm"]
     for sid in cols:
@@ -354,12 +361,13 @@ def tab_summary_all(D, ci=False):
         cells[-1] += r" \\"
         body += [lab(a, narrow=True)] + cells + [""]
     cap = (r"Budget required to achieve $>90\%$ convergence for selected precision settings and "
-           r"prior intervals. Improvement factors are relative to the brute-force baseline; values "
-           r"greater than one indicate a lower required budget.")
+           r"prior intervals. Values are budgets in thousands; smaller values indicate a lower "
+           r"required budget.")
     if ci:
         cap += r" Brackets give 95\% bootstrap intervals."
     return wrap(body, cap, "tab:summary-all" + ("-ci" if ci else ""), size="scriptsize",
-                foot=FOOT % f"{D.R:,}".replace(",", "{,}"))
+                foot=FOOT % f"{D.R:,}".replace(",", "{,}"),
+                tabcolsep="3pt" if ci else None)
 
 
 # ======================================================= Table 3: scaling with precision
@@ -391,8 +399,8 @@ def tab_scaling_with_prec(D, ci=False):
         body += [eps_tex(D.scen[sid]["eps"])] + cells
     cap = (r"Improvement factor over the brute-force baseline as the precision requirement tightens, "
            r"at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with "
-           r"precision and then saturates; the oracle column bounds how much of it is attainable "
-           r"at all.")
+           r"precision and then saturates; the oracle column gives the corresponding deterministic "
+           r"large-$m$ reference.")
     if ci:
         cap += r" Brackets give 95\% bootstrap intervals; these are conservative (the two curves are resampled independently despite being seed-paired)."
     return wrap(body, cap, "tab:scaling-with-prec" + ("-ci" if ci else ""), size="small",
@@ -441,7 +449,8 @@ def tab_robustness_across_thresholds(D):
     could come from different algorithms.
     """
     thresholds = [int(t) for t in D.man["thresholds_pct"]]
-    scenarios = D.man["scenarios"]
+    active = active_sids(D)
+    scenarios = [s for s in D.man["scenarios"] if s["id"] in active]
     adaptive = ["linear", "binary_deep", "reverse_eng_risk"]
     short = {"linear": "LS", "binary_deep": "BS", "reverse_eng_risk": "RE"}
 
@@ -537,7 +546,7 @@ def tab_opt_param_first(D):
            r"($\epsilon=10^{-3}$, $\phi\sim\mathcal{U}(0.01,0.1)$). For Reverse Engineering, "
            r"the planned exploration-shot count is additionally reported as the fraction $m'/B$. "
            r"Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.")
-    return wrap(body, cap, "tab:opt-param-first-tab")
+    return wrap(body, cap, "tab:opt-param-first-tab", size="footnotesize")
 
 
 def tab_opt_param_second(D):
@@ -594,6 +603,7 @@ def _agg(D, algo, key, how="median", sid=None, allowed_sids=None):
 def tab_diag_search(D):
     """Main-text summary of exploration quality, cost, and detector errors."""
     algs = ["linear", "binary_deep", "reverse_eng_risk"]
+    allowed = active_sids(D)
     body = [r"\begin{tabular}{lcccccc}", r"\toprule", "Algorithm",
             r"& \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}",
             r"& \makecell{Within \\ $10\%$}",
@@ -602,18 +612,20 @@ def tab_diag_search(D):
             r"& \makecell{Median expl. \\ budget share}",
             r"& \makecell{False alarm \\ / miss} \\", r"\midrule"]
     for a in algs:
-        rs = [r for r in D.live(D.det) if r["algorithm"] == a]
+        rs = [r for r in D.live(D.det)
+              if r["algorithm"] == a and r["scenario_id"] in allowed]
         fa = np.mean([f(r["false_alarm_rate"]) for r in rs]) if rs else float("nan")
         ms = np.mean([f(r["miss_rate"]) for r in rs]) if rs else float("nan")
         detector = f"{100*fa:.1f}\\% / {100*ms:.1f}\\%" if np.isfinite(fa) else "--"
         body += [lab(a, narrow=True),
-                 f"& {_agg(D,a,'guess_ratio_median'):.2f}",
-                 f"& {100*_agg(D,a,'guess_within10','mean'):.1f}\\%",
-                 f"& {100*_agg(D,a,'guess_overshoot','mean'):.1f}\\%",
-                 f"& {_agg(D,a,'n_probes_mean','mean'):.1f}",
-                 f"& {100*_agg(D,a,'exploration_share_median'):.2f}\\%",
+                 f"& {_agg(D,a,'guess_ratio_median',allowed_sids=allowed):.2f}",
+                 f"& {100*_agg(D,a,'guess_within10','mean',allowed_sids=allowed):.1f}\\%",
+                 f"& {100*_agg(D,a,'guess_overshoot','mean',allowed_sids=allowed):.1f}\\%",
+                 f"& {_agg(D,a,'n_probes_mean','mean',allowed_sids=allowed):.1f}",
+                 f"& {100*_agg(D,a,'exploration_share_median',allowed_sids=allowed):.2f}\\%",
                  f"& {detector} \\\\"]
-    n_live = sum(1 for r in D.ops if r["regime"] == "live")
+    n_live = sum(1 for r in D.ops
+                 if r["regime"] == "live" and r["scenario_id"] in allowed)
     cap = (r"Exploration quality, cost, and overshoot-detector errors, aggregated over the "
            rf"{n_live} informative operating points. $N_{{\mathrm{{guess}}}}$ is recorded before "
            r"the safeguard and $N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the "
@@ -625,8 +637,7 @@ def tab_diag_search(D):
 
 def tab_diag_exploration(D):
     algs = ["linear", "binary_deep", "reverse_eng_risk"]
-    broad = {s["id"] for s in M.SCENARIOS if "broad_prior" in s.get("families", ())}
-    allowed = {sid for sid in D.scen if sid not in broad}
+    allowed = active_sids(D)
     if LONG:
         return tab_diag_exploration_long(D, algs, allowed)
     body = [r"\begin{tabular}{lcccccc}", r"\toprule", "Algorithm",
@@ -659,8 +670,8 @@ def tab_diag_exploration(D):
            r"$N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the "
            r"largest non-aliasing value. Brute force is absent because it does not search: its "
            r"$N_{\mathrm{guess}}$ is undefined, not zero. "
-           rf"Broad-prior scenarios are excluded; the values aggregate the remaining {n_live} "
-           r"informative operating points.")
+           rf"The values aggregate {n_live} informative operating points across the active "
+           r"scenarios.")
     return wrap(body, cap, "tab:diag-exploration", size="small")
 
 
@@ -716,6 +727,7 @@ def tab_diag_exploration_long(D, algs, allowed):
 
 def tab_diag_downstream(D):
     algs = ["brute", "linear", "binary_deep", "reverse_eng_risk"]
+    allowed = active_sids(D)
     body = [r"\begin{tabular}{lccccc}", r"\toprule", "Algorithm",
             r"& \makecell{Median \\ $N_{\mathrm{guess}}/N_{\mathrm{opt}}$}",
             r"& \makecell{Median \\ $N^*/N_{\mathrm{opt}}$}",
@@ -724,15 +736,17 @@ def tab_diag_downstream(D):
             r"& \makecell{Converged \\ given safe $N^*$} \\", r"\midrule"]
     for a in algs:
         # Brute force does not search, but its fixed pre-exploitation choice is N_min.
-        g = _agg(D, a, "star_ratio_median" if a == "brute" else "guess_ratio_median")
-        rc = _agg(D, a, "rescue_share", "mean")
+        g = _agg(D, a, "star_ratio_median" if a == "brute" else "guess_ratio_median",
+                 allowed_sids=allowed)
+        rc = _agg(D, a, "rescue_share", "mean", allowed_sids=allowed)
         body += [lab(a, narrow=True),
                  f"& {g:.2f}" if np.isfinite(g) else "& --",
-                 f"& {_agg(D,a,'star_ratio_median'):.2f}",
-                 f"& {100*_agg(D,a,'star_overshoot','mean'):.2f}\\%",
+                 f"& {_agg(D,a,'star_ratio_median',allowed_sids=allowed):.2f}",
+                 f"& {100*_agg(D,a,'star_overshoot','mean',allowed_sids=allowed):.2f}\\%",
                  f"& {100*rc:.1f}\\%" if np.isfinite(rc) else "& --",
-                 f"& {100*_agg(D,a,'conv_given_safe_depth','mean'):.1f}\\% \\\\"]
-    n_live = sum(1 for r in D.ops if r["regime"] == "live")
+                 f"& {100*_agg(D,a,'conv_given_safe_depth','mean',allowed_sids=allowed):.1f}\\% \\\\"]
+    n_live = sum(1 for r in D.ops
+                 if r["regime"] == "live" and r["scenario_id"] in allowed)
     cap = (r"From the exploration's guess to the value of $N$ actually used, aggregated over the "
            rf"{n_live} informative operating points. $N^*$ is the "
            r"exploitation value after the safeguard; \emph{unsafe-guess rescue} is "
@@ -748,13 +762,15 @@ def tab_diag_downstream(D):
 
 
 def tab_diag_detector(D):
+    allowed = active_sids(D)
     body = [r"\setlength{\tabcolsep}{4pt}", r"\begin{tabular}{lccccc}", r"\toprule", "Algorithm",
             r"& \makecell{False-alarm \\ rate}", r"& \makecell{Miss \\ rate}",
             r"& \makecell{Probes \\ per trial}",
             r"& \makecell{Probe-level \\ TP / FP}", r"& \makecell{Probe-level \\ TN / FN} \\",
             r"\midrule"]
     for a in ["linear", "binary_deep"]:
-        rs = [r for r in D.live(D.det) if r["algorithm"] == a]
+        rs = [r for r in D.live(D.det)
+              if r["algorithm"] == a and r["scenario_id"] in allowed]
         fa = np.mean([f(r["false_alarm_rate"]) for r in rs])
         ms = np.mean([f(r["miss_rate"]) for r in rs])
         tp = sum(int(f(r["probe_tp"], 0)) for r in rs)
@@ -762,10 +778,11 @@ def tab_diag_detector(D):
         tn = sum(int(f(r["probe_tn"], 0)) for r in rs)
         fn = sum(int(f(r["probe_fn"], 0)) for r in rs)
         body += [lab(a, narrow=True), f"& {100*fa:.1f}\\%", f"& {100*ms:.1f}\\%",
-                 f"& {_agg(D,a,'n_probes_mean','mean'):.1f}",
+                 f"& {_agg(D,a,'n_probes_mean','mean',allowed_sids=allowed):.1f}",
                  f"& {tex_int(tp)} / {tex_int(fp)}",
                  f"& {tex_int(tn)} / {tex_int(fn)} \\\\"]
-    n_live = sum(1 for r in D.ops if r["regime"] == "live")
+    n_live = sum(1 for r in D.ops
+                 if r["regime"] == "live" and r["scenario_id"] in allowed)
     cap = (r"How well each search's own overshoot decision matches the simulation truth "
            r"$N_i > N_{\mathrm{opt}}$, aggregated over the "
            rf"{n_live} informative operating points. Rates are \emph{{trial-level}}: a run is a "
@@ -889,8 +906,9 @@ def tab_overshoot_operating(D):
            r"for every $m'$; the second column reports the worst case of that bound and the third "
            r"the distance actually attained. The remaining columns give the largest gap between "
            r"the size the rule achieves and its nominal level $\alpha = 1-\mathrm{conf}$, computed "
-           r"from the exact binomial over safe depths. The residual gap is the discreteness of "
-           r"$K$, not a central-limit error, which is why it does not shrink with $m'$.")
+           r"from the exact binomial over safe values of $N$. That gap includes finite-sample "
+           r"threshold placement and binomial discreteness; its worst case need not shrink here "
+           r"because the regularity region expands toward the boundary as $m'$ grows.")
     return wrap(body, cap, "tab:overshoot-operating", size="small")
 
 
@@ -911,10 +929,6 @@ def main():
     made.append(write("tab_summary_all_ci.tex", tab_summary_all(D, ci=True)))
     made.append(write("tab_scaling_with_prec.tex", tab_scaling_with_prec(D, ci=False)))
     made.append(write("tab_scaling_with_prec_ci.tex", tab_scaling_with_prec(D, ci=True)))
-    if "broad_pi2_e3" in D.scen:
-        made.append(write("tab_broad_pi2.tex", tab_broad(D, "broad_pi2_e3", r"\pi/2")))
-    if "broad_pi4_e3" in D.scen:
-        made.append(write("tab_broad_pi4.tex", tab_broad(D, "broad_pi4_e3", r"\pi/4")))
     made.append(write("tab_robustness_across_thresholds.tex",
                       tab_robustness_across_thresholds(D)))
     made.append(write("tab_opt_param_first.tex", tab_opt_param_first(D)))

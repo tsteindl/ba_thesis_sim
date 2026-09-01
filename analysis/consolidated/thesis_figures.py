@@ -18,7 +18,6 @@ Figures (written to results/consolidated/):
     fig_error_density   density of normalized per-trial errors at the headline fixed budget
     fig_signed_error_density density of signed normalized errors at the headline fixed budget
     fig_phi_hat_density density of final estimates at the headline fixed budget
-    fig_broad           convergence vs budget under the broad priors
     fig_algorithm_diagnostics exploration cost and final overshoot near 90% convergence
     fig_overshoot_criterion   exact operating characteristic of the overshoot rule (Sec. 3.2.2)
     fig_linear_detector       linear search under alternative stopping rules (Sec. 4.5)
@@ -312,7 +311,8 @@ def fig_algorithm_diagnostics(d):
 
 
 def fig_pareto(d):
-    sids = [s["id"] for s in M.SCENARIOS if s["id"] in d.scen]
+    sids = [s["id"] for s in M.SCENARIOS
+            if s["id"] in d.scen and "broad_prior" not in s.get("families", ())]
     n = len(sids)
     ncol = 5
     nrow = int(np.ceil(n/ncol))
@@ -918,7 +918,6 @@ def main():
                         ("error_density", lambda: fig_error_density(d)),
                         ("signed_error_density", lambda: fig_signed_error_density(d)),
                         ("phi_hat_density", lambda: fig_phi_hat_density(d)),
-                        ("broad", lambda: fig_broad(d)),
                         ("overshoot", lambda: fig_overshoot_criterion(d)),
                         ("linear_detector", lambda: fig_linear_detector(d))):
             if only and tag not in only:

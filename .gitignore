@@ -6,3 +6,5 @@ venv
 *.pdf
 
 AGENTS.MD
+qmetrology/__init__.pyc
+qmetrology/algorithms.pyc
