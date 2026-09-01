@@ -66,7 +66,9 @@ def _one(seed, pmin, pmax, eps, budget, m, conf):
         return (0.0, len(probes), float(len(probes) >= 2), float(len(probes) >= 4),
                 0.0, used / budget, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                 max(int(L), 1) / n_opt)
-    N = risk_optimal_depth(phi_0, pilot_sd(N_0, m), rem, eps, N_max=n_sup, support=(pmin, pmax))
+    N = risk_optimal_depth(phi_0, pilot_sd(N_0, m), rem, eps,
+                           N_min=min(max(int(np.pi // (2 * pmax)), 1), n_sup),
+                           N_max=n_sup, support=(pmin, pmax))
     mm = int(rem / N)
     est = simulate_errors(np.random.default_rng([int(seed) % (2 ** 32), 15485863]), phi, mm, N)
     # a probe is "useful" if it moved the bracket, i.e. every probe after the opening one

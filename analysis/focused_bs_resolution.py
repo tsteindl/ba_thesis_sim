@@ -180,6 +180,7 @@ def _one(seed, pmin, pmax, eps, budget, m, conf):
             raw[arm] = (0.0, min(used / budget, 1.0), probes, 0.0, 0.0)
             continue
         depth = risk_optimal_depth(pilot, pilot_sd(npilot, m), rem, eps,
+                                   N_min=min(max(int(np.pi // (2 * pmax)), 1), max(int(cap), 1)),
                                    N_max=max(int(cap), 1), support=(pmin, pmax))
         shots = int(rem / depth)
         # Same (phi, N, m) gives the same exploitation draw in every arm.

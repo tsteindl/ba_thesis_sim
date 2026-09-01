@@ -88,8 +88,8 @@ def _op_trial(task):
             rem = B - m * nmin
             if rem <= 0 or not np.isfinite(ph0):
                 continue
-            N = risk_optimal_depth(ph0, pilot_sd(nmin, m), rem, eps, N_max=nsup,
-                                   support=(pmin, pmax))
+            N = risk_optimal_depth(ph0, pilot_sd(nmin, m), rem, eps,
+                                   N_min=min(nmin, nsup), N_max=nsup, support=(pmin, pmax))
             mm = int(rem / N)
             if mm < 1:
                 continue

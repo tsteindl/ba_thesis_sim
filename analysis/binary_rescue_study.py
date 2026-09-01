@@ -103,11 +103,12 @@ def _one_trial(seed, pmin, pmax, eps, budget, m, conf):
     n_opt = max(1, int(np.pi // (2 * phi)))
     depths = {}
     if rem > 0:
+        n_min = min(max(int(np.pi // (2 * pmax)), 1), n_sup)
         depths["first"] = risk_optimal_depth(phi_0, pilot_sd(N_0, m), rem, eps,
-                                             N_max=n_sup, support=(pmin, pmax))
+                                             N_min=n_min, N_max=n_sup, support=(pmin, pmax))
         pa, Na = acc[-1]
         depths["deep"] = risk_optimal_depth(pa, pilot_sd(Na, m), rem, eps,
-                                            N_max=n_sup, support=(pmin, pmax))
+                                            N_min=n_min, N_max=n_sup, support=(pmin, pmax))
         depths["post"] = depth_from_posterior(probes, m, pmin, pmax, rem, eps, N_max=n_sup)
         depths["postL"] = depth_from_posterior(probes, m, pmin, pmax, rem, eps,
                                                N_max=max(int(L), 1))

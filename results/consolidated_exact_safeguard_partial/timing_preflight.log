@@ -1,0 +1,10 @@
+safeguard timing preflight   numpy 2.4.6   python 3.11.9
+interval             cand    calls   total s   us/call  distinct N*
+narrow  15..157       143   10,000     0.148      14.8          100
+small  157..1570    1,414    5,000     0.198      39.7          600
+wide    15..1570    1,556    5,000     0.191      38.3          243
+
+widest active interval (15..1570): 0.0383 ms/call   [diagnostic trigger 0.5 ms/call]
+upper bound on the sweep's safeguard cost at that rate: 2.16 CPU-hours (203,550,000 calls, pre-dedup, single core)
+
+below the trigger -- enumeration is not the bottleneck for the active matrix.

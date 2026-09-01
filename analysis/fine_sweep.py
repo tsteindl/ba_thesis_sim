@@ -69,8 +69,8 @@ def _bin_trial(seed, pmin, pmax, eps, B, m, conf):
         return 0.0
     n_min = max(int(np.pi // (2 * pmax)), 1)
     n_sup = max(int(np.pi // (2 * pmin)), 1)
-    N = risk_optimal_depth(phi_acc, pilot_sd(N_acc, m), rem, eps, N_max=n_sup, support=(pmin, pmax))
-    N = max(N, min(n_min, n_sup))
+    N = risk_optimal_depth(phi_acc, pilot_sd(N_acc, m), rem, eps, N_min=min(n_min, n_sup),
+                           N_max=n_sup, support=(pmin, pmax))
     mm = int(rem / N)
     if mm < 1:
         return 0.0

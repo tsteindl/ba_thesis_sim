@@ -29,12 +29,14 @@ PILOT_NOTE = {
                "(before the safeguard); N_star = max(1, N_guess - s)"),
     "binary_deep": ("(phi_acc, N_acc) -- the DEEPEST probe the bisection did not flag as an "
                     "overshoot; sigma = 1/(2 N_acc sqrt(m'))",
-                    "N_guess = N_acc = L; N_star = risk_optimal_depth(...) capped by the prior "
-                    "support N_max = floor(pi/(2 phi_min)) and floored at N_min"),
+                    "N_guess = N_acc = L; N_star = risk_optimal_depth(...), the exact argmax "
+                    "over the prior support N_min = floor(pi/(2 phi_max)) .. N_max = "
+                    "floor(pi/(2 phi_min))"),
     "reverse_eng_risk": ("(phi_hat_0, N_min) -- the single opening pilot; sigma = 1/(2 N_min "
                          "sqrt(m'))",
-                         "N_guess = floor(pi/(2 phi_hat_0)); N_star = risk_optimal_depth(...) "
-                         "capped by N_max = floor(pi/(2 phi_min))"),
+                         "N_guess = floor(pi/(2 phi_hat_0)); N_star = risk_optimal_depth(...), "
+                         "the exact argmax over N_min = floor(pi/(2 phi_max)) .. N_max = "
+                         "floor(pi/(2 phi_min)) -- the same range binary_deep uses"),
 }
 
 

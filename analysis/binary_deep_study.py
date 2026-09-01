@@ -134,7 +134,8 @@ def _one_trial(seed, pmin, pmax, eps, budget, m, conf):
                 res[a] = (0.0, used / budget, 0.0, 0.0, n_probes, n_acc, N_acc / n_min,
                           float(N_acc > n_opt))
                 continue
-            N = risk_optimal_depth(ph, pilot_sd(N0, m), rem, eps, N_max=n_sup, support=(pmin, pmax))
+            N = risk_optimal_depth(ph, pilot_sd(N0, m), rem, eps, N_min=min(n_min, n_sup),
+                                   N_max=n_sup, support=(pmin, pmax))
             mm = int(rem / N)
             est = simulate_errors(np.random.default_rng([int(seed) % (2 ** 32), 15485863]),
                                   phi, mm, N)

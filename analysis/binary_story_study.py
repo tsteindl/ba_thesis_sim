@@ -146,6 +146,7 @@ def _one_trial(seed, pmin, pmax, eps, budget, m, conf):
         "bracketU":  (phi_0,   sd0, n_sup,          brU),
         "bracket":   (phi_0,   sd0, n_sup,          brLU),
     }
+    n_lo = min(max(int(np.pi // (2 * pmax)), 1), n_sup)
     res, chosen = {}, {"first": 0}
     for k, a in enumerate(ARMS):
         if rem <= 0:
@@ -153,7 +154,7 @@ def _one_trial(seed, pmin, pmax, eps, budget, m, conf):
             res[a] = (0.0, used, 0.0, 0.0, 0.0)
             continue
         ph, sd, cap, sup = spec[a]
-        N = risk_optimal_depth(ph, sd, rem, eps, N_max=cap, support=sup)
+        N = risk_optimal_depth(ph, sd, rem, eps, N_min=min(n_lo, cap), N_max=cap, support=sup)
         mm = int(rem / N)
         # common random numbers: the exploitation draw depends on the trial and on (N, m), not on
         # which arm asked for it, so two arms that choose the same depth get literally the same shot

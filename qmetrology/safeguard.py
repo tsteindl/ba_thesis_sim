@@ -63,27 +63,60 @@ Reading Eq. (3.4) as a likelihood for the unknown phi given the pilot (phi_hat0,
 exploitation depth N carries two quantifiable risks:
 
     P(no overshoot)  = P(phi < pi/(2N))      = Phi( (pi/(2N) - phi_hat0) / sigma )
-    P(converge | N)  = P(|phi_hat - phi| < eps) with the *same* law at (N, m = B/N),
-                       and since N^2 m = N B this is  2 Phi( 2 eps sqrt(N B) ) - 1.
+    P(converge | N)  = P(|phi_hat - phi| < eps) with the *same* law at (N, m = floor(B/N)),
+                       i.e.  2 Phi( 2 eps N sqrt(floor(B/N)) ) - 1.
 
 The exploitation depth is the one that maximises their product,
 
-    N* = argmax_{1 <= N <= N_max}  Phi( (pi/(2N) - phi_hat0)/sigma ) * ( 2 Phi( 2 eps sqrt(N B) ) - 1 ),
+    N* = argmax_{N_min <= N <= N_max}  P(phi < pi/(2N) | pilot) * ( 2 Phi(2 eps N sqrt(floor(B/N))) - 1 ),
 
 which needs no tuned constant at all. Both factors move in opposite directions: a deeper circuit is
-more precise (second factor increases as sqrt(N)) but more likely to alias (first factor falls).
+more precise (second factor grows roughly as sqrt(N)) but more likely to alias (first factor falls).
+
+TWO THINGS ARE EXACT HERE, AND ONE IS NOT.
+
+  * The MAXIMISATION is exact. Every integer of {N_min, ..., N_max} is scored by one vectorised
+    evaluation and the argmax is taken directly. There is no coarse-to-fine bracketing, no local
+    interval, no 5-sigma cutoff and no hard cap, so the returned depth cannot depend on the shape of
+    a search schedule or on an unproven unimodality of the score.
+
+  * The SHOT COUNT is exact. The accuracy factor uses m = floor(B/N), the whole number of shots the
+    depth can actually be paid for, rather than the smooth substitution m ~ B/N (which gives
+    2 Phi(2 eps sqrt(N B)) - 1). The two agree to O(N/B); they differ visibly exactly where the
+    depth is a material fraction of the budget, which is where the rule is deciding.
+
+  * "Exact" does NOT modify the statistical model. A1-A7 above are unchanged, and the score is still
+    a Gaussian approximation to a discrete problem. What is now exact is the numerical maximisation
+    of that approximate score over the admissible set.
+
+THE ADMISSIBLE SET IS [N_min, N_max], AND BOTH ENDS ARE DELIBERATE.
+
+    N_min = floor(pi / (2 phi_max))   the deepest circuit that stays on the first identifiable
+                                      branch for the WHOLE prior support (N_min * phi <= pi/2 for
+                                      every admissible phi, with equality possible only at an
+                                      endpoint). It is therefore safe by construction, and it is the
+                                      depth the opening pilot is already taken at. Running the
+                                      exploitation shallower than the guaranteed-safe baseline is
+                                      not a trade-off the safeguard should be able to make, so
+                                      N < N_min is excluded rather than merely disfavoured.
+    N_max = floor(pi / (2 phi_min))   beyond it the truncated posterior puts zero mass on "no
+                                      overshoot", so the score is identically zero.
+
+Because m is now a floor, the score is not monotone below N_min and no proof is offered that some
+smaller integer could never carry a marginally larger numerical score; the claim is that N* is the
+exact maximiser over the CONSTRAINED range. On the 177 active scenario/budget points of the thesis
+matrix a direct integer audit found N_min's accuracy factor to be at least as large as that of every
+N < N_min anyway, so nothing is excluded that would have won.
 
 The implied multiplicative safeguard C_eff = N* / floor(pi/(2 phi_hat0)) is therefore *adaptive*:
 it tightens when the pilot is relatively imprecise (small phi, small N0 sqrt(m')) and relaxes toward
 1 as the budget grows. A constant C cannot track either axis, which is what the grid search was
 compensating for.
 """
+from functools import lru_cache
+
 import numpy as np
 from scipy.special import ndtr  # standard normal CDF, vectorised and faster than scipy.stats.norm.cdf
-
-_N_SEARCH = 128   # candidates per refinement round
-_N_ROUNDS = 3     # geometric refinement rounds before the final exact integer scan
-_HARD_CAP = 1 << 45  # only reached when the pilot carries no usable information at all
 
 
 def pilot_sd(N, m):
@@ -106,54 +139,68 @@ def _p_safe(N, phi_hat, sigma, support=None):
 
 
 def _score(N, phi_hat, sigma, budget, eps, support=None):
-    """P(no overshoot) * P(|phi_hat - phi| < eps) for candidate depths N (array or scalar)."""
-    Nf = np.asarray(N, dtype=float)
-    p_conv = 2.0 * ndtr(2.0 * eps * np.sqrt(Nf * float(budget))) - 1.0
-    return _p_safe(Nf, phi_hat, sigma, support) * p_conv
+    """P(no overshoot) * P(|phi_hat - phi| < eps) for candidate depths N (array or scalar).
+
+    The accuracy factor is evaluated at the WHOLE number of exploitation shots the depth can be paid
+    for, m = floor(B/N) -- what the algorithm actually spends -- not at the smooth m = B/N. With
+    N^2 m in Eq. (3.4) that gives 2 Phi(2 eps N sqrt(m)) - 1, and 0 where the depth is unaffordable
+    (m = 0), so an N the trial could not buy a single shot at can never win the argmax.
+    """
+    Ni = np.asarray(N, dtype=np.int64)
+    m = int(budget) // np.maximum(Ni, 1)
+    p_acc = np.where(m >= 1, 2.0 * ndtr(2.0 * eps * Ni.astype(float) * np.sqrt(m)) - 1.0, 0.0)
+    return _p_safe(Ni.astype(float), phi_hat, sigma, support) * p_acc
 
 
-def risk_optimal_depth(phi_hat, sigma, budget, eps, N_max=None, support=None):
-    """Exploitation depth maximising P(no overshoot) x P(converge).
+@lru_cache(maxsize=64)
+def _candidates(N_min, N_max):
+    """The closed integer interval [N_min, N_max], cached and read-only.
+
+    Pure allocation avoidance: the tuning sweep makes O(10^8) safeguard calls and the active
+    scenarios use only three distinct (N_min, N_max) pairs, so the same array is rebuilt millions of
+    times otherwise. It is frozen because callers share it; `_score` only reads.
+    """
+    c = np.arange(N_min, N_max + 1, dtype=np.int64)
+    c.flags.writeable = False
+    return c
+
+
+def risk_optimal_depth(phi_hat, sigma, budget, eps, *, N_min, N_max, support=None):
+    """Exploitation depth maximising P(no overshoot) x P(converge), by exhaustive enumeration.
+
+    Every integer of the closed interval [N_min, N_max] is scored in one vectorised pass and the
+    argmax is returned, so the result is the exact maximiser of the (approximate, Gaussian) score
+    over the admissible set -- see the module docstring for what "exact" does and does not claim.
+    `np.argmax` breaks an exact tie toward the SHALLOWEST depth, which is the conservative side.
 
     phi_hat, sigma : pilot estimate and its asymptotic sd (use `pilot_sd`).
-    budget         : budget remaining for the exploitation shot (m = budget / N).
+    budget         : budget remaining for the exploitation shot (m = floor(budget / N)).
     eps            : target tolerance |phi_hat - phi| < eps.
-    N_max          : hard cap, normally floor(pi/(2 phi_min)) from the prior support (and, for
-                     binary search, the depth the bisection settled on — the safeguard only reduces N).
+    N_min, N_max   : REQUIRED, keyword-only. The admissible depth range, normally
+                     floor(pi/(2 phi_max)) .. floor(pi/(2 phi_min)) from the prior support (binary
+                     search may lower N_max to the depth the bisection settled on). They are
+                     keyword-only and mandatory so that no call site can silently fall back to a
+                     lower bound of 1 and pick a depth shallower than the guaranteed-safe baseline.
     support        : optional (phi_min, phi_max). Given, the overshoot factor uses the exact
                      truncated-normal posterior instead of the untruncated one. Off by default:
                      analysis/truncation_check.py measures the difference as <= 0.14 pp of
                      convergence (SE 0.25 pp) at every operating point the thesis reports, because
                      the prior spans pi*sqrt(m')*(1 - phi_min/phi_max) >= 14 sigma there.
+
+    Returns N_min on invalid input (non-finite pilot, non-positive sigma/budget/eps) -- the
+    guaranteed-safe baseline, never 1. If the remaining budget cannot buy a single shot even at
+    N_min the score is zero everywhere and N_min is returned as well; the CALLER is responsible for
+    taking its no-exploitation path rather than spending a shot it cannot afford.
     """
+    lo = max(int(N_min), 1)
+    hi = max(int(N_max), lo)
     if not np.isfinite(phi_hat) or sigma <= 0 or budget <= 0 or eps <= 0:
-        return 1
-
-    # Above pi/(2N) < phi_hat - 5 sigma the overshoot term is numerically dead; the prior support
-    # (N_max) bounds the search when the pilot is too noisy to bound it on its own.
-    phi_lo = phi_hat - 5.0 * sigma
-    if support is not None:
-        # the truncated posterior has no mass outside [phi_min, phi_max], so the 5-sigma bound is
-        # only meaningful once clamped to the support -- without this a pilot that lands outside
-        # the prior range would cut the search short at a depth the posterior does not rule out.
-        phi_lo = min(max(phi_lo, support[0]), support[1])
-    hi = _HARD_CAP if phi_lo <= 0 else int(np.pi / (2.0 * phi_lo)) + 1
-    if N_max is not None:
-        hi = min(hi, int(N_max))
-    hi, lo = max(int(hi), 1), 1
-
-    for _ in range(_N_ROUNDS):
-        if hi - lo <= 1:
-            break
-        cand = np.unique(np.geomspace(lo, hi, _N_SEARCH).astype(np.int64))
-        i = int(np.argmax(_score(cand, phi_hat, sigma, budget, eps, support)))
-        lo, hi = int(cand[max(i - 1, 0)]), int(cand[min(i + 1, len(cand) - 1)])
-
-    cand = np.arange(lo, hi + 1, dtype=np.int64)
-    return max(int(cand[int(np.argmax(_score(cand, phi_hat, sigma, budget, eps, support)))]), 1)
+        return lo
+    cand = _candidates(lo, hi)
+    return int(cand[int(np.argmax(_score(cand, phi_hat, sigma, budget, eps, support)))])
 
 
-def effective_C(phi_hat, sigma, budget, eps, N_max=None):
+def effective_C(phi_hat, sigma, budget, eps, *, N_min, N_max):
     """Diagnostic: the multiplicative safeguard N*/floor(pi/(2 phi_hat)) the rule implies."""
     naive = max(int(np.pi // (2 * phi_hat)), 1)
-    return risk_optimal_depth(phi_hat, sigma, budget, eps, N_max) / naive
+    return risk_optimal_depth(phi_hat, sigma, budget, eps, N_min=N_min, N_max=N_max) / naive

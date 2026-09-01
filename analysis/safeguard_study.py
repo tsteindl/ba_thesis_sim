@@ -130,7 +130,8 @@ def figure(rows):
         sd = pilot_sd(nmin, m_e)
         for p in phis:
             naive = max(int(np.pi // (2 * p)), 1)
-            ceff.append(risk_optimal_depth(p, sd, B - m_e * nmin, eps, N_max=314) / naive)
+            ceff.append(risk_optimal_depth(p, sd, B - m_e * nmin, eps,
+                                           N_min=nmin, N_max=314) / naive)
         ax2.plot(phis, ceff, lw=2, color=c, label=f"B={B:,.0f}, ε={eps:.0e}, m'={m_e}")
     ax2.axhline(0.85, ls="--", lw=1.4, color="#d62728", label="grid-tuned constant C = 0.85")
     ax2.set(xscale="log", xlabel="true phase φ", ylabel="implied safeguard  $C_{eff}=N^*/\\lfloor π/2\\hatφ\\rfloor$",

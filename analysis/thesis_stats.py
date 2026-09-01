@@ -32,6 +32,7 @@ def _task(t):
     acc = [0.0] * 6
     n = 0
     n_sup = max(int(np.pi // (2 * pmin)), 1)
+    n_min = min(max(int(np.pi // (2 * pmax)), 1), n_sup)
     with np.errstate(invalid="ignore", divide="ignore"):
         for s in seeds:
             rng = np.random.default_rng(int(s))
@@ -44,8 +45,8 @@ def _task(t):
             n_opt = max(1, int(np.pi // (2 * phi)))
             if rem <= 0 or not np.isfinite(phi_acc):
                 continue
-            N = risk_optimal_depth(phi_acc, pilot_sd(N_acc, m), rem, eps, N_max=n_sup,
-                                   support=(pmin, pmax))
+            N = risk_optimal_depth(phi_acc, pilot_sd(N_acc, m), rem, eps,
+                                   N_min=min(n_min, n_sup), N_max=n_sup, support=(pmin, pmax))
             n += 1
             acc[0] += used / B                       # exploration budget share
             acc[1] += len(probes)                    # probes

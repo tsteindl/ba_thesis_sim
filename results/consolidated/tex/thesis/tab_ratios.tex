@@ -1,7 +1,8 @@
 \begin{table}[ht]
 \centering
 \small
-\caption{Budget to reach $90\%$ convergence, expressed two ways. \textbf{First number:} $B_{\mathrm{brute}}/B_{\mathrm{alg}}$, the factor less budget than the baseline ($>1$ is better). \textbf{Second number:} $B_{\mathrm{alg}}/B_{\mathrm{oracle}}$, the algorithm's budget relative to the oracle reference ($1.00\texttimes$ means equal budget). The second number is what makes the first interpretable: it shows directly how far the algorithm remains from the oracle reference. The two multiply to the oracle's own factor in the last row. The separable protocol is omitted -- it is slower than the baseline; its raw budget is in Table~\ref{tab:summary-all-ci}.}
+\setlength{\tabcolsep}{3pt}
+\caption{Budget ratios at $90\%$ convergence. \textbf{First:} $B_{\mathrm{brute}}/B_{\mathrm{alg}}$ ($>1$ is better). \textbf{Second:} $B_{\mathrm{alg}}/B_{\mathrm{oracle}}$ ($1.00\times$ means equal budget). Their product is $B_{\mathrm{brute}}/B_{\mathrm{oracle}}$. The separable protocol is omitted; its raw budget is in Table~\ref{tab:summary-all-ci}.}
 \label{tab:ratios}
 \begin{tabular}{lcccc}
 \toprule
@@ -35,5 +36,5 @@ Oracle ($N_\text{opt}$)
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle value is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}, and thus carries no confidence interval.
 \end{table}

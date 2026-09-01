@@ -58,6 +58,7 @@ def _depth(which, probes, m_exploration, remaining, eps, phi_min, phi_max):
     if pil is None or not np.isfinite(pil[0]) or pil[1] <= 0:
         return None
     N_star = risk_optimal_depth(pil[0], pil[1], remaining, eps,
+                                N_min=max(int(np.pi // (2 * phi_max)), 1),
                                 N_max=max(int(np.pi // (2 * phi_min)), 1),
                                 support=(phi_min, phi_max))
     if which == "risk":

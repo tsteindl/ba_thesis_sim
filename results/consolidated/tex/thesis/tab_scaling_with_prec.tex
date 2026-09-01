@@ -1,7 +1,7 @@
 \begin{table}[ht]
 \centering
 \small
-\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the oracle column bounds how much of it is attainable at all.}
+\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the oracle column gives the corresponding deterministic large-$m$ reference.}
 \label{tab:scaling-with-prec}
 \begin{tabular}{lcccc}
 \toprule
@@ -44,5 +44,5 @@ $10^{-8}$
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle value is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}, and thus carries no confidence interval.
 \end{table}

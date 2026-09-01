@@ -52,7 +52,7 @@ def _re(rng, phi, phi_max, phi_min, m_exploration, budget, eps_target, truncated
     if rem <= 0:
         return phi_hat, used
     N = risk_optimal_depth(phi_hat, pilot_sd(N_min, m_exploration), rem, eps_target,
-                           N_max=max(int(N_max), 1),
+                           N_min=max(int(N_min), 1), N_max=max(int(N_max), int(N_min), 1),
                            support=(phi_min, phi_max) if truncated else None)
     m = int(rem / N)
     return simulate_errors(rng, phi, m, N), used + N * m
@@ -82,8 +82,8 @@ def worst_shift(pmin, pmax, eps, B):
             ph = pmin + q * sd
             if ph > pmax:
                 continue
-            a = risk_optimal_depth(ph, sd, B, eps, N_max=N_max)
-            b = risk_optimal_depth(ph, sd, B, eps, N_max=N_max, support=(pmin, pmax))
+            a = risk_optimal_depth(ph, sd, B, eps, N_min=N0, N_max=N_max)
+            b = risk_optimal_depth(ph, sd, B, eps, N_min=N0, N_max=N_max, support=(pmin, pmax))
             worst = max(worst, abs(b - a) / a)
     return worst
 

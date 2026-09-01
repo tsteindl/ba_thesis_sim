@@ -129,6 +129,7 @@ def _run(which, rng, phi, phi_max, phi_min, m_exploration, budget, eps_target, c
     if not np.isfinite(phi_pilot) or sigma <= 0:
         return np.inf, budget_used
     N = risk_optimal_depth(phi_pilot, sigma, remaining, eps_target,
+                           N_min=max(int(np.pi // (2 * phi_max)), 1),
                            N_max=max(int(np.pi // (2 * phi_min)), 1), support=(phi_min, phi_max))
     m = int(remaining / N)
     phi_hat = simulate_errors(rng, phi, m, N)
@@ -177,6 +178,7 @@ def diagnostics(which, phi_min, phi_max, eps, budget, m_exploration, conf, R=600
         if not np.isfinite(phi_pilot):
             continue
         N = risk_optimal_depth(phi_pilot, sigma, remaining, eps,
+                               N_min=max(int(np.pi // (2 * phi_max)), 1),
                                N_max=max(int(np.pi // (2 * phi_min)), 1), support=(phi_min, phi_max))
         n_opt = max(1, int(np.pi // (2 * phi)))
         rows.append((phi_pilot - phi, sigma, float(N * phi > np.pi / 2), N / n_opt,

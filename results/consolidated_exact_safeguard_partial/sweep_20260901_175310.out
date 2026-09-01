@@ -1,0 +1,213 @@
+PARTIAL run: algorithms=['binary_deep', 'reverse_eng_risk']  scenarios=['narrow_e3', 'narrow_e4', 'narrow_e5', 'narrow_e6', 'narrow_e7', 'narrow_e8', 'small_e4', 'wide_e4']
+             output -> results/consolidated_exact_safeguard_partial/
+wrote results/consolidated_exact_safeguard_partial/algorithm_code_audit.md
+--resume: 0 scenario(s) already complete for ['binary_deep', 'reverse_eng_risk']
+
+=== U(0.01,0.1), eps=1e-03  [narrow_e3]  N_min=15 N_max=157  23 budgets 896..1,344,800 ===
+   B=               896  bin  19.73  rev  18.78
+   B=             1,270  bin  24.16  rev  23.63
+   B=             1,799  bin  28.98  rev  29.08
+   B=             2,548  bin  35.46  rev  35.58
+   B=             3,610  bin  41.94  rev  42.22
+   B=             5,114  bin  49.47  rev  50.14
+   B=             7,244  bin  57.55  rev  58.16
+   B=            10,000  bin  65.07  rev  66.25
+   B=            10,262  bin  66.00  rev  66.61
+   B=            14,538  bin  73.99  rev  75.09
+   B=            20,594  bin  81.92  rev  83.24
+   B=            29,173  bin  88.49  rev  89.72
+   B=            41,326  bin  93.43  rev  94.44
+   B=            58,543  bin  94.96  rev  97.40
+   B=            82,931  bin  98.62  rev  99.04
+   B=           117,479  bin  99.51  rev  99.75
+   B=           166,419  bin  99.93  rev  99.93
+   B=           235,746  bin 100.00  rev  99.99
+   B=           333,954  bin  99.97  rev 100.00
+   B=           473,075  bin  99.98  rev 100.00
+   B=           670,151  bin 100.00  rev 100.00
+   B=           949,325  bin 100.00  rev 100.00
+   B=         1,344,800  bin 100.00  rev 100.00
+   traces written for 4 budgets
+
+=== U(0.01,0.1), eps=1e-04  [narrow_e4]  N_min=15 N_max=157  22 budgets 89,653..134,480,000 ===
+   B=            89,653  bin  22.64  rev  25.49
+   B=           127,001  bin  27.46  rev  30.38
+   B=           179,908  bin  32.49  rev  36.03
+   B=           254,855  bin  38.70  rev  42.49
+   B=           361,024  bin  46.22  rev  49.13
+   B=           511,421  bin  53.74  rev  56.60
+   B=           724,471  bin  61.65  rev  64.30
+   B=         1,026,274  bin  69.75  rev  72.50
+   B=         1,453,804  bin  77.41  rev  79.68
+   B=         2,059,436  bin  84.44  rev  86.40
+   B=         2,917,365  bin  90.51  rev  91.80
+   B=         4,132,694  bin  94.74  rev  95.25
+   B=         5,854,310  bin  97.68  rev  97.92
+   B=         8,293,124  bin  99.17  rev  99.24
+   B=        11,747,910  bin  99.74  rev  99.79
+   B=        16,641,905  bin  99.91  rev  99.96
+   B=        23,574,663  bin  99.96  rev  99.99
+   B=        33,395,498  bin  99.95  rev 100.00
+   B=        47,307,541  bin  99.95  rev 100.00
+   B=        67,015,122  bin 100.00  rev 100.00
+   B=        94,932,574  bin 100.00  rev 100.00
+   B=       134,480,000  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.01,0.1), eps=1e-05  [narrow_e5]  N_min=15 N_max=157  22 budgets 8,965,333..13,447,999,999 ===
+   B=         8,965,333  bin  25.85  rev  27.27
+   B=        12,700,150  bin  31.48  rev  32.05
+   B=        17,990,835  bin  36.49  rev  37.92
+   B=        25,485,535  bin  43.04  rev  44.16
+   B=        36,102,410  bin  50.01  rev  51.10
+   B=        51,142,110  bin  57.59  rev  58.46
+   B=        72,447,113  bin  64.66  rev  65.95
+   B=       102,627,447  bin  72.65  rev  73.64
+   B=       145,380,436  bin  80.33  rev  80.70
+   B=       205,943,651  bin  86.70  rev  87.04
+   B=       291,736,555  bin  91.86  rev  92.29
+   B=       413,269,439  bin  95.77  rev  95.90
+   B=       585,431,022  bin  98.03  rev  97.94
+   B=       829,312,426  bin  99.36  rev  99.19
+   B=     1,174,791,008  bin  99.82  rev  99.79
+   B=     1,664,190,563  bin  99.93  rev  99.95
+   B=     2,357,466,314  bin  99.97  rev  99.99
+   B=     3,339,549,897  bin  99.95  rev 100.00
+   B=     4,730,754,135  bin  99.95  rev 100.00
+   B=     6,701,512,293  bin 100.00  rev 100.00
+   B=     9,493,257,466  bin 100.00  rev 100.00
+   B=    13,447,999,999  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.01,0.1), eps=1e-06  [narrow_e6]  N_min=15 N_max=157  22 budgets 896,533,333..1,344,800,000,000 ===
+   B=       896,533,333  bin  27.20  rev  27.63
+   B=     1,270,015,093  bin  32.58  rev  32.52
+   B=     1,799,083,511  bin  37.57  rev  38.23
+   B=     2,548,553,554  bin  44.14  rev  44.16
+   B=     3,610,241,091  bin  50.66  rev  51.38
+   B=     5,114,211,046  bin  58.49  rev  58.47
+   B=     7,244,711,353  bin  65.80  rev  66.18
+   B=    10,262,744,755  bin  73.68  rev  73.65
+   B=    14,538,043,655  bin  80.26  rev  80.80
+   B=    20,594,365,186  bin  86.98  rev  87.12
+   B=    29,173,655,514  bin  92.03  rev  92.23
+   B=    41,326,943,964  bin  95.89  rev  95.94
+   B=    58,543,102,238  bin  98.17  rev  97.97
+   B=    82,931,242,693  bin  99.41  rev  99.22
+   B=   117,479,100,897  bin  99.83  rev  99.79
+   B=   166,419,056,310  bin  99.79  rev  99.96
+   B=   235,746,631,456  bin  99.97  rev  99.99
+   B=   333,954,989,743  bin  99.98  rev 100.00
+   B=   473,075,413,571  bin  99.95  rev 100.00
+   B=   670,151,229,355  bin 100.00  rev 100.00
+   B=   949,325,746,642  bin 100.00  rev 100.00
+   B= 1,344,800,000,000  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.01,0.1), eps=1e-07  [narrow_e7]  N_min=15 N_max=157  22 budgets 89,653,333,333..134,480,000,000,000 ===
+   B=    89,653,333,333  bin  27.61  rev  27.75
+   B=   127,001,509,327  bin  32.76  rev  32.60
+   B=   179,908,351,108  bin  37.53  rev  38.27
+   B=   254,855,355,420  bin  44.46  rev  44.23
+   B=   361,024,109,144  bin  50.96  rev  51.20
+   B=   511,421,104,605  bin  58.38  rev  58.55
+   B=   724,471,135,335  bin  66.19  rev  66.19
+   B= 1,026,274,475,590  bin  73.99  rev  73.69
+   B= 1,453,804,365,525  bin  80.68  rev  80.87
+   B= 2,059,436,518,680  bin  87.10  rev  87.12
+   B= 2,917,365,551,411  bin  92.15  rev  92.39
+   B= 4,132,694,396,433  bin  95.89  rev  95.85
+   B= 5,854,310,223,842  bin  98.16  rev  97.83
+   B= 8,293,124,269,377  bin  99.32  rev  99.21
+   B=11,747,910,089,773  bin  99.83  rev  99.79
+   B=16,641,905,631,032  bin  99.88  rev  99.95
+   B=23,574,663,145,682  bin  99.96  rev  99.99
+   B=33,395,498,974,351  bin  99.98  rev 100.00
+   B=47,307,541,357,178  bin  99.95  rev 100.00
+   B=67,015,122,935,579  bin 100.00  rev 100.00
+   B=94,932,574,664,214  bin 100.00  rev 100.00
+   B=134,480,000,000,000  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.01,0.1), eps=1e-08  [narrow_e8]  N_min=15 N_max=157  22 budgets 8,965,333,333,333..13,447,999,999,999,998 ===
+   B= 8,965,333,333,333  bin  27.43  rev  27.74
+   B=12,700,150,932,713  bin  32.00  rev  32.57
+   B=17,990,835,110,839  bin  37.38  rev  38.27
+   B=25,485,535,542,077  bin  44.40  rev  44.27
+   B=36,102,410,914,495  bin  50.95  rev  51.19
+   B=51,142,110,460,546  bin  58.74  rev  58.58
+   B=72,447,113,533,589  bin  66.27  rev  66.26
+   B=102,627,447,559,047  bin  73.68  rev  73.69
+   B=145,380,436,552,546  bin  80.80  rev  80.78
+   B=205,943,651,868,068  bin  86.51  rev  87.23
+   B=291,736,555,141,147  bin  92.16  rev  92.39
+   B=413,269,439,643,361  bin  95.92  rev  95.91
+   B=585,431,022,384,237  bin  98.21  rev  97.93
+   B=829,312,426,937,782  bin  99.36  rev  99.22
+   B=1,174,791,008,977,376  bin  99.82  rev  99.78
+   B=1,664,190,563,103,208  bin  99.91  rev  99.95
+   B=2,357,466,314,568,226  bin  99.96  rev  99.99
+   B=3,339,549,897,435,170  bin  99.98  rev 100.00
+   B=4,730,754,135,717,893  bin  99.95  rev 100.00
+   B=6,701,512,293,557,939  bin 100.00  rev 100.00
+   B=9,493,257,466,421,480  bin 100.00  rev 100.00
+   B=13,447,999,999,999,998  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.001,0.01), eps=1e-04  [small_e4]  N_min=157 N_max=1570  22 budgets 8,565..12,848,407 ===
+   B=             8,565  bin  19.72  rev  18.52
+   B=            12,133  bin  23.71  rev  23.14
+   B=            17,188  bin  28.98  rev  28.31
+   B=            24,349  bin  34.43  rev  34.37
+   B=            34,492  bin  40.91  rev  41.10
+   B=            48,861  bin  48.53  rev  48.58
+   B=            69,216  bin  56.37  rev  57.17
+   B=            98,051  bin  64.71  rev  65.58
+   B=           138,898  bin  73.19  rev  73.96
+   B=           196,761  bin  80.78  rev  82.21
+   B=           278,729  bin  87.29  rev  88.82
+   B=           394,843  bin  92.51  rev  93.76
+   B=           559,329  bin  96.15  rev  96.92
+   B=           792,336  bin  98.31  rev  98.85
+   B=         1,122,411  bin  99.16  rev  99.66
+   B=         1,589,990  bin  99.65  rev  99.93
+   B=         2,252,356  bin  99.88  rev  99.98
+   B=         3,190,652  bin  99.97  rev 100.00
+   B=         4,519,828  bin  99.97  rev 100.00
+   B=         6,402,718  bin  99.99  rev 100.00
+   B=         9,069,991  bin 100.00  rev 100.00
+   B=        12,848,407  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+=== U(0.001,0.1), eps=1e-04  [wide_e4]  N_min=15 N_max=1570  22 budgets 89,653..134,480,000 ===
+   B=            89,653  bin  27.95  rev  27.74
+   B=           127,001  bin  33.38  rev  33.27
+   B=           179,908  bin  39.62  rev  39.28
+   B=           254,855  bin  45.83  rev  45.81
+   B=           361,024  bin  52.66  rev  52.53
+   B=           511,421  bin  59.78  rev  59.72
+   B=           724,471  bin  67.45  rev  67.13
+   B=         1,026,274  bin  74.80  rev  74.80
+   B=         1,453,804  bin  81.74  rev  81.74
+   B=         2,059,436  bin  87.54  rev  87.44
+   B=         2,917,365  bin  92.45  rev  92.56
+   B=         4,132,694  bin  95.85  rev  95.73
+   B=         5,854,310  bin  98.12  rev  98.04
+   B=         8,293,124  bin  99.33  rev  99.28
+   B=        11,747,910  bin  99.81  rev  99.83
+   B=        16,641,905  bin  99.88  rev  99.96
+   B=        23,574,663  bin  99.95  rev  99.99
+   B=        33,395,498  bin  99.98  rev 100.00
+   B=        47,307,541  bin  99.98  rev 100.00
+   B=        67,015,122  bin 100.00  rev 100.00
+   B=        94,932,574  bin 100.00  rev 100.00
+   B=       134,480,000  bin 100.00  rev 100.00
+   traces written for 3 budgets
+
+sweep finished in 38.7 min
+
+PARTIAL run: skipping add_baselines and finalize.
+Next: merge these rows into a staging copy of the complete data, e.g.
+  python analysis/consolidated/merge_partial.py --partial results/consolidated_exact_safeguard_partial/ \
+      --base results/consolidated --out results/consolidated_staging
+then finalize the staging directory.

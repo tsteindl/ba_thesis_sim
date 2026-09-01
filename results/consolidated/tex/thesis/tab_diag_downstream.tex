@@ -1,7 +1,7 @@
 \begin{table}[ht]
 \centering
 \small
-\caption{From the exploration's guess to the value of $N$ actually used, aggregated over the 144 informative operating points. $N^*$ is the exploitation value after the safeguard; \emph{unsafe-guess rescue} is $P(N^* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how often the safeguard pulls an aliasing guess back to safety. For the statistical safeguard, a selected $N^*/N_{\mathrm{opt}}$ below one may be intentional: it maximizes $P(\text{no overshoot})\times P(\text{converge})$ and deliberately backs off from the aliasing cliff. \emph{Converged given safe $N^*$} is $P(|\hat\phi-\phi|<\epsilon\mid N^*\leq N_{\mathrm{opt}})$. Brute force performs no search, so its fixed $N_{\mathrm{guess}}=N_{\min}$ is reported.}
+\caption{From the exploration's guess to the value of $N$ actually used, aggregated over the 106 informative operating points. $N^*$ is the exploitation value after the safeguard; \emph{unsafe-guess rescue} is $P(N^* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how often the safeguard pulls an aliasing guess back to safety. For the statistical safeguard, a selected $N^*/N_{\mathrm{opt}}$ below one may be intentional: it maximizes $P(\text{no overshoot})\times P(\text{converge})$ and deliberately backs off from the aliasing cliff. \emph{Converged given safe $N^*$} is $P(|\hat\phi-\phi|<\epsilon\mid N^*\leq N_{\mathrm{opt}})$. Brute force performs no search, so its fixed $N_{\mathrm{guess}}=N_{\min}$ is reported.}
 \label{tab:diag-downstream}
 \begin{tabular}{lccccc}
 \toprule
@@ -17,25 +17,25 @@ A.~\ref{alg:brute-force}: BF
 & 0.54
 & 0.00\%
 & --
-& 51.3\% \\
+& 53.0\% \\
 A.~\ref{alg:linear-search}: LS
-& 1.00
-& 0.95
-& 1.72\%
-& 44.6\%
-& 59.7\% \\
+& 0.99
+& 0.94
+& 1.22\%
+& 48.3\%
+& 62.3\% \\
 A.~\ref{alg:binary-search}: BS
-& 0.93
-& 1.00
+& 0.90
+& 0.96
 & 0.74\%
-& 96.4\%
-& 61.3\% \\
+& 96.5\%
+& 63.3\% \\
 A.~\ref{alg:reverse-engineering}: RE
 & 1.00
-& 1.00
-& 0.47\%
-& 97.3\%
-& 61.7\% \\
+& 0.96
+& 0.43\%
+& 98.6\%
+& 63.8\% \\
 \bottomrule
 \end{tabular}
 \end{table}

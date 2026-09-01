@@ -185,6 +185,7 @@ def fig2(probes, used, L, path):
     ph0 = float(np.arccos(np.sqrt(h0 / M)) / N0)
     sd0 = pilot_sd(N0, M)
 
+    n_min = min(max(int(np.pi // (2 * PMAX)), 1), n_sup)
     Ns = np.arange(1, n_sup + 1)
     thr = np.pi / (2.0 * Ns)
 
@@ -194,10 +195,12 @@ def fig2(probes, used, L, path):
     p_post = np.where(idx < 0, 0.0, cdf[np.clip(idx, 0, len(cdf) - 1)])
     p_post = np.where(thr >= g[-1], 1.0, p_post)
     p_norm = ndtr((thr - ph0) / sd0)
-    p_conv = 2.0 * ndtr(2.0 * EPS * np.sqrt(Ns * rem)) - 1.0
+    # the safeguard's own accuracy factor: whole shots, m = floor(B'/N)
+    p_conv = 2.0 * ndtr(2.0 * EPS * Ns * np.sqrt(int(rem) // Ns)) - 1.0
 
     N_post = depth_from_posterior(counts, M, PMIN, PMAX, rem, EPS, N_max=n_sup)
-    N_norm = risk_optimal_depth(ph0, sd0, rem, EPS, N_max=n_sup, support=(PMIN, PMAX))
+    N_norm = risk_optimal_depth(ph0, sd0, rem, EPS, N_min=n_min, N_max=n_sup,
+                                support=(PMIN, PMAX))
 
     fig, axes = plt.subplots(1, 2, figsize=(11.6, 4.0))
 
@@ -205,7 +208,7 @@ def fig2(probes, used, L, path):
     ax.plot(Ns, p_post, lw=2.4, color=BLUE, label=r"$P(\varphi<\pi/2N\mid\mathrm{all\ probes})$, exact")
     ax.plot(Ns, p_norm, lw=2.2, ls="--", color=ORANGE,
             label=r"$\Phi\left((\pi/2N-\hat\varphi_0)/\sigma\right)$, normal")
-    ax.plot(Ns, p_conv, lw=2.0, color=AQUA, label=r"$2\Phi(2\varepsilon\sqrt{NB'})-1$, precision")
+    ax.plot(Ns, p_conv, lw=2.0, color=AQUA, label=r"$2\Phi(2\varepsilon\N\sqrt{\lfloor B'/N\rfloor})-1$, precision")
     ax.axvline(n_opt, lw=1.4, ls="--", color=INK2)
     ax.text(n_opt * 1.02, 0.5, r"$N_{\rm opt}$", color=INK2, fontsize=9)
     ax.set_xlabel("exploitation depth $N$")

@@ -52,6 +52,7 @@ def _one_trial(seed, pmin, pmax, eps, budget, m_exploration, conf):
     rem = budget - used
     n_opt = max(1, int(np.pi // (2 * phi)))
     n_sup = max(int(np.pi // (2 * pmin)), 1)
+    n_lo = min(max(int(np.pi // (2 * pmax)), 1), n_sup)
     res = {}
     for k, (pilot, cap) in enumerate(ARMS):
         ph_p, N_p = (phi_0, N_0) if pilot == "first" else (phi_acc, N_acc)
@@ -60,7 +61,7 @@ def _one_trial(seed, pmin, pmax, eps, budget, m_exploration, conf):
             res[NAMES[k]] = (0.0, used, 0.0)
             continue
         N = risk_optimal_depth(ph_p, pilot_sd(N_p, m_exploration), rem, eps,
-                               N_max=cap_v, support=(pmin, pmax))
+                               N_min=min(n_lo, cap_v), N_max=cap_v, support=(pmin, pmax))
         m = int(rem / N)
         r2 = np.random.default_rng([int(seed) % (2**32), k, 104729])
         est = simulate_errors(r2, phi, m, N)

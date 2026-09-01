@@ -232,9 +232,10 @@ ALGO_DOC = {
          "           threshold = Phi^-1(1-conf; phi_hat_i, 1/(4 m' N^2))",
          "N_guess = N_acc  (== L)",
          "N_star  = risk_optimal_depth(phi_acc, sigma = 1/(2 N_acc sqrt(m')),",
-         "                             remaining_budget, eps, N_max = floor(pi/(2 phi_min)),",
-         "                             support = (phi_min, phi_max))",
-         "N_star  = max(N_star, min(N_min, N_max))         # never shallower than the opening probe",
+         "                             remaining_budget, eps,",
+         "                             N_min = floor(pi/(2 phi_max)),   # the search STARTS here,",
+         "                             N_max = floor(pi/(2 phi_min)),   # so no post-hoc floor is",
+         "                             support = (phi_min, phi_max))    # needed",
          "m       = floor(remaining_budget / N_star)",
          "return phi_hat(N_star, m)"],
         "m_exploration (m'), conf",
@@ -249,7 +250,9 @@ ALGO_DOC = {
          "    phi_hat_0 = measure(N_min, m')               # retries are charged to B_exploration",
          "N_guess = max(floor(pi / (2 phi_hat_0)), 1)      # the raw inverted depth",
          "N_star  = risk_optimal_depth(phi_hat_0, sigma = 1/(2 N_min sqrt(m')),",
-         "                             remaining_budget, eps, N_max = floor(pi/(2 phi_min)),",
+         "                             remaining_budget, eps,",
+         "                             N_min = floor(pi/(2 phi_max)),",
+         "                             N_max = floor(pi/(2 phi_min)),",
          "                             support = (phi_min, phi_max))",
          "m       = floor(remaining_budget / N_star)",
          "return phi_hat(N_star, m)"],
@@ -294,19 +297,42 @@ def part_algorithms(man):
     w("```")
     w("P(no overshoot | N) = P( phi < pi/(2N) )       -- from the TRUNCATED normal posterior on")
     w("                                                  [phi_min, phi_max]")
-    w("P(converge | N)     = 2*Phi( 2 eps sqrt(N B) ) - 1")
+    w("P(converge | N)     = 2*Phi( 2 eps N sqrt(m) ) - 1,  m = floor(B / N)   -- WHOLE shots,")
+    w("                      = 0 where m == 0                                    not the smooth B/N")
     w("")
-    w("N_star = argmax_{1 <= N <= N_max}  P(no overshoot | N) * P(converge | N)")
+    w("N_star = argmax_{N_min <= N <= N_max}  P(no overshoot | N) * P(converge | N)")
+    w("")
+    w("N_min = floor(pi/(2 phi_max))     safe for the WHOLE prior support (A2)")
+    w("N_max = floor(pi/(2 phi_min))     beyond it P(no overshoot) is exactly 0")
     w("```")
     w()
-    w("A deeper circuit is more precise (the second factor grows as `sqrt(N)`) but more likely to "
-      "alias (the first falls). The optimum needs no tuned constant. The implied multiplicative "
-      "safety factor `N_star / floor(pi/(2 phi_hat_0))` is adaptive: it tightens when the pilot is "
-      "imprecise and relaxes toward 1 as the budget grows — which is what a constant `C` could "
-      "never track.")
+    w("A deeper circuit is more precise (the second factor grows roughly as `sqrt(N)`) but more "
+      "likely to alias (the first falls). The optimum needs no tuned constant. The implied "
+      "multiplicative safety factor `N_star / floor(pi/(2 phi_hat_0))` is adaptive: it tightens "
+      "when the pilot is imprecise and relaxes toward 1 as the budget grows — which is what a "
+      "constant `C` could never track.")
     w()
-    w("The maximisation is a three-round geometric refinement followed by an exact integer scan, "
-      "capped at `N_max = floor(pi/(2 phi_min))` from the prior support.")
+    w("**The maximisation is exhaustive.** Every integer of the closed interval "
+      "`[N_min, N_max]` is scored in one vectorised pass and the argmax is taken directly, so "
+      "`N_star` is the exact maximiser of the score over the admissible set — no coarse-to-fine "
+      "refinement, no local bracket, no sigma cutoff, no cap. `numpy.argmax` resolves an exact tie "
+      "to the smallest (shallowest) `N`. \"Exact\" describes the numerical maximisation only: the "
+      "score itself is still the Gaussian approximation derived above.")
+    w()
+    w("**The accuracy factor counts whole shots.** `m = floor(B/N)` is what the algorithm can "
+      "actually pay for, so the factor is `2*Phi(2 eps N sqrt(m)) - 1`, and zero where `m == 0`. "
+      "It differs from the smooth substitution `m ~ B/N` by `O(N/B)` — invisible while the "
+      "exploitation buys thousands of shots, decisive where the depth is a material fraction of "
+      "the budget. It also makes the factor non-monotone in `N` (one step deeper can cost a whole "
+      "shot), which is a second reason not to assume the score has a well-behaved shape.")
+    w()
+    w("**The search starts at `N_min`, never at 1.** `N_min = floor(pi/(2 phi_max))` is the "
+      "deepest circuit that stays on the first identifiable branch for the entire prior support, "
+      "so it is safe by construction and is the depth the opening pilot is already taken at. "
+      "Running the exploitation shallower than that baseline is not a trade-off the safeguard is "
+      "allowed to make. `N_star` is therefore the exact maximiser over the CONSTRAINED range; on "
+      "the active scenario/budget grid a direct integer audit found `N_min` to have at least as "
+      "large an accuracy factor as every `N < N_min` in any case.")
     w()
     w("### 2.6 The two reference rows")
     w()

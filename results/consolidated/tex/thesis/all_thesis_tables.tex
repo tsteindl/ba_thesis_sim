@@ -8,7 +8,7 @@
 % ---- tab_summary_low_prec.tex ------------------------------------
 \begin{table}[ht]
 \centering
-\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated analytically using the asymptotic QCRB law.}
+\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}.}
 \label{tab:summary-low-prec}
 \begin{tabular}{lcc}
 \toprule
@@ -26,7 +26,7 @@ A.~\ref{alg:binary-search}: Binary search
 & 65.07\%
 & 32{,}400 \\
 A.~\ref{alg:reverse-engineering}: Reverse engineering
-& 66.21\%
+& 66.25\%
 & 29{,}800 \\
 \midrule
 Separable protocol ($N=1$)
@@ -39,14 +39,14 @@ Oracle ($N_\text{opt}$)
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle value is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}, and thus carries no confidence interval.
 \end{table}
 
 
 % ---- tab_summary_low_prec_ci.tex ---------------------------------
 \begin{table}[ht]
 \centering
-\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated analytically using the asymptotic QCRB law. Brackets give 95\% intervals (Wilson for rates, bootstrap for budgets); the oracle is exact and carries none.}
+\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}. Brackets give 95\% intervals (Wilson for rates, bootstrap for budgets); the deterministic oracle reference carries none.}
 \label{tab:summary-low-prec-ci}
 \begin{tabular}{lcc}
 \toprule
@@ -64,7 +64,7 @@ A.~\ref{alg:binary-search}: Binary search
 & 65.07\% \newline {\scriptsize [64.65, 65.49]}
 & 32{,}400 \newline {\scriptsize [32{,}000, 32{,}900]} \\
 A.~\ref{alg:reverse-engineering}: Reverse engineering
-& 66.21\% \newline {\scriptsize [65.79, 66.62]}
+& 66.25\% \newline {\scriptsize [65.84, 66.67]}
 & 29{,}800 \newline {\scriptsize [29{,}200, 30{,}300]} \\
 \midrule
 Separable protocol ($N=1$)
@@ -77,7 +77,7 @@ Oracle ($N_\text{opt}$)
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle value is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}, and thus carries no confidence interval.
 \end{table}
 
 
@@ -85,7 +85,8 @@ Oracle ($N_\text{opt}$)
 \begin{table}[ht]
 \centering
 \small
-\caption{Budget to reach $90\%$ convergence, expressed two ways. \textbf{First number:} $B_{\mathrm{brute}}/B_{\mathrm{alg}}$, the factor less budget than the baseline ($>1$ is better). \textbf{Second number:} $B_{\mathrm{alg}}/B_{\mathrm{oracle}}$, the algorithm's budget relative to the oracle reference ($1.00\texttimes$ means equal budget). The second number is what makes the first interpretable: it shows directly how far the algorithm remains from the oracle reference. The two multiply to the oracle's own factor in the last row. The separable protocol is omitted -- it is slower than the baseline; its raw budget is in Table~\ref{tab:summary-all-ci}.}
+\setlength{\tabcolsep}{3pt}
+\caption{Budget ratios at $90\%$ convergence. \textbf{First:} $B_{\mathrm{brute}}/B_{\mathrm{alg}}$ ($>1$ is better). \textbf{Second:} $B_{\mathrm{alg}}/B_{\mathrm{oracle}}$ ($1.00\times$ means equal budget). Their product is $B_{\mathrm{brute}}/B_{\mathrm{oracle}}$. The separable protocol is omitted; its raw budget is in Table~\ref{tab:summary-all-ci}.}
 \label{tab:ratios}
 \begin{tabular}{lcccc}
 \toprule
@@ -119,7 +120,7 @@ Oracle ($N_\text{opt}$)
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle value is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}, and thus carries no confidence interval.
 \end{table}
 
 
@@ -127,7 +128,7 @@ Oracle ($N_\text{opt}$)
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Budget required to achieve $>90\%$ convergence for selected precision settings and prior intervals. Improvement factors are relative to the brute-force baseline; values greater than one indicate a lower required budget.}
+\caption{Budget required to achieve $>90\%$ convergence for selected precision settings and prior intervals. Values are budgets in thousands; smaller values indicate a lower required budget.}
 \label{tab:summary-all}
 \begin{tabular}{l c c c c}
 \toprule
@@ -155,7 +156,7 @@ A.~\ref{alg:binary-search}: BS
 A.~\ref{alg:reverse-engineering}: RE
 & 29.8
 & 2{,}600
-& 302
+& 303
 & 2{,}450 \\
 \midrule
 Sep. ($N=1$)
@@ -172,7 +173,7 @@ Oracle ($N_\text{opt}$)
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle value is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}, and thus carries no confidence interval.
 \end{table}
 
 
@@ -180,7 +181,8 @@ Oracle ($N_\text{opt}$)
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Budget required to achieve $>90\%$ convergence for selected precision settings and prior intervals. Improvement factors are relative to the brute-force baseline; values greater than one indicate a lower required budget. Brackets give 95\% bootstrap intervals.}
+\setlength{\tabcolsep}{3pt}
+\caption{Budget required to achieve $>90\%$ convergence for selected precision settings and prior intervals. Values are budgets in thousands; smaller values indicate a lower required budget. Brackets give 95\% bootstrap intervals.}
 \label{tab:summary-all-ci}
 \begin{tabular}{l c c c c}
 \toprule
@@ -208,7 +210,7 @@ A.~\ref{alg:binary-search}: BS
 A.~\ref{alg:reverse-engineering}: RE
 & 29.8 \newline {\scriptsize [29.2, 30.3]}
 & 2{,}600 \newline {\scriptsize [2{,}570, 2{,}630]}
-& 302 \newline {\scriptsize [298, 307]}
+& 303 \newline {\scriptsize [298, 307]}
 & 2{,}450 \newline {\scriptsize [2{,}420, 2{,}480]} \\
 \midrule
 Sep. ($N=1$)
@@ -225,7 +227,7 @@ Oracle ($N_\text{opt}$)
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle value is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}, and thus carries no confidence interval.
 \end{table}
 
 
@@ -233,7 +235,7 @@ Oracle ($N_\text{opt}$)
 \begin{table}[ht]
 \centering
 \small
-\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the oracle column bounds how much of it is attainable at all.}
+\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the oracle column gives the corresponding deterministic large-$m$ reference.}
 \label{tab:scaling-with-prec}
 \begin{tabular}{lcccc}
 \toprule
@@ -276,7 +278,7 @@ $10^{-8}$
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle value is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}, and thus carries no confidence interval.
 \end{table}
 
 
@@ -284,7 +286,7 @@ $10^{-8}$
 \begin{table}[ht]
 \centering
 \small
-\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the oracle column bounds how much of it is attainable at all. Brackets give 95\% bootstrap intervals; these are conservative (the two curves are resampled independently despite being seed-paired).}
+\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the oracle column gives the corresponding deterministic large-$m$ reference. Brackets give 95\% bootstrap intervals; these are conservative (the two curves are resampled independently despite being seed-paired).}
 \label{tab:scaling-with-prec-ci}
 \begin{tabular}{lcccc}
 \toprule
@@ -327,279 +329,7 @@ $10^{-8}$
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
-\end{table}
-
-
-% ---- tab_broad_pi2.tex -------------------------------------------
-\begin{table}[ht]
-\centering
-\small
-\caption{Convergence under a broad uniform prior $\phi\sim\mathcal{U}(0.01,\pi/2)$ at $\epsilon=10^{-3}$: average share of simulations that converge, by budget. The best implementable entry in each row is set in bold; the oracle is an analytic reference, not a competitor. Only budgets in the informative band are listed (see \texttt{operating\_points.csv}).}
-\label{tab:broad-pi2}
-\begin{tabular}{rccccc}
-\toprule
-Budget $C=N\cdot m$
-& Brute force baseline
-& Linear search
-& Binary search
-& Reverse engineering
-& Oracle ($N_\text{opt}$) \\
-\midrule
-3{,}000
-& 8.8\%
-& 11.3\%
-& \textbf{12.1\%}
-& 11.9\%
-& 14.6\% \\
-4{,}088
-& 10.2\%
-& 13.4\%
-& \textbf{14.5\%}
-& 14.3\%
-& 16.9\% \\
-5{,}572
-& 12.0\%
-& 15.7\%
-& \textbf{17.1\%}
-& 16.8\%
-& 19.6\% \\
-7{,}595
-& 14.1\%
-& 17.9\%
-& \textbf{20.2\%}
-& 19.6\%
-& 22.6\% \\
-10{,}351
-& 16.4\%
-& 21.0\%
-& \textbf{23.4\%}
-& 23.2\%
-& 25.9\% \\
-14{,}108
-& 19.2\%
-& 24.5\%
-& \textbf{27.3\%}
-& 27.2\%
-& 29.7\% \\
-19{,}228
-& 22.2\%
-& 28.4\%
-& 31.9\%
-& \textbf{31.9\%}
-& 33.9\% \\
-26{,}207
-& 25.4\%
-& 32.4\%
-& 36.4\%
-& \textbf{36.4\%}
-& 38.5\% \\
-35{,}718
-& 29.5\%
-& 35.5\%
-& \textbf{41.9\%}
-& 41.8\%
-& 43.5\% \\
-48{,}681
-& 34.2\%
-& 41.7\%
-& \textbf{47.3\%}
-& 47.3\%
-& 48.9\% \\
-66{,}349
-& 39.4\%
-& 46.3\%
-& \textbf{53.3\%}
-& 53.1\%
-& 54.7\% \\
-90{,}429
-& 45.3\%
-& 52.2\%
-& \textbf{59.3\%}
-& 59.2\%
-& 60.7\% \\
-123{,}248
-& 51.9\%
-& 59.7\%
-& \textbf{65.7\%}
-& 65.5\%
-& 66.8\% \\
-167{,}979
-& 58.8\%
-& 65.6\%
-& \textbf{72.1\%}
-& 71.9\%
-& 72.9\% \\
-228{,}942
-& 66.3\%
-& 72.2\%
-& \textbf{78.1\%}
-& 77.9\%
-& 78.7\% \\
-312{,}031
-& 73.7\%
-& 78.5\%
-& \textbf{83.6\%}
-& 83.6\%
-& 84.2\% \\
-425{,}275
-& 81.1\%
-& 84.7\%
-& \textbf{88.7\%}
-& 88.6\%
-& 89.0\% \\
-579{,}619
-& 87.4\%
-& 89.6\%
-& \textbf{92.7\%}
-& 92.6\%
-& 93.0\% \\
-789{,}977
-& 92.6\%
-& 93.9\%
-& \textbf{95.9\%}
-& 95.7\%
-& 96.0\% \\
-1{,}076{,}679
-& 96.2\%
-& 97.0\%
-& 97.1\%
-& \textbf{97.9\%}
-& 98.0\% \\
-\bottomrule
-\end{tabular}
-\\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
-\end{table}
-
-
-% ---- tab_broad_pi4.tex -------------------------------------------
-\begin{table}[ht]
-\centering
-\small
-\caption{Convergence under a broad uniform prior $\phi\sim\mathcal{U}(0.01,\pi/4)$ at $\epsilon=10^{-3}$: average share of simulations that converge, by budget. The best implementable entry in each row is set in bold; the oracle is an analytic reference, not a competitor. Only budgets in the informative band are listed (see \texttt{operating\_points.csv}).}
-\label{tab:broad-pi4}
-\begin{tabular}{rccccc}
-\toprule
-Budget $C=N\cdot m$
-& Brute force baseline
-& Linear search
-& Binary search
-& Reverse engineering
-& Oracle ($N_\text{opt}$) \\
-\midrule
-3{,}000
-& 12.4\%
-& 15.3\%
-& \textbf{17.1\%}
-& 16.7\%
-& 20.6\% \\
-4{,}088
-& 14.3\%
-& 16.6\%
-& \textbf{20.3\%}
-& 19.9\%
-& 23.7\% \\
-5{,}572
-& 16.7\%
-& 20.6\%
-& \textbf{23.5\%}
-& 23.2\%
-& 27.4\% \\
-7{,}595
-& 19.3\%
-& 24.4\%
-& \textbf{27.9\%}
-& 27.6\%
-& 31.4\% \\
-10{,}351
-& 22.8\%
-& 27.6\%
-& \textbf{32.5\%}
-& 32.3\%
-& 35.9\% \\
-14{,}108
-& 26.4\%
-& 32.0\%
-& \textbf{37.9\%}
-& 37.8\%
-& 40.8\% \\
-19{,}228
-& 30.8\%
-& 34.9\%
-& \textbf{43.4\%}
-& 43.4\%
-& 46.1\% \\
-26{,}207
-& 35.5\%
-& 42.1\%
-& 49.2\%
-& \textbf{49.3\%}
-& 51.8\% \\
-35{,}718
-& 40.7\%
-& 47.4\%
-& \textbf{55.7\%}
-& 55.5\%
-& 57.8\% \\
-48{,}681
-& 46.9\%
-& 53.0\%
-& 62.0\%
-& \textbf{62.1\%}
-& 64.0\% \\
-66{,}349
-& 53.4\%
-& 61.0\%
-& \textbf{68.4\%}
-& 68.4\%
-& 70.2\% \\
-90{,}429
-& 60.5\%
-& 67.5\%
-& 74.9\%
-& \textbf{75.1\%}
-& 76.3\% \\
-123{,}248
-& 68.0\%
-& 74.9\%
-& \textbf{81.0\%}
-& 81.0\%
-& 82.0\% \\
-167{,}979
-& 75.4\%
-& 81.3\%
-& 86.2\%
-& \textbf{86.3\%}
-& 87.1\% \\
-228{,}942
-& 82.7\%
-& 87.1\%
-& \textbf{90.8\%}
-& 90.6\%
-& 91.5\% \\
-312{,}031
-& 88.7\%
-& 91.6\%
-& 94.5\%
-& \textbf{94.5\%}
-& 94.9\% \\
-425{,}275
-& 93.6\%
-& 95.1\%
-& 97.0\%
-& \textbf{97.0\%}
-& 97.3\% \\
-579{,}619
-& 96.8\%
-& 97.5\%
-& 98.7\%
-& \textbf{98.7\%}
-& 98.8\% \\
-\bottomrule
-\end{tabular}
-\\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle value is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}, and thus carries no confidence interval.
 \end{table}
 
 
@@ -618,8 +348,8 @@ Scenario
 & \makecell{$95\%$ convergence} \\
 \midrule
 \makecell[l]{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon=10^{-3}$}
-& \makecell{1.49\texttimes \\ {\scriptsize [1.45, 1.53]} \\ {\scriptsize RE}}
-& \makecell{1.53\texttimes \\ {\scriptsize [1.51, 1.56]} \\ {\scriptsize RE}}
+& \makecell{1.50\texttimes \\ {\scriptsize [1.46, 1.53]} \\ {\scriptsize RE}}
+& \makecell{1.53\texttimes \\ {\scriptsize [1.50, 1.55]} \\ {\scriptsize RE}}
 & \makecell{1.54\texttimes \\ {\scriptsize [1.51, 1.58]} \\ {\scriptsize RE}}
 & \makecell{1.48\texttimes \\ {\scriptsize [1.44, 1.52]} \\ {\scriptsize RE}} \\
 \makecell[l]{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon=10^{-4}$}
@@ -649,24 +379,14 @@ Scenario
 & \makecell{1.71\texttimes \\ {\scriptsize [1.67, 1.74]} \\ {\scriptsize RE}} \\
 \makecell[l]{$\phi \sim \mathcal{U}(0.001,0.01)$ \\ $\epsilon=10^{-4}$}
 & \makecell{1.42\texttimes \\ {\scriptsize [1.39, 1.45]} \\ {\scriptsize RE}}
-& \makecell{1.47\texttimes \\ {\scriptsize [1.44, 1.49]} \\ {\scriptsize RE}}
+& \makecell{1.47\texttimes \\ {\scriptsize [1.45, 1.50]} \\ {\scriptsize RE}}
 & \makecell{1.46\texttimes \\ {\scriptsize [1.43, 1.49]} \\ {\scriptsize RE}}
-& \makecell{1.40\texttimes \\ {\scriptsize [1.37, 1.43]} \\ {\scriptsize RE}} \\
+& \makecell{1.39\texttimes \\ {\scriptsize [1.36, 1.42]} \\ {\scriptsize RE}} \\
 \makecell[l]{$\phi \sim \mathcal{U}(0.001,0.1)$ \\ $\epsilon=10^{-4}$}
-& \makecell{2.38\texttimes \\ {\scriptsize [2.33, 2.44]} \\ {\scriptsize BS}}
-& \makecell{2.04\texttimes \\ {\scriptsize [2.00, 2.08]} \\ {\scriptsize BS}}
+& \makecell{2.38\texttimes \\ {\scriptsize [2.32, 2.44]} \\ {\scriptsize BS}}
+& \makecell{2.04\texttimes \\ {\scriptsize [2.00, 2.07]} \\ {\scriptsize BS}}
 & \makecell{1.85\texttimes \\ {\scriptsize [1.81, 1.88]} \\ {\scriptsize RE}}
 & \makecell{1.71\texttimes \\ {\scriptsize [1.67, 1.74]} \\ {\scriptsize BS}} \\
-\makecell[l]{$\phi \sim \mathcal{U}(0.01,\pi/4)$ \\ $\epsilon=10^{-3}$}
-& \makecell{2.08\texttimes \\ {\scriptsize [2.03, 2.13]} \\ {\scriptsize RE}}
-& \makecell{1.75\texttimes \\ {\scriptsize [1.71, 1.78]} \\ {\scriptsize BS}}
-& \makecell{1.57\texttimes \\ {\scriptsize [1.53, 1.60]} \\ {\scriptsize BS}}
-& \makecell{1.46\texttimes \\ {\scriptsize [1.43, 1.50]} \\ {\scriptsize BS}} \\
-\makecell[l]{$\phi \sim \mathcal{U}(0.01,\pi/2)$ \\ $\epsilon=10^{-3}$}
-& \makecell{2.01\texttimes \\ {\scriptsize [1.97, 2.06]} \\ {\scriptsize BS}}
-& \makecell{1.60\texttimes \\ {\scriptsize [1.57, 1.63]} \\ {\scriptsize BS}}
-& \makecell{1.44\texttimes \\ {\scriptsize [1.41, 1.47]} \\ {\scriptsize BS}}
-& \makecell{1.34\texttimes \\ {\scriptsize [1.32, 1.36]} \\ {\scriptsize BS}} \\
 \bottomrule
 \end{tabular}
 \\[2pt]
@@ -677,6 +397,7 @@ Scenario
 % ---- tab_opt_param_first.tex -------------------------------------
 \begin{table}[ht]
 \centering
+\footnotesize
 \caption{Parameter configurations selected for Table~\ref{tab:summary-low-prec-ci} at fixed budget $10{,}000$ ($\epsilon=10^{-3}$, $\phi\sim\mathcal{U}(0.01,0.1)$). For Reverse Engineering, the planned exploration-shot count is additionally reported as the fraction $m'/B$. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.}
 \label{tab:opt-param-first-tab}
 \begin{tabular}{ll}
@@ -689,7 +410,7 @@ Linear search
 Binary search
 & \texttt{m\_exploration=114, conf=0.5} \\
 Reverse engineering
-& \texttt{m\_exploration=44}, $m'/B=0.44\%$ \\
+& \texttt{m\_exploration=54}, $m'/B=0.54\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -725,7 +446,7 @@ BS
 RE
 & \makecell{\texttt{m\_exploration=91}, \\ {\scriptsize $B=29{,}173$}, \\ {\scriptsize $m'/B=0.31\%$}}
 & \makecell{\texttt{m\_exploration=1286}, \\ {\scriptsize $B=2{,}917{,}365$}, \\ {\scriptsize $m'/B=0.04\%$}}
-& \makecell{\texttt{m\_exploration=116}, \\ {\scriptsize $B=278{,}729$}, \\ {\scriptsize $m'/B=0.04\%$}}
+& \makecell{\texttt{m\_exploration=58}, \\ {\scriptsize $B=278{,}729$}, \\ {\scriptsize $m'/B=0.02\%$}}
 & \makecell{\texttt{m\_exploration=2288}, \\ {\scriptsize $B=2{,}059{,}436$}, \\ {\scriptsize $m'/B=0.11\%$}} \\
 \bottomrule
 \end{tabular}
@@ -736,7 +457,7 @@ RE
 \begin{table}[ht]
 \centering
 \small
-\caption{Exploration quality, cost, and overshoot-detector errors, aggregated over the 144 informative operating points. $N_{\mathrm{guess}}$ is recorded before the safeguard and $N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the largest non-aliasing phase-gate count. False-alarm and miss rates are trial-level: they indicate whether at least one such event occurred during a run. Reverse engineering has no overshoot detector, so these rates are not applicable.}
+\caption{Exploration quality, cost, and overshoot-detector errors, aggregated over the 106 informative operating points. $N_{\mathrm{guess}}$ is recorded before the safeguard and $N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the largest non-aliasing phase-gate count. False-alarm and miss rates are trial-level: they indicate whether at least one such event occurred during a run. Reverse engineering has no overshoot detector, so these rates are not applicable.}
 \label{tab:diag-search}
 \begin{tabular}{lcccccc}
 \toprule
@@ -749,25 +470,25 @@ Algorithm
 & \makecell{False alarm \\ / miss} \\
 \midrule
 A.~\ref{alg:linear-search}: LS
-& 1.00
-& 61.1\%
-& 6.6\%
-& 22.8
-& 0.83\%
-& 53.8\% / 6.6\% \\
+& 0.99
+& 61.8\%
+& 5.5\%
+& 28.9
+& 0.58\%
+& 61.7\% / 5.5\% \\
 A.~\ref{alg:binary-search}: BS
-& 0.93
-& 45.7\%
-& 4.1\%
-& 4.4
-& 2.70\%
-& 22.8\% / 4.1\% \\
+& 0.90
+& 46.6\%
+& 5.6\%
+& 5.5
+& 2.41\%
+& 30.7\% / 5.6\% \\
 A.~\ref{alg:reverse-engineering}: RE
 & 1.00
-& 86.8\%
-& 19.3\%
+& 87.9\%
+& 22.9\%
 & 1.0
-& 1.33\%
+& 0.77\%
 & -- \\
 \bottomrule
 \end{tabular}
@@ -778,7 +499,7 @@ A.~\ref{alg:reverse-engineering}: RE
 \begin{table}[ht]
 \centering
 \small
-\caption{Quality of the value of $N$ returned by exploration, before any safeguard is applied. $N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{which value of $N$ should be used for exploitation}; $N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the largest non-aliasing value. Brute force is absent because it does not search: its $N_{\mathrm{guess}}$ is undefined, not zero. Broad-prior scenarios are excluded; the values aggregate the remaining 106 informative operating points.}
+\caption{Quality of the value of $N$ returned by exploration, before any safeguard is applied. $N_{\mathrm{guess}}$ is each algorithm's own answer to \emph{which value of $N$ should be used for exploitation}; $N_{\mathrm{opt}}=\left\lfloor\pi/(2\phi)\right\rfloor$ is the largest non-aliasing value. Brute force is absent because it does not search: its $N_{\mathrm{guess}}$ is undefined, not zero. The values aggregate 106 informative operating points across the active scenarios.}
 \label{tab:diag-exploration}
 \begin{tabular}{lcccccc}
 \toprule
@@ -802,14 +523,14 @@ A.~\ref{alg:binary-search}: BS
 & 0.25
 & 26.6\%
 & 46.6\%
-& 5.5\%
+& 5.6\%
 & 5.5 \\
 A.~\ref{alg:reverse-engineering}: RE
 & 1.00
 & 0.04
-& 51.5\%
-& 87.7\%
-& 22.8\%
+& 51.6\%
+& 87.9\%
+& 22.9\%
 & 1.0 \\
 \bottomrule
 \end{tabular}
@@ -820,7 +541,7 @@ A.~\ref{alg:reverse-engineering}: RE
 \begin{table}[ht]
 \centering
 \small
-\caption{From the exploration's guess to the value of $N$ actually used, aggregated over the 144 informative operating points. $N^*$ is the exploitation value after the safeguard; \emph{unsafe-guess rescue} is $P(N^* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how often the safeguard pulls an aliasing guess back to safety. For the statistical safeguard, a selected $N^*/N_{\mathrm{opt}}$ below one may be intentional: it maximizes $P(\text{no overshoot})\times P(\text{converge})$ and deliberately backs off from the aliasing cliff. \emph{Converged given safe $N^*$} is $P(|\hat\phi-\phi|<\epsilon\mid N^*\leq N_{\mathrm{opt}})$. Brute force performs no search, so its fixed $N_{\mathrm{guess}}=N_{\min}$ is reported.}
+\caption{From the exploration's guess to the value of $N$ actually used, aggregated over the 106 informative operating points. $N^*$ is the exploitation value after the safeguard; \emph{unsafe-guess rescue} is $P(N^* \le N_{\mathrm{opt}} \mid N_{\mathrm{guess}} > N_{\mathrm{opt}})$, i.e.\ how often the safeguard pulls an aliasing guess back to safety. For the statistical safeguard, a selected $N^*/N_{\mathrm{opt}}$ below one may be intentional: it maximizes $P(\text{no overshoot})\times P(\text{converge})$ and deliberately backs off from the aliasing cliff. \emph{Converged given safe $N^*$} is $P(|\hat\phi-\phi|<\epsilon\mid N^*\leq N_{\mathrm{opt}})$. Brute force performs no search, so its fixed $N_{\mathrm{guess}}=N_{\min}$ is reported.}
 \label{tab:diag-downstream}
 \begin{tabular}{lccccc}
 \toprule
@@ -836,25 +557,25 @@ A.~\ref{alg:brute-force}: BF
 & 0.54
 & 0.00\%
 & --
-& 51.3\% \\
+& 53.0\% \\
 A.~\ref{alg:linear-search}: LS
-& 1.00
-& 0.95
-& 1.72\%
-& 44.6\%
-& 59.7\% \\
+& 0.99
+& 0.94
+& 1.22\%
+& 48.3\%
+& 62.3\% \\
 A.~\ref{alg:binary-search}: BS
-& 0.93
-& 1.00
+& 0.90
+& 0.96
 & 0.74\%
-& 96.4\%
-& 61.3\% \\
+& 96.5\%
+& 63.3\% \\
 A.~\ref{alg:reverse-engineering}: RE
 & 1.00
-& 1.00
-& 0.47\%
-& 97.3\%
-& 61.7\% \\
+& 0.96
+& 0.43\%
+& 98.6\%
+& 63.8\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -864,7 +585,7 @@ A.~\ref{alg:reverse-engineering}: RE
 \begin{table}[ht]
 \centering
 \small
-\caption{How well each search's own overshoot decision matches the simulation truth $N_i > N_{\mathrm{opt}}$, aggregated over the 144 informative operating points. Rates are \emph{trial-level}: a run is a false alarm if at least one safe probe was declared an overshoot, and a miss if at least one overshooting probe was accepted. Trial-level is the correct unit because probes within a run are dependent; the probe-level counts are supporting telemetry only. Reverse engineering and brute force have no detector and are omitted rather than scored as zero. Reverse engineering's $N_{\mathrm{guess}}$ and the safeguard's correction to $N^*$ are instead evaluated in Tables~\ref{tab:diag-exploration}--\ref{tab:diag-exploration-priors} and \ref{tab:diag-downstream}. Linear search makes no per-probe declaration, so its classification is the backtracking decision of its own stopping rule.}
+\caption{How well each search's own overshoot decision matches the simulation truth $N_i > N_{\mathrm{opt}}$, aggregated over the 106 informative operating points. Rates are \emph{trial-level}: a run is a false alarm if at least one safe probe was declared an overshoot, and a miss if at least one overshooting probe was accepted. Trial-level is the correct unit because probes within a run are dependent; the probe-level counts are supporting telemetry only. Reverse engineering and brute force have no detector and are omitted rather than scored as zero. Reverse engineering's $N_{\mathrm{guess}}$ and the safeguard's correction to $N^*$ are instead evaluated in Tables~\ref{tab:diag-exploration}--\ref{tab:diag-exploration-priors} and \ref{tab:diag-downstream}. Linear search makes no per-probe declaration, so its classification is the backtracking decision of its own stopping rule.}
 \label{tab:diag-detector}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccccc}
@@ -877,17 +598,17 @@ Algorithm
 & \makecell{Probe-level \\ TN / FN} \\
 \midrule
 A.~\ref{alg:linear-search}: LS
-& 53.8\%
-& 6.6\%
-& 22.8
-& 26{,}034{,}339 / 11{,}647{,}285
-& 125{,}047{,}269 / 1{,}230{,}018 \\
+& 61.7\%
+& 5.5\%
+& 28.9
+& 22{,}371{,}575 / 10{,}570{,}939
+& 119{,}493{,}094 / 908{,}477 \\
 A.~\ref{alg:binary-search}: BS
-& 22.8\%
-& 4.1\%
-& 4.4
-& 14{,}367{,}412 / 4{,}664{,}659
-& 12{,}323{,}125 / 335{,}727 \\
+& 30.7\%
+& 5.6\%
+& 5.5
+& 14{,}023{,}723 / 4{,}623{,}687
+& 10{,}412{,}191 / 337{,}547 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -927,7 +648,7 @@ CUSUM on the pooled reference & \textbf{59.77\%} & 19.9\% & \textbf{91.27\%} & 4
 \begin{table}[ht]
 \centering
 \small
-\caption{Justification of the normal quantile in Equation~(\ref{eq:overshoot-threshold}), restricted to the two-sided regularity region $m'\min(p_0,1-p_0)\geq 10$. Because $\hat\phi_N$ is strictly decreasing in the count $K$, the rule $\hat\phi_N < \phi_1$ is \emph{identical} to the cut $K > m'\cos^2(N\phi_1)$, so the only quantity that has to be Gaussian is $K$ itself, and $K$ is a sum of $m'$ i.i.d.\ Bernoulli variables. The Berry--Esseen theorem then bounds the error of its normal approximation by $C(p_0^2+(1-p_0)^2)/\sqrt{m'p_0(1-p_0)}$ with $C \leq 0.4748$, non-asymptotically and for every $m'$; the second column reports the worst case of that bound and the third the distance actually attained. The remaining columns give the largest gap between the size the rule achieves and its nominal level $\alpha = 1-\mathrm{conf}$, computed from the exact binomial over safe depths. The residual gap is the discreteness of $K$, not a central-limit error, which is why it does not shrink with $m'$.}
+\caption{Justification of the normal quantile in Equation~(\ref{eq:overshoot-threshold}), restricted to the two-sided regularity region $m'\min(p_0,1-p_0)\geq 10$. Because $\hat\phi_N$ is strictly decreasing in the count $K$, the rule $\hat\phi_N < \phi_1$ is \emph{identical} to the cut $K > m'\cos^2(N\phi_1)$, so the only quantity that has to be Gaussian is $K$ itself, and $K$ is a sum of $m'$ i.i.d.\ Bernoulli variables. The Berry--Esseen theorem then bounds the error of its normal approximation by $C(p_0^2+(1-p_0)^2)/\sqrt{m'p_0(1-p_0)}$ with $C \leq 0.4748$, non-asymptotically and for every $m'$; the second column reports the worst case of that bound and the third the distance actually attained. The remaining columns give the largest gap between the size the rule achieves and its nominal level $\alpha = 1-\mathrm{conf}$, computed from the exact binomial over safe values of $N$. That gap includes finite-sample threshold placement and binomial discreteness; its worst case need not shrink here because the regularity region expands toward the boundary as $m'$ grows.}
 \label{tab:overshoot-operating}
 \setlength{\tabcolsep}{6pt}
 \begin{tabular}{r cc ccc}

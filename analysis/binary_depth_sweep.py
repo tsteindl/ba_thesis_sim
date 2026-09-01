@@ -63,6 +63,7 @@ def _one_trial(seed, pmin, pmax, eps, budget, m_exploration, conf):
             res[name] = (0.0, used, 0, 0.0)
             continue
         N = risk_optimal_depth(phi_0, pilot_sd(N_0, m_exploration), rem, eps,
+                               N_min=min(max(int(np.pi // (2 * pmax)), 1), cap),
                                N_max=cap, support=(pmin, pmax))
         m = int(rem / N)
         # an exploitation stream per variant: the exploration is shared (paired), the final shots

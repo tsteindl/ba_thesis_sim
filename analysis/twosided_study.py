@@ -94,6 +94,7 @@ def _one(seed, pmin, pmax, eps, budget, m, conf):
     rng = np.random.default_rng(int(seed))
     phi = float(rng.uniform(pmin, pmax))
     nsup = max(int(np.pi//(2*pmin)), 1); nopt = max(1, int(np.pi//(2*phi)))
+    nlo = min(max(int(np.pi//(2*pmax)), 1), nsup)
     out = {}
     for two in (False, True):
         r = explore(np.random.default_rng(int(seed)), phi, pmax, pmin, m, budget, conf, two)
@@ -106,14 +107,17 @@ def _one(seed, pmin, pmax, eps, budget, m, conf):
     if budget - u1 > 0:
         pa, Na = a1[-1]
         depths["deep_1s"] = (risk_optimal_depth(pa, pilot_sd(Na, m), budget-u1, eps,
-                                                N_max=nsup, support=(pmin, pmax)), u1)
+                                                N_min=nlo, N_max=nsup,
+                                                support=(pmin, pmax)), u1)
         depths["first"] = (risk_optimal_depth(f1, pilot_sd(n1, m), budget-u1, eps,
-                                              N_max=nsup, support=(pmin, pmax)), u1)
+                                              N_min=nlo, N_max=nsup,
+                                              support=(pmin, pmax)), u1)
         depths["post"] = (depth_from_posterior(p1, m, pmin, pmax, budget-u1, eps, N_max=nsup), u1)
     if budget - u2 > 0:
         pa, Na = a2[-1]
         depths["deep_2s"] = (risk_optimal_depth(pa, pilot_sd(Na, m), budget-u2, eps,
-                                                N_max=nsup, support=(pmin, pmax)), u2)
+                                                N_min=nlo, N_max=nsup,
+                                                support=(pmin, pmax)), u2)
         depths["L_2s"] = (max(int(L2), 1), u2)
     for j, a in enumerate(ARMS):
         if a not in depths:

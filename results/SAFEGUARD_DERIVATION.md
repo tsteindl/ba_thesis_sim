@@ -273,20 +273,28 @@ plain $\Phi\!\left(\frac{\pi/(2N)-\hat\phi_0}{\sigma}\right)$ is the shortcut me
 ## 5. Factor 2 — the convergence probability
 
 Conditional on not overshooting, the final estimate at depth $N$ with $m=\lfloor B/N\rfloor$ shots
-obeys (S1) again. The key algebraic step:
+obeys (S1) again, so
 
-$$N^2 m \;=\; N^2\Big\lfloor\frac{B}{N}\Big\rfloor \;\approx\; N B
+$$\sigma_{\text{final}}=\frac{1}{2N\sqrt{m}}=\frac{1}{2N\sqrt{\lfloor B/N\rfloor}}
 \qquad\Longrightarrow\qquad
-\sigma_{\text{final}}=\frac{1}{2\sqrt{NB}}$$
-
-so that
-
-$$\mathbb P\big(|\hat\phi-\phi|<\varepsilon\big)
+\mathbb P\big(|\hat\phi-\phi|<\varepsilon\big)
 =2\Phi\!\left(\frac{\varepsilon}{\sigma_{\text{final}}}\right)-1
-=2\Phi\!\left(2\varepsilon\sqrt{NB}\right)-1$$
+=2\Phi\!\left(2\varepsilon N\sqrt{\Big\lfloor\frac{B}{N}\Big\rfloor}\right)-1$$
 
-Monotonically **increasing** in $N$ (as $\sqrt N$), and — crucially — **free of $\phi$**, again by A1.
-That is what allows it to be evaluated without knowing $\phi$.
+and $0$ where $\lfloor B/N\rfloor=0$, i.e. where the depth cannot be paid for at all.
+
+The shot count is kept as a **whole number**. Dropping the floor, $N^2\lfloor B/N\rfloor\approx NB$,
+gives the smooth $2\Phi(2\varepsilon\sqrt{NB})-1$ that earlier versions of this document and of the
+code used. The two agree to $O(N/B)$, so they are indistinguishable while the exploitation buys
+thousands of shots — and they disagree exactly where $N$ is a material fraction of $B$, which is
+where the rule is deciding. The smooth form is also *strictly increasing* in $N$, whereas the true
+factor is not: at $N$ with $\lfloor B/N\rfloor=k$ and $N'=N+1$ with $\lfloor B/N'\rfloor=k-1$ the
+deeper circuit can be genuinely **less** precise, because it lost a whole shot. That non-monotonicity
+is real, it is what the discrete resource actually does, and it is one of the reasons the maximiser
+is now found by enumeration rather than by a search that assumes a well-behaved shape.
+
+Both forms are — crucially — **free of $\phi$**, again by A1. That is what allows the factor to be
+evaluated without knowing $\phi$.
 
 > Note the resource asymmetry: $N\cdot m=B$ is fixed, but $N^2m=NB$ grows with $N$. Depth is worth
 > more than repetitions. That is the Heisenberg scaling, and it is why the safeguard is not simply
@@ -307,14 +315,41 @@ only modelling input is A5, the zero in the second bracket.
 
 ## 7. The rule
 
-$$\boxed{\;N^{*}=\operatorname*{arg\,max}_{1\le N\le N_{\max}}\;
-\mathbb P\big(\phi<\tfrac{\pi}{2N}\mid\hat\phi_0\big)\cdot\Big[2\Phi\!\left(2\varepsilon\sqrt{NB}\right)-1\Big]\;}$$
+$$\boxed{\;N^{*}=\operatorname*{arg\,max}_{N_{\min}\le N\le N_{\max}}\;
+\mathbb P\big(\phi<\tfrac{\pi}{2N}\mid\hat\phi_0\big)\cdot\Big[2\Phi\!\left(2\varepsilon N\sqrt{\lfloor B/N\rfloor}\right)-1\Big]\;}$$
 
 with the first factor the truncated-normal tail of §4 (or, to within 0.14 pp, the plain
-$\Phi\!\left(\frac{\pi/(2N)-\hat\phi_0}{\sigma}\right)$),
+$\Phi\!\left(\frac{\pi/(2N)-\hat\phi_0}{\sigma}\right)$), and
 
-and $N_{\max}=\lfloor\pi/(2\phi_{\min})\rfloor$ from the prior support. No tuned constant appears
-anywhere.
+$$N_{\min}=\Big\lfloor\frac{\pi}{2\phi_{\max}}\Big\rfloor,\qquad
+N_{\max}=\Big\lfloor\frac{\pi}{2\phi_{\min}}\Big\rfloor$$
+
+both from the prior support. No tuned constant appears anywhere.
+
+**The maximisation is exact, and that word is doing narrow work.** Every integer of
+$\{N_{\min},\dots,N_{\max}\}$ is scored in one vectorised pass and the argmax is taken directly;
+`numpy.argmax` returns the smallest index, so an exact tie resolves to the *shallowest* depth. There
+is no coarse-to-fine bracketing, no local interval, no $5\sigma$ cutoff and no hard cap, so $N^{*}$
+cannot depend on the shape of a search schedule or on an unproven unimodality of the score — which
+matters now that §5's floor has made the score genuinely non-monotone. What is exact is the
+**numerical maximisation** of an approximate score: A1–A7 are untouched and the objective is still a
+Gaussian approximation to a discrete problem.
+
+**Why the search starts at $N_{\min}$ and not at 1.** $N_{\min}=\lfloor\pi/(2\phi_{\max})\rfloor$ is
+the deepest circuit that stays on the first identifiable branch for the *whole* prior support:
+$N_{\min}\phi\le\pi/2$ for every admissible $\phi$, with equality possible only at an endpoint (A2).
+It is safe by construction and is already the depth the opening pilot is taken at, so running the
+exploitation shallower than that baseline is not a trade-off the safeguard should be able to make.
+The admissible set is therefore constrained, and the claim is that $N^{*}$ is the exact maximiser
+**over that constrained range** — not a proof that no smaller integer could ever carry a marginally
+larger numerical score, which the floor of §5 makes a non-trivial question. On the 177 active
+scenario/budget points of the thesis matrix a direct integer audit found $N_{\min}$'s accuracy factor
+to be at least as large as that of every $N<N_{\min}$ anyway, so nothing that would have won is being
+excluded. Cost is not the reason for the constraint either: the active scenarios enumerate at most
+1,556 candidates per call.
+
+The upper end needs no separate argument — beyond $N_{\max}$ the truncated posterior of §4 puts zero
+mass on "no overshoot", so the score is identically zero there.
 
 **The binary-search search is *not* capped at the bisection result.** That would mirror the published
 "reduce $N$ by $s$" wording, but the bisection stops when its step size reaches zero and therefore

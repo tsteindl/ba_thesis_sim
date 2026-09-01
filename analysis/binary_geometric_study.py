@@ -100,9 +100,9 @@ def explore_geo(rng, phi, phi_max, phi_min, m, budget, conf):
     return ph, N, used, phi_acc, N_acc, phi_0, N_0, lb, ub, probes
 
 
-def _depth(spec, rem, eps):
+def _depth(spec, rem, eps, n_min):
     ph, sd, cap, sup = spec
-    return risk_optimal_depth(ph, sd, rem, eps, N_max=cap, support=sup)
+    return risk_optimal_depth(ph, sd, rem, eps, N_min=min(n_min, cap), N_max=cap, support=sup)
 
 
 def _one_trial(seed, pmin, pmax, eps, budget, m, conf):
@@ -110,6 +110,7 @@ def _one_trial(seed, pmin, pmax, eps, budget, m, conf):
     phi = float(rng.uniform(pmin, pmax))
     n_sup = max(int(np.pi // (2 * pmin)), 1)
     n_opt = max(1, int(np.pi // (2 * phi)))
+    n_lo = min(max(int(np.pi // (2 * pmax)), 1), n_sup)
     full = (pmin, pmax)
     specs, useds = {}, {}
 
@@ -144,7 +145,7 @@ def _one_trial(seed, pmin, pmax, eps, budget, m, conf):
             chosen[a] = 0
             res[a] = (0.0, used / budget, 0.0, 0.0, 0.0, specs[f"{a[0]}_nprobe"])
             continue
-        N = _depth(specs[a], rem, eps)
+        N = _depth(specs[a], rem, eps, n_lo)
         mm = int(rem / N)
         r2 = np.random.default_rng([int(seed) % (2 ** 32), 15485863])
         est = simulate_errors(r2, phi, mm, N)

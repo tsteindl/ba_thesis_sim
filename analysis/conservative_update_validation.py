@@ -36,8 +36,9 @@ def _finish(seed, phi, pmin, pmax, eps, budget, pilot, sigma, used):
     remaining = budget - used
     if remaining <= 0:
         return 0.0, 0.0, 0.0, 0.0
-    depth = risk_optimal_depth(pilot, sigma, remaining, eps, N_max=n_sup,
-                               support=(pmin, pmax))
+    depth = risk_optimal_depth(pilot, sigma, remaining, eps,
+                               N_min=min(max(int(np.pi // (2 * pmax)), 1), n_sup),
+                               N_max=n_sup, support=(pmin, pmax))
     shots = int(remaining / depth)
     rng = np.random.default_rng([int(seed) % (2**32), int(depth) % (2**32),
                                  int(shots) % (2**32), 499_979])

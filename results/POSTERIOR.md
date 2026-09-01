@@ -517,7 +517,7 @@ explicit about:
 | | how the argmax is taken | exact? |
 |---|---|---|
 | `posterior.py::depth_from_posterior` | evaluates $S$ at **every** integer $N=1,\dots,N_{\max}$ and takes `argmax` | **yes**, exact argmax over the admissible integers |
-| `safeguard.py::risk_optimal_depth` | 3 rounds of geometric bracketing (128 candidates each), then an exact scan of the final bracket | no — a local search; correct if $S$ is unimodal, which is not proven |
+| `safeguard.py::risk_optimal_depth` | evaluates $S$ at **every** integer $N=N_{\min},\dots,N_{\max}$ and takes `argmax` | **yes**, exact argmax over the admissible integers — and no unimodality is assumed |
 
 ### 8.3 The upper limit $N_{\max}$
 
@@ -530,9 +530,14 @@ A(N) \;=\; P\!\left(\varphi<\tfrac{\pi}{2N}\ \Big|\ \mathcal D\right) \;=\; 0
 \qquad\Longrightarrow\qquad S(N)=0 .
 $$
 
-Truncating the search there discards only depths whose objective is exactly zero. (The additional
-$5\sigma$ cut inside `risk_optimal_depth` *is* an approximation, and a numerical one only: it clips the
-search where the Gaussian tail (13) is below $\sim3\times10^{-7}$.)
+Truncating the search there discards only depths whose objective is exactly zero. (An earlier
+`risk_optimal_depth` additionally clipped the search at $\hat\varphi_0-5\sigma$, which *was* a
+numerical approximation. It is gone: the whole interval is now enumerated.)
+
+`risk_optimal_depth` differs from `depth_from_posterior` in one further respect, and it is a
+constraint rather than an approximation: its search starts at $N_{\min}=\lfloor\pi/(2\varphi_{\max})\rfloor$,
+the depth that is safe for the entire prior support, not at 1. It is an exact argmax over that
+constrained range.
 
 Any *smaller* cap — e.g. the bisection's lower bound $L$ — is a genuine constraint that can exclude the
 maximiser. §13 measures what that costs.

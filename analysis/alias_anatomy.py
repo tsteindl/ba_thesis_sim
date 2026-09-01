@@ -46,8 +46,9 @@ def _task(t):
             if rem <= 0 or not np.isfinite(phi_acc):
                 continue
             n_opt = max(1, int(np.pi // (2 * phi)))
-            N = risk_optimal_depth(phi_acc, pilot_sd(N_acc, m), rem, eps, N_max=n_sup,
-                                   support=(pmin, pmax))
+            N = risk_optimal_depth(phi_acc, pilot_sd(N_acc, m), rem, eps,
+                                   N_min=min(max(int(np.pi // (2 * pmax)), 1), n_sup),
+                                   N_max=n_sup, support=(pmin, pmax))
             mm = int(rem / N)
             if mm < 1:
                 continue

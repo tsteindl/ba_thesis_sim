@@ -167,8 +167,9 @@ def _one(seed, pmin, pmax, eps, budget, m, conf):
             result[arm] = (0.0, min(used / budget, 1.0), probes, certified - 1,
                            float(certified > 1), contaminated, 0.0, 0.0, 50.0)
             continue
-        depth = risk_optimal_depth(pilot, sigma, rem, eps, N_max=n_sup,
-                                   support=(pmin, pmax))
+        depth = risk_optimal_depth(pilot, sigma, rem, eps,
+                                   N_min=min(max(int(np.pi // (2 * pmax)), 1), n_sup),
+                                   N_max=n_sup, support=(pmin, pmax))
         shots = int(rem / depth)
         r2 = np.random.default_rng([seed % (2**32), int(depth) % (2**32),
                                     int(shots) % (2**32), 499_979])

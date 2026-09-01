@@ -1,0 +1,35 @@
+\begin{table}[ht]
+\centering
+\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated analytically using the asymptotic QCRB law. Brackets give 95\% intervals (Wilson for rates, bootstrap for budgets); the oracle is exact and carries none.}
+\label{tab:summary-low-prec-ci}
+\begin{tabular}{lcc}
+\toprule
+Algorithm
+& \makecell{Avg. \% converged \\ (budget = 10{,}000)}
+& \makecell{Budget for $>90\%$ \\ convergence} \\
+\midrule
+A.~\ref{alg:brute-force}: Brute force baseline
+& 56.09\% \newline {\scriptsize [55.66, 56.53]}
+& 45{,}900 \newline {\scriptsize [45{,}300, 46{,}500]} \\
+A.~\ref{alg:linear-search}: Linear search
+& 64.10\% \newline {\scriptsize [63.68, 64.52]}
+& 35{,}500 \newline {\scriptsize [34{,}900, 36{,}000]} \\
+A.~\ref{alg:binary-search}: Binary search
+& 65.07\% \newline {\scriptsize [64.65, 65.49]}
+& 32{,}400 \newline {\scriptsize [32{,}000, 32{,}900]} \\
+A.~\ref{alg:reverse-engineering}: Reverse engineering
+& 66.21\% \newline {\scriptsize [65.79, 66.62]}
+& 29{,}800 \newline {\scriptsize [29{,}200, 30{,}300]} \\
+\midrule
+Separable protocol ($N=1$)
+& 15.68\% \newline {\scriptsize [15.36, 16.00]}
+& 680{,}000 \newline {\scriptsize [669{,}000, 691{,}000]} \\
+\midrule
+Oracle ($N_\text{opt}$)
+& 73.48\%
+& 24{,}435 \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\end{table}

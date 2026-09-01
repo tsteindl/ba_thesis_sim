@@ -1,7 +1,8 @@
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Budget required to achieve $>90\%$ convergence for selected precision settings and prior intervals. Improvement factors are relative to the brute-force baseline; values greater than one indicate a lower required budget. Brackets give 95\% bootstrap intervals.}
+\setlength{\tabcolsep}{3pt}
+\caption{Budget required to achieve $>90\%$ convergence for selected precision settings and prior intervals. Values are budgets in thousands; smaller values indicate a lower required budget. Brackets give 95\% bootstrap intervals.}
 \label{tab:summary-all-ci}
 \begin{tabular}{l c c c c}
 \toprule
@@ -29,7 +30,7 @@ A.~\ref{alg:binary-search}: BS
 A.~\ref{alg:reverse-engineering}: RE
 & 29.8 \newline {\scriptsize [29.2, 30.3]}
 & 2{,}600 \newline {\scriptsize [2{,}570, 2{,}630]}
-& 302 \newline {\scriptsize [298, 307]}
+& 303 \newline {\scriptsize [298, 307]}
 & 2{,}450 \newline {\scriptsize [2{,}420, 2{,}480]} \\
 \midrule
 Sep. ($N=1$)
@@ -46,5 +47,5 @@ Oracle ($N_\text{opt}$)
 \bottomrule
 \end{tabular}
 \\[2pt]
-\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle is exact and can be calculated analytically for each $\phi$. Thus it carries no confidence interval.
+\footnotesize Adaptive entries are de-biased: parameters are grid-tuned on seeds 42 and 43 and the frozen winner is re-validated on the independent seed 2024 at $R=50{,}000$ trials. The oracle value is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}, and thus carries no confidence interval.
 \end{table}

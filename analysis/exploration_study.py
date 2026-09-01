@@ -109,9 +109,10 @@ def _linear_risk(rng, phi, phi_max, phi_min, m_exploration, budget, eps_target,
     else:
         phi_pilot, sigma = float(ph[-1]), pilot_sd(Nk[-1], m_exploration)
 
-    N_max = max(int(np.pi // (2 * phi_min)), 1)
+    N_min = max(int(np.pi // (2 * phi_max)), 1)
+    N_max = max(int(np.pi // (2 * phi_min)), N_min)
     N = risk_optimal_depth(phi_pilot, sigma, remaining_budget, eps_target,
-                           N_max=N_max, support=(phi_min, phi_max))
+                           N_min=N_min, N_max=N_max, support=(phi_min, phi_max))
     m = int(remaining_budget / N)
     phi_hat = simulate_errors(rng, phi, m, N)
     return phi_hat, budget_used + m * N

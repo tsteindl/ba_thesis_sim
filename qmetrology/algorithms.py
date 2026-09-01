@@ -365,9 +365,10 @@ def find_phi_fixed_budget_linear_search_risk(rng, phi, phi_max, phi_min, m_explo
     else:
         phi_pilot, sigma = float(ph[-1]), pilot_sd(Nk[-1], m_exploration)
 
-    N_max = max(int(np.pi // (2 * phi_min)), 1)
+    N_min = max(int(np.pi // (2 * phi_max)), 1)
+    N_max = max(int(np.pi // (2 * phi_min)), N_min)
     N = risk_optimal_depth(phi_pilot, sigma, remaining_budget, eps_target,
-                           N_max=N_max, support=(phi_min, phi_max))
+                           N_min=N_min, N_max=N_max, support=(phi_min, phi_max))
     m = int(remaining_budget / N)
     phi_hat = simulate_errors(rng, phi, m, N)
     budget_used += m * N
@@ -486,8 +487,11 @@ def find_phi_fixed_budget_binary_search_risk(rng, phi, phi_max, phi_min, m_explo
     N_cap = {"support": max(int(np.pi // (2 * phi_min)), 1),
              "L": max(int(L), 1),
              "min": min(max(int(L), 1), max(int(np.pi // (2 * phi_min)), 1))}[depth_cap]
+    # the "L"/"min" caps can land BELOW the prior's N_min (the bisection may settle at its own lower
+    # bound), so the admissible set is anchored at whichever of the two is shallower -- never at 1.
+    N_floor = min(max(int(np.pi // (2 * phi_max)), 1), N_cap)
     N = risk_optimal_depth(phi_0, pilot_sd(N_0, m_exploration), remaining_budget,
-                           eps_target, N_max=N_cap, support=(phi_min, phi_max))
+                           eps_target, N_min=N_floor, N_max=N_cap, support=(phi_min, phi_max))
     m = int(remaining_budget / N)
     phi_hat = simulate_errors(rng, phi, m, N)
     budget_used += m * N
@@ -507,10 +511,11 @@ def find_phi_fixed_budget_binary_search_deep(rng, phi, phi_max, phi_min, m_explo
     only thing the bisection buys the depth rule.
 
       N_guess = N_acc = L,  the deepest accepted depth -- the exploration's answer, before safeguard.
-      N_star  = the Eq. (3.8) risk-optimal depth over the prior support, floored at N_min.
+      N_star  = the Eq. (3.8) risk-optimal depth, the exact argmax over N_min..N_max.
 
-    The floor `N >= min(N_min, N_max)` keeps the exploitation from running shallower than the
-    opening probe, which no admissible phi would justify.
+    The safeguard enumerates the whole admissible interval, so N_star >= N_min holds by construction
+    and no post-hoc floor is applied: the exploitation never runs shallower than the opening probe,
+    a depth no admissible phi would justify.
 
     CAVEAT, stated in results/BS_METHOD_DECISION.md and results/consolidated/algorithm_code_audit.md:
     the deepest accepted estimate is selected *because it passed the overshoot test*, so treating it
@@ -541,9 +546,9 @@ def find_phi_fixed_budget_binary_search_deep(rng, phi, phi_max, phi_min, m_explo
 
     N_min = max(int(np.pi // (2 * phi_max)), 1)
     N_sup = max(int(np.pi // (2 * phi_min)), 1)
+    # no post-hoc floor: the search itself starts at N_min, so it cannot return anything shallower
     N = risk_optimal_depth(phi_acc, pilot_sd(N_acc, m_exploration), remaining_budget, eps_target,
-                           N_max=N_sup, support=(phi_min, phi_max))
-    N = max(N, min(N_min, N_sup))
+                           N_min=min(N_min, N_sup), N_max=N_sup, support=(phi_min, phi_max))
     m = int(remaining_budget / N)
     if m < 1:
         if trace is not None:
@@ -636,8 +641,9 @@ def find_phi_fixed_budget_reverse_engineering_risk(rng, phi, phi_max, phi_min, m
                                                    budget, eps_target, trace=None):
     """Algorithm 6 with the tuned safety factor C_safe (Eq. 3.6) replaced by the risk-optimal depth.
 
-    N is capped by the prior support, N_max = floor(pi/(2 phi_min)) — the constant-C form has no such
-    cap, so a badly under-shooting pilot could send it past any admissible depth.
+    N is confined to the prior support, N_min = floor(pi/(2 phi_max)) .. N_max = floor(pi/(2 phi_min))
+    — the constant-C form has neither bound, so a badly under-shooting pilot could send it past any
+    admissible depth, and an over-shooting one below the depth its own pilot was taken at.
     """
     N_min = max(np.pi // (2 * phi_max), 1)
     N_max = max(np.pi // (2 * phi_min), 1)
@@ -671,7 +677,8 @@ def find_phi_fixed_budget_reverse_engineering_risk(rng, phi, phi_max, phi_min, m
             trace.status = "no_exploitation_budget_exhausted"
         return phi_hat, budget_used
     N = risk_optimal_depth(phi_hat, pilot_sd(N_min, m_exploration), remaining_budget,
-                           eps_target, N_max=max(int(N_max), 1), support=(phi_min, phi_max))
+                           eps_target, N_min=max(int(N_min), 1),
+                           N_max=max(int(N_max), int(N_min), 1), support=(phi_min, phi_max))
     m = int(remaining_budget / N)
     if m < 1:
         if trace is not None:

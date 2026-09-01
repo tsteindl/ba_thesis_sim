@@ -143,6 +143,7 @@ def _one_trial(seed, pmin, pmax, eps, budget, m, conf):
         "unwrapd": (mu_d,    sd_d,               n_sup, full),
         "bracket": (phi_0,   pilot_sd(N_0, m),   n_sup, brLU),
     }
+    n_lo = min(max(int(np.pi // (2 * pmax)), 1), n_sup)
     res, chosen = {}, {}
     for a in ARMS:
         ph, sd, cap, sup = spec[a]
@@ -150,7 +151,7 @@ def _one_trial(seed, pmin, pmax, eps, budget, m, conf):
             chosen[a] = 0
             res[a] = (0.0, used / budget, 0.0, 0.0, 0.0, 0.0, 0.0)
             continue
-        N = risk_optimal_depth(ph, sd, rem, eps, N_max=cap, support=sup)
+        N = risk_optimal_depth(ph, sd, rem, eps, N_min=min(n_lo, cap), N_max=cap, support=sup)
         mm = int(rem / N)
         r2 = np.random.default_rng([int(seed) % (2 ** 32), 15485863])
         est = simulate_errors(r2, phi, mm, N)

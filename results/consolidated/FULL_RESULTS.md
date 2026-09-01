@@ -4,16 +4,16 @@ Consolidated performance, algorithm diagnostics and uncertainty for the four alg
 
 | | |
 |---|---|
-| Generated | 2026-08-26 23:43 by `python analysis/consolidated/full_report.py` |
+| Generated | 2026-09-01 18:35 by `python analysis/consolidated/full_report.py` |
 | Sweep command | `python analysis/consolidated/run.py --max --keep-traces` |
 | Sweep mode | `max` |
 | Sweep wall clock | 307 min (5.1 h), 24 cores |
-| Repository commit | `49aec23` (working tree dirty) |
+| Repository commit | `e70668c` (working tree dirty) |
 | Scenarios | 10 |
-| Operating points | 221 (144 live, 77 saturated/floored) |
-| Evaluated (point, algorithm) cells | 1326 |
+| Operating points | 177 (106 live, 71 saturated/floored) |
+| Evaluated (point, algorithm) cells | 1062 |
 | Held-out trials per cell | R = 50,000 |
-| Total held-out trials | 66,300,000 |
+| Total held-out trials | 53,100,000 |
 
 > **Scope note.** This document is generated from `results/consolidated/*.csv` and nothing else. No thesis file (`../thesis/*.tex`) is read or written anywhere in this pipeline; the LaTeX in `results/consolidated/tex/` is a proposal to paste, never an edit.
 
@@ -130,9 +130,10 @@ while budget allows and the bracket is not exhausted:
            threshold = Phi^-1(1-conf; phi_hat_i, 1/(4 m' N^2))
 N_guess = N_acc  (== L)
 N_star  = risk_optimal_depth(phi_acc, sigma = 1/(2 N_acc sqrt(m')),
-                             remaining_budget, eps, N_max = floor(pi/(2 phi_min)),
-                             support = (phi_min, phi_max))
-N_star  = max(N_star, min(N_min, N_max))         # never shallower than the opening probe
+                             remaining_budget, eps,
+                             N_min = floor(pi/(2 phi_max)),   # the search STARTS here,
+                             N_max = floor(pi/(2 phi_min)),   # so no post-hoc floor is
+                             support = (phi_min, phi_max))    # needed
 m       = floor(remaining_budget / N_star)
 return phi_hat(N_star, m)
 ```
@@ -147,7 +148,9 @@ while phi_hat_0 == 0 and budget allows:
     phi_hat_0 = measure(N_min, m')               # retries are charged to B_exploration
 N_guess = max(floor(pi / (2 phi_hat_0)), 1)      # the raw inverted depth
 N_star  = risk_optimal_depth(phi_hat_0, sigma = 1/(2 N_min sqrt(m')),
-                             remaining_budget, eps, N_max = floor(pi/(2 phi_min)),
+                             remaining_budget, eps,
+                             N_min = floor(pi/(2 phi_max)),
+                             N_max = floor(pi/(2 phi_min)),
                              support = (phi_min, phi_max))
 m       = floor(remaining_budget / N_star)
 return phi_hat(N_star, m)
@@ -160,14 +163,22 @@ return phi_hat(N_star, m)
 ```
 P(no overshoot | N) = P( phi < pi/(2N) )       -- from the TRUNCATED normal posterior on
                                                   [phi_min, phi_max]
-P(converge | N)     = 2*Phi( 2 eps sqrt(N B) ) - 1
+P(converge | N)     = 2*Phi( 2 eps N sqrt(m) ) - 1,  m = floor(B / N)   -- WHOLE shots,
+                      = 0 where m == 0                                    not the smooth B/N
 
-N_star = argmax_{1 <= N <= N_max}  P(no overshoot | N) * P(converge | N)
+N_star = argmax_{N_min <= N <= N_max}  P(no overshoot | N) * P(converge | N)
+
+N_min = floor(pi/(2 phi_max))     safe for the WHOLE prior support (A2)
+N_max = floor(pi/(2 phi_min))     beyond it P(no overshoot) is exactly 0
 ```
 
-A deeper circuit is more precise (the second factor grows as `sqrt(N)`) but more likely to alias (the first falls). The optimum needs no tuned constant. The implied multiplicative safety factor `N_star / floor(pi/(2 phi_hat_0))` is adaptive: it tightens when the pilot is imprecise and relaxes toward 1 as the budget grows — which is what a constant `C` could never track.
+A deeper circuit is more precise (the second factor grows roughly as `sqrt(N)`) but more likely to alias (the first falls). The optimum needs no tuned constant. The implied multiplicative safety factor `N_star / floor(pi/(2 phi_hat_0))` is adaptive: it tightens when the pilot is imprecise and relaxes toward 1 as the budget grows — which is what a constant `C` could never track.
 
-The maximisation is a three-round geometric refinement followed by an exact integer scan, capped at `N_max = floor(pi/(2 phi_min))` from the prior support.
+**The maximisation is exhaustive.** Every integer of the closed interval `[N_min, N_max]` is scored in one vectorised pass and the argmax is taken directly, so `N_star` is the exact maximiser of the score over the admissible set — no coarse-to-fine refinement, no local bracket, no sigma cutoff, no cap. `numpy.argmax` resolves an exact tie to the smallest (shallowest) `N`. "Exact" describes the numerical maximisation only: the score itself is still the Gaussian approximation derived above.
+
+**The accuracy factor counts whole shots.** `m = floor(B/N)` is what the algorithm can actually pay for, so the factor is `2*Phi(2 eps N sqrt(m)) - 1`, and zero where `m == 0`. It differs from the smooth substitution `m ~ B/N` by `O(N/B)` — invisible while the exploitation buys thousands of shots, decisive where the depth is a material fraction of the budget. It also makes the factor non-monotone in `N` (one step deeper can cost a whole shot), which is a second reason not to assume the score has a well-behaved shape.
+
+**The search starts at `N_min`, never at 1.** `N_min = floor(pi/(2 phi_max))` is the deepest circuit that stays on the first identifiable branch for the entire prior support, so it is safe by construction and is the depth the opening pilot is already taken at. Running the exploitation shallower than that baseline is not a trade-off the safeguard is allowed to make. `N_star` is therefore the exact maximiser over the CONSTRAINED range; on the active scenario/budget grid a direct integer audit found `N_min` to have at least as large an accuracy factor as every `N < N_min` in any case.
 
 ### 2.6 The two reference rows
 
@@ -335,8 +346,8 @@ Each operating point is labelled by the *best* convergence rate achieved at it b
 
 | regime | rule | count |
 |---|---|---:|
-| `live` | 3% < best rate < 99% | **144** |
-| `saturated` | best rate >= 99% | 77 |
+| `live` | 3% < best rate < 99% | **106** |
+| `saturated` | best rate >= 99% | 71 |
 | `floored` | best rate <= 3% | 0 |
 
 **Every aggregate in §7–§11 is over `live` points only.** At a saturated point every configuration converges, the grid search cannot distinguish them (selection margins go to 0.00 pp), and the tie-break rule then picks the cheapest exploration — often a one-shot pilot. The *performance* number there is still valid; the *diagnostics* measured at that arbitrary configuration are not a property of the algorithm. All points remain in every CSV; join on `operating_points.csv` to filter differently.
@@ -511,7 +522,7 @@ The ratio `B_brute(p*) / B_algo(p*)` resamples both curves **independently**. Be
 
 Monte-Carlo error is not the only thing moving a crossing; the finite budget grid does too. This is probed directly and without assumptions: re-derive each crossing from the two half-density subgrids (`budgets[0::2]` and `budgets[1::2]`) and report the largest relative deviation. Log-linear interpolation error is `O(h^2)` in the grid log-spacing, so the full-density grid carries roughly **a quarter** of the deviation reported.
 
-Measured here: median **2.59%**, 90th percentile 6.74%, max 13.14% over 197 crossings — so the full-grid contribution is of order 0.65% at the median.
+Measured here: median **2.87%**, 90th percentile 7.18%, max 13.12% over 157 crossings — so the full-grid contribution is of order 0.72% at the median.
 
 ### 6.7 Rounding conventions
 
@@ -535,11 +546,11 @@ Convergence rate of the frozen winner on the held-out seed, R = 50,000 per cell.
 
 | algorithm | mean | median | min | max | points won |
 |---|---:|---:|---:|---:|---:|
-| Brute force | 51.3% | 49.0% | 8.8% | 97.4% | 0/144 |
-| Linear search | 59.0% | 58.9% | 11.3% | 98.5% | 0/144 |
-| Binary search | 61.2% | 61.8% | 12.1% | 98.7% | 63/144 |
-| Reverse engineering | 61.6% | 63.1% | 11.9% | 98.9% | 81/144 |
-| *Separable protocol (N=1)* | 22.0% | 15.7% | 0.0% | 96.2% | -- |
+| Brute force | 53.0% | 49.2% | 17.5% | 97.4% | 0/106 |
+| Linear search | 61.8% | 63.7% | 17.2% | 98.5% | 0/106 |
+| Binary search | 63.1% | 64.9% | 19.7% | 98.3% | 35/106 |
+| Reverse engineering | 63.7% | 66.1% | 18.5% | 98.9% | 71/106 |
+| *Separable protocol (N=1)* | 15.0% | 11.8% | 0.0% | 37.5% | -- |
 
 Means and medians mix scenarios and budgets; they summarise the table, they are not a headline claim. The per-cell rows with Wilson intervals are in `performance_curves.csv`. The last two rows are reference points, not protocols under comparison: they cannot win a point and are excluded from every diagnostic aggregate and from the regime rule.
 
@@ -549,18 +560,18 @@ Ratio `B_brute(p*) / B_algo(p*)`; **greater than 1 means the algorithm needs les
 
 | algorithm | p* | median ratio | min | max | scenarios with a crossing |
 |---|---|---:|---:|---:|---:|
-| Linear search | 50% | **1.76** | 1.26 | 2.07 | 10 |
-| Linear search | 80% | **1.59** | 1.21 | 1.88 | 10 |
-| Linear search | 90% | **1.49** | 1.14 | 1.67 | 10 |
-| Linear search | 95% | **1.41** | 1.10 | 1.54 | 10 |
-| Binary search | 50% | **2.08** | 1.41 | 2.38 | 10 |
-| Binary search | 80% | **1.82** | 1.39 | 2.04 | 10 |
-| Binary search | 90% | **1.68** | 1.32 | 1.84 | 10 |
-| Binary search | 95% | **1.59** | 1.11 | 1.71 | 10 |
-| Reverse engineering | 50% | **2.14** | 1.42 | 2.35 | 10 |
-| Reverse engineering | 80% | **1.89** | 1.47 | 2.04 | 10 |
-| Reverse engineering | 90% | **1.77** | 1.43 | 1.85 | 10 |
-| Reverse engineering | 95% | **1.66** | 1.32 | 1.71 | 10 |
+| Linear search | 50% | **1.94** | 1.26 | 2.07 | 8 |
+| Linear search | 80% | **1.69** | 1.37 | 1.88 | 8 |
+| Linear search | 90% | **1.60** | 1.29 | 1.67 | 8 |
+| Linear search | 95% | **1.47** | 1.22 | 1.54 | 8 |
+| Binary search | 50% | **2.12** | 1.41 | 2.38 | 8 |
+| Binary search | 80% | **1.90** | 1.39 | 2.04 | 8 |
+| Binary search | 90% | **1.76** | 1.32 | 1.84 | 8 |
+| Binary search | 95% | **1.68** | 1.11 | 1.71 | 8 |
+| Reverse engineering | 50% | **2.21** | 1.42 | 2.37 | 8 |
+| Reverse engineering | 80% | **1.94** | 1.47 | 2.04 | 8 |
+| Reverse engineering | 90% | **1.80** | 1.46 | 1.85 | 8 |
+| Reverse engineering | 95% | **1.70** | 1.39 | 1.71 | 8 |
 
 ### 7.3 Per-scenario, at the 90% threshold
 
@@ -572,10 +583,8 @@ Ratio `B_brute(p*) / B_algo(p*)`; **greater than 1 means the algorithm needs les
 | `narrow_e6` | 4.51e+10 | 2.73e+10 | 2.54e+10 | 2.51e+10 | 1.80x |
 | `narrow_e7` | 4.51e+12 | 2.70e+12 | 2.52e+12 | 2.49e+12 | 1.81x |
 | `narrow_e8` | 4.51e+14 | 2.72e+14 | 2.55e+14 | 2.48e+14 | 1.82x |
-| `small_e4` | 441,000 | 325,000 | 334,000 | 302,000 | 1.46x |
+| `small_e4` | 441,000 | 325,000 | 334,000 | 303,000 | 1.46x |
 | `wide_e4` | 4.52e+06 | 3.19e+06 | 2.45e+06 | 2.45e+06 | 1.85x |
-| `broad_pi4_e3` | 339,000 | 279,000 | 216,000 | 219,000 | 1.57x |
-| `broad_pi2_e3` | 678,000 | 595,000 | 471,000 | 473,000 | 1.44x |
 
 Full rows — every threshold, both interval endpoints, `coverage`, `grid_sensitivity_rel`, `R`, `n_boot`, `boot_seed` — are in `budget_crossings.csv`.
 
@@ -588,7 +597,7 @@ Full rows — every threshold, both interval endpoints, `coverage`, `grid_sensit
 | Brute force | **56.09%** | [55.66%, 56.53%] | none |
 | Linear search | **64.10%** | [63.68%, 64.52%] | inc=1, lookback_window=6, m_exploration=1, mean_window=4, safeguard=0 |
 | Binary search | **65.07%** | [64.65%, 65.49%] | conf=0.5, m_exploration=114 |
-| Reverse engineering | **66.21%** | [65.79%, 66.62%] | m_exploration=44 |
+| Reverse engineering | **66.25%** | [65.84%, 66.67%] | m_exploration=54 |
 
 ---
 
@@ -598,9 +607,9 @@ The primary exploration diagnostic: how close the exploration phase's *own answe
 
 | algorithm | median ratio | mean abs. rel. err. | signed rel. err. | exact hit | within 5% | within 10% | guess overshoot |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Linear search | **1.00** | 0.16 | -0.11 | 37.3% | 50.9% | 61.1% | 6.6% |
-| Binary search | **0.93** | 0.29 | -0.28 | 31.0% | 38.2% | 45.7% | 4.1% |
-| Reverse engineering | **1.00** | 0.05 | +0.00 | 59.1% | 77.6% | 86.8% | 19.3% |
+| Linear search | **0.99** | 0.13 | -0.12 | 30.0% | 48.4% | 61.8% | 5.5% |
+| Binary search | **0.90** | 0.25 | -0.25 | 26.6% | 36.4% | 46.6% | 5.6% |
+| Reverse engineering | **1.00** | 0.04 | +0.00 | 51.6% | 76.6% | 87.9% | 22.9% |
 
 The mean ratio, the signed error and the absolute error are all retained deliberately: a mean ratio near 1 can hide a mixture of severe under- and overshoots, and only the absolute error exposes that.
 
@@ -613,9 +622,9 @@ Each cell contributes its own within-cell statistic. The three *share* columns t
 | algorithm | expl. share: median | mean | p90 | mean probes/trial | median probes | only one probe | no exploitation phase |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Brute force | 0.00% | 0.00% | 0.00% | -- | -- | -- | 0.00% |
-| Linear search | 0.83% | 2.45% | 4.52% | 22.8 | 16.0 | 0.0% | 0.00% |
-| Binary search | 2.70% | 2.83% | 3.09% | 4.4 | 1.0 | 53.5% | 0.00% |
-| Reverse engineering | 1.33% | 1.37% | 1.33% | 1.0 | 1.0 | 98.6% | 0.04% |
+| Linear search | 0.58% | 1.91% | 4.23% | 28.9 | 19.0 | 0.0% | 0.00% |
+| Binary search | 2.41% | 2.73% | 2.95% | 5.5 | 8.0 | 37.7% | 0.00% |
+| Reverse engineering | 0.77% | 0.77% | 0.77% | 1.0 | 1.0 | 98.8% | 0.03% |
 
 Brute force takes no probes at all, so its probe-shape columns are blank rather than reporting the vacuously true "0 probes is <= 1 probe".
 
@@ -627,10 +636,10 @@ Brute force takes no probes at all, so its probe-shape columns are blank rather 
 
 | algorithm | median `N*/N_opt` | Q1 | Q3 | final overshoot | exact | within 10% | converged given a safe depth |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Brute force | **0.54** | 0.31 | 0.75 | 0.00% | 12.7% | 17.8% | 51.3% |
-| Linear search | **0.95** | 0.72 | 0.97 | 1.72% | 22.8% | 54.2% | 59.7% |
-| Binary search | **1.00** | 0.94 | 1.00 | 0.74% | 44.5% | 76.0% | 61.3% |
-| Reverse engineering | **1.00** | 0.92 | 1.00 | 0.47% | 43.2% | 72.5% | 61.7% |
+| Brute force | **0.54** | 0.31 | 0.75 | 0.00% | 1.9% | 8.9% | 53.0% |
+| Linear search | **0.94** | 0.88 | 0.97 | 1.22% | 11.1% | 53.3% | 62.3% |
+| Binary search | **0.96** | 0.94 | 1.00 | 0.74% | 33.5% | 75.5% | 63.3% |
+| Reverse engineering | **0.96** | 0.93 | 1.00 | 0.43% | 32.8% | 72.1% | 63.8% |
 
 **A median below 1 is the intended behaviour, not a miss.** The safeguard's objective is `P(no overshoot) x P(converge)`, not `N_opt` itself: it deliberately backs off from the aliasing cliff, and because the estimator is boundary-censored near `N_opt` (where `p0 = cos^2(N phi)` sits against 0) a depth slightly below `N_opt` can have *higher* true convergence than `N_opt`. Exact attainment is reported because readers ask for it, but it is not the success criterion.
 
@@ -638,9 +647,9 @@ Brute force takes no probes at all, so its probe-shape columns are blank rather 
 
 | algorithm | median `N*/N_guess` | Q1 | Q3 | unsafe-guess rescue | backoff when the guess was already safe |
 |---|---:|---:|---:|---:|---:|
-| Linear search | 0.98 | 0.95 | 1.00 | 44.6% | 1.00x |
-| Binary search | 1.05 | 1.00 | 2.25 | 96.4% | 1.06x |
-| Reverse engineering | 0.99 | 0.92 | 1.00 | 97.3% | 1.00x |
+| Linear search | 0.96 | 0.95 | 0.98 | 48.3% | 0.96x |
+| Binary search | 1.06 | 1.00 | 1.35 | 96.5% | 1.06x |
+| Reverse engineering | 0.96 | 0.93 | 1.00 | 98.6% | 0.96x |
 
 *Unsafe-guess rescue* is `P(N_star <= N_opt | N_guess > N_opt)` — how often the safeguard pulls a genuinely aliasing guess back to safety. Its denominator (`rescue_share_n`) is the count of runs whose guess overshot, and is reported per row.
 
@@ -654,8 +663,8 @@ Only linear and binary search make overshoot declarations. Reverse engineering a
 
 | algorithm | trial-level false alarm | trial-level miss | probe TP | FP | TN | FN | eligible runs |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Linear search | **53.8%** | **6.6%** | 26,034,339 | 11,647,285 | 125,047,269 | 1,230,018 | 7,200,000 |
-| Binary search | **22.8%** | **4.1%** | 14,367,412 | 4,664,659 | 12,323,125 | 335,727 | 7,200,000 |
+| Linear search | **61.7%** | **5.5%** | 22,371,575 | 10,570,939 | 119,493,094 | 908,477 | 5,300,000 |
+| Binary search | **30.7%** | **5.6%** | 14,023,723 | 4,623,687 | 10,412,191 | 337,547 | 5,300,000 |
 
 Rates are **trial-level** with Wilson intervals at the row's own R (§3): a run counts as a false alarm if *at least one* safe probe was declared an overshoot, and as a miss if *at least one* overshooting probe was accepted. Probe-level confusion counts are supporting telemetry and carry no interval, because probes within a run are dependent.
 
@@ -683,13 +692,13 @@ Per-cell rows with both interval endpoints and denominators: `detector_confusion
 | Linear search | 1e-06 | 0.34% | 1.00 | 0.95 | 0.45% | 63.7% |
 | Linear search | 1e-07 | 0.06% | 1.00 | 1.00 | 0.49% | 64.2% |
 | Linear search | 1e-08 | 0.00% | 1.00 | 0.99 | 0.41% | 64.1% |
-| Binary search | 1e-03 | 15.56% | 0.54 | 0.87 | 1.56% | 58.7% |
-| Binary search | 1e-04 | 5.44% | 0.97 | 0.92 | 1.71% | 61.4% |
+| Binary search | 1e-03 | 15.90% | 0.54 | 0.87 | 1.57% | 58.7% |
+| Binary search | 1e-04 | 5.44% | 0.98 | 0.92 | 1.77% | 61.3% |
 | Binary search | 1e-05 | 1.57% | 0.98 | 0.97 | 0.27% | 64.2% |
 | Binary search | 1e-06 | 0.04% | 1.00 | 1.00 | 0.19% | 64.9% |
 | Binary search | 1e-07 | 0.00% | 1.00 | 1.00 | 0.09% | 65.1% |
 | Binary search | 1e-08 | 0.00% | 1.00 | 1.00 | 0.13% | 65.0% |
-| Reverse engineering | 1e-03 | 6.41% | 1.00 | 0.83 | 1.31% | 59.3% |
+| Reverse engineering | 1e-03 | 8.00% | 1.00 | 0.83 | 1.25% | 59.3% |
 | Reverse engineering | 1e-04 | 2.75% | 1.00 | 0.94 | 0.36% | 63.7% |
 | Reverse engineering | 1e-05 | 0.18% | 1.00 | 1.00 | 0.09% | 65.0% |
 | Reverse engineering | 1e-06 | 0.00% | 1.00 | 1.00 | 0.05% | 65.1% |
@@ -702,15 +711,15 @@ Live points split into terciles of budget *within each scenario*, so scale diffe
 
 | algorithm | tercile | median expl. share | median `N_guess/N_opt` | guess overshoot | mean probes | only the opening probe |
 |---|---|---:|---:|---:|---:|---:|
-| Linear search | low | 0.54% | 1.00 | 9.2% | 20.3 | 0.0% |
-| Linear search | mid | 0.87% | 1.00 | 7.1% | 22.7 | 0.0% |
-| Linear search | high | 1.22% | 1.00 | 2.8% | 25.8 | 0.0% |
-| Binary search | low | 5.58% | 0.97 | 6.2% | 4.4 | 52.8% |
-| Binary search | mid | 2.69% | 0.94 | 3.0% | 4.1 | 57.4% |
-| Binary search | high | 2.33% | 0.88 | 2.8% | 4.7 | 50.0% |
-| Reverse engineering | low | 4.48% | 1.00 | 18.1% | 1.1 | 97.5% |
-| Reverse engineering | mid | 1.43% | 1.00 | 20.1% | 1.0 | 99.1% |
-| Reverse engineering | high | 0.13% | 1.00 | 19.9% | 1.0 | 99.5% |
+| Linear search | low | 0.40% | 0.97 | 6.3% | 25.0 | 0.0% |
+| Linear search | mid | 0.73% | 1.00 | 6.6% | 29.2 | 0.0% |
+| Linear search | high | 0.60% | 0.99 | 3.2% | 33.6 | 0.0% |
+| Binary search | low | 3.12% | 0.97 | 8.3% | 5.6 | 37.5% |
+| Binary search | mid | 2.75% | 0.91 | 4.1% | 5.3 | 41.2% |
+| Binary search | high | 2.07% | 0.88 | 3.8% | 5.8 | 34.4% |
+| Reverse engineering | low | 1.80% | 1.00 | 20.9% | 1.1 | 97.6% |
+| Reverse engineering | mid | 0.99% | 1.00 | 24.2% | 1.0 | 99.3% |
+| Reverse engineering | high | 0.08% | 1.00 | 23.9% | 1.0 | 99.8% |
 
 ### 11.3 With the true phase
 
@@ -718,22 +727,22 @@ Each cell's runs split into quartiles of the true `phi` (`diagnostics_by_phase.c
 
 | algorithm | phase quartile | median `N_guess/N_opt` | guess overshoot | median `N*/N_opt` | final overshoot | convergence |
 |---|---|---:|---:|---:|---:|---:|
-| Brute force | Q1 | -- | -- | 0.21 | 0.00% | 67.9% |
-| Brute force | Q2 | -- | -- | 0.43 | 0.00% | 68.3% |
-| Brute force | Q3 | -- | -- | 0.65 | 0.00% | 68.1% |
-| Brute force | Q4 | -- | -- | 0.88 | 0.00% | 68.3% |
-| Linear search | Q1 | 0.65 | 5.3% | 0.61 | 1.17% | 80.8% |
-| Linear search | Q2 | 0.83 | 4.8% | 0.78 | 0.84% | 74.4% |
-| Linear search | Q3 | 0.95 | 5.0% | 0.89 | 1.35% | 70.0% |
-| Linear search | Q4 | 0.94 | 3.0% | 0.89 | 1.19% | 67.7% |
-| Binary search | Q1 | 0.69 | 11.3% | 0.83 | 1.07% | 83.5% |
-| Binary search | Q2 | 0.76 | 8.9% | 0.95 | 0.55% | 75.9% |
-| Binary search | Q3 | 0.91 | 6.5% | 0.96 | 0.26% | 71.0% |
-| Binary search | Q4 | 1.00 | 6.8% | 1.00 | 0.10% | 68.1% |
-| Reverse engineering | Q1 | 1.00 | 28.2% | 0.72 | 0.37% | 83.6% |
-| Reverse engineering | Q2 | 1.00 | 19.3% | 0.90 | 0.44% | 76.2% |
-| Reverse engineering | Q3 | 1.00 | 13.8% | 0.95 | 0.32% | 71.3% |
-| Reverse engineering | Q4 | 1.00 | 8.7% | 0.95 | 0.11% | 68.5% |
+| Brute force | Q1 | -- | -- | 0.21 | 0.00% | 71.5% |
+| Brute force | Q2 | -- | -- | 0.43 | 0.00% | 71.9% |
+| Brute force | Q3 | -- | -- | 0.65 | 0.00% | 71.6% |
+| Brute force | Q4 | -- | -- | 0.88 | 0.00% | 71.8% |
+| Linear search | Q1 | 0.65 | 3.9% | 0.65 | 0.89% | 84.1% |
+| Linear search | Q2 | 0.78 | 3.0% | 0.78 | 0.23% | 78.5% |
+| Linear search | Q3 | 0.81 | 3.7% | 0.79 | 0.67% | 74.3% |
+| Linear search | Q4 | 0.91 | 3.3% | 0.88 | 1.17% | 71.3% |
+| Binary search | Q1 | 0.80 | 13.7% | 0.83 | 0.93% | 85.5% |
+| Binary search | Q2 | 0.83 | 11.0% | 0.91 | 0.55% | 79.1% |
+| Binary search | Q3 | 0.90 | 8.1% | 0.94 | 0.23% | 75.0% |
+| Binary search | Q4 | 1.00 | 8.5% | 0.95 | 0.12% | 71.8% |
+| Reverse engineering | Q1 | 1.00 | 28.2% | 0.68 | 0.22% | 85.7% |
+| Reverse engineering | Q2 | 1.00 | 22.1% | 0.84 | 0.38% | 79.4% |
+| Reverse engineering | Q3 | 1.00 | 16.3% | 0.90 | 0.29% | 75.4% |
+| Reverse engineering | Q4 | 1.00 | 10.8% | 0.94 | 0.13% | 72.3% |
 
 *(Phase strata are computed over all points, live and saturated alike, since they are within-cell splits rather than cross-cell aggregates.)*
 
@@ -748,7 +757,7 @@ Both regenerate from `diagnostics_by_point.csv` alone via `python analysis/conso
 
 ## 12. Budget compliance audit
 
-Over **all 1,105 evaluated cells** and every held-out run in them:
+Over **all 885 evaluated cells** and every held-out run in them:
 
 | | |
 |---|---:|
@@ -767,7 +776,7 @@ One convention worth stating: when an algorithm cannot afford even its opening p
 
 ## 13. Tuning provenance and grid adequacy
 
-663 tuned cells, 432 of them at live operating points. Every held-out row in `performance_curves.csv` points to exactly one frozen winner in `winners.csv` with the same parameter dictionary — asserted by `test_end_to_end_smoke_and_provenance`, which also checks that the winner's recorded held-out rate equals the reported rate exactly.
+531 tuned cells, 318 of them at live operating points. Every held-out row in `performance_curves.csv` points to exactly one frozen winner in `winners.csv` with the same parameter dictionary — asserted by `test_end_to_end_smoke_and_provenance`, which also checks that the winner's recorded held-out rate equals the reported rate exactly.
 
 Each winner row carries: both per-block tuning rates, their mean, the runner-up configuration, the selection margin in percentage points, the stage A/B/C configuration counts, the `m'` box endpoints, and `at_axis_bound`.
 
@@ -775,9 +784,9 @@ Each winner row carries: both per-block tuning rates, their mean, the runner-up 
 
 | algorithm | median margin over runner-up | p90 | max |
 |---|---:|---:|---:|
-| Linear search | 0.08 pp | 0.24 pp | 0.56 pp |
-| Binary search | 0.00 pp | 0.12 pp | 0.50 pp |
-| Reverse engineering | 0.04 pp | 0.19 pp | 0.64 pp |
+| Linear search | 0.08 pp | 0.24 pp | 0.44 pp |
+| Binary search | 0.02 pp | 0.13 pp | 0.26 pp |
+| Reverse engineering | 0.03 pp | 0.18 pp | 0.62 pp |
 
 These margins are small — the objective is flat near its optimum. That is exactly why the deciding stage runs at the largest R, and why the `m'` grid resolution (~10% steps) is far below the noise floor rather than being pushed further.
 
@@ -787,20 +796,20 @@ These margins are small — the objective is flat near its optimum. That is exac
 
 | algorithm | axis | share of live tuned cells | verdict |
 |---|---|---:|---|
-| Linear search | `mean_window` (min) | 12/144 = 8.3% | negligible |
-| Linear search | `inc` (max) | 8/144 = 5.6% | negligible |
-| Linear search | `mean_window` (max) | 1/144 = 0.7% | negligible |
-| Binary search | `conf` (max) | 1/144 = 0.7% | negligible |
+| Linear search | `mean_window` (min) | 11/106 = 10.4% | watch |
+| Linear search | `inc` (max) | 8/106 = 7.5% | negligible |
+| Binary search | `conf` (max) | 1/106 = 0.9% | negligible |
+| Linear search | `mean_window` (max) | 1/106 = 0.9% | negligible |
 
 **Pins at an axis MINIMUM** — physical floors, not defects (`m' = 1` is one shot, `inc = 1` one step, `safeguard = 0` no decrement, `lookback_window = 1` a single look back, `conf = 0.5` the point at which the normal quantile vanishes and the branch rule becomes a plain comparison against the reference estimate):
 
 | algorithm | axis | share of live tuned cells |
 |---|---|---:|
-| Linear search | `inc` | 117/144 = 81.2% |
-| Binary search | `conf` | 82/144 = 56.9% |
-| Linear search | `safeguard` | 62/144 = 43.1% |
-| Linear search | `m_exploration` | 36/144 = 25.0% |
-| Linear search | `lookback_window` | 6/144 = 4.2% |
+| Linear search | `inc` | 80/106 = 75.5% |
+| Binary search | `conf` | 44/106 = 41.5% |
+| Linear search | `safeguard` | 38/106 = 35.8% |
+| Linear search | `m_exploration` | 35/106 = 33.0% |
+| Linear search | `lookback_window` | 5/106 = 4.7% |
 
 ### 13.3 Selected parameter values
 
@@ -808,20 +817,20 @@ Distribution of the frozen winners over live cells — showing whether the widen
 
 **Linear search**
 
-* `m_exploration`: 92 distinct values, 1 .. 43,212,199 (median 92)
-* `lookback_window`: 1x6, 2x26, 3x17, 4x6, 5x17, 6x39, 8x23, 12x10
-* `safeguard`: 0x62, 1x50, 2x11, 3x9, 4x5, 6x5, 8x2
-* `inc`: 1x117, 2x11, 3x4, 5x4, 8x8
-* `mean_window`: 0x12, 1x46, 2x25, 3x26, 4x23, 6x5, 8x6, 12x1
+* `m_exploration`: 67 distinct values, 1 .. 43,212,199 (median 211)
+* `lookback_window`: 1x5, 2x5, 3x3, 4x6, 5x15, 6x39, 8x23, 12x10
+* `safeguard`: 0x38, 1x44, 2x7, 3x5, 4x5, 6x5, 8x2
+* `inc`: 1x80, 2x10, 3x4, 5x4, 8x8
+* `mean_window`: 0x11, 1x34, 2x22, 3x15, 4x14, 6x3, 8x6, 12x1
 
 **Binary search**
 
-* `m_exploration`: 142 distinct values, 9 .. 241,392 (median 1,361)
-* `conf`: 0.5x82, 0.52x10, 0.62x1, 0.66x3, 0.7x7, 0.75x9, 0.8x7, 0.85x4, 0.9x13, 0.95x7, 0.99x1
+* `m_exploration`: 105 distinct values, 9 .. 241,392 (median 1,800)
+* `conf`: 0.5x44, 0.52x10, 0.62x1, 0.66x3, 0.7x6, 0.75x10, 0.8x7, 0.85x4, 0.9x13, 0.95x7, 0.99x1
 
 **Reverse engineering**
 
-* `m_exploration`: 139 distinct values, 4 .. 6,586,591 (median 769)
+* `m_exploration`: 102 distinct values, 4 .. 6,586,591 (median 2,298)
 
 Full appendix-ready tables, including the frozen configuration at the tested budget nearest each interpolated `B_90` **and both bracketing winners**, are in `optimal_params.csv` and `tex/optimal_params.tex`. A budget crossing is interpolated between tested budgets; parameter dictionaries are **not** interpolated, which is precisely why the bracketing rows exist and why every such row carries a `budget_note` saying so.
 
