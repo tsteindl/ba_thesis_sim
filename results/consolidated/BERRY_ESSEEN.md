@@ -5,6 +5,11 @@ the numbered edit list. This document is the detailed derivation, the numerical 
 the reasoning behind the decision not to replace the criterion. Recommendations only — no `.tex`
 was touched.
 
+> **Terminology.** This document analyzes the normal quantile used by the Binary Search
+> *overshoot classifier*. The thesis's later *statistical safeguard* is a separate mechanism: it
+> uses a pilot-based truncated-normal approximation to choose the exploitation value $N^*$. Part 7
+> audits how the two arguments fit together.
+
 ---
 
 ## Part 0 — First, your updated passage
@@ -292,190 +297,652 @@ Nothing you have written needs to be deleted. The new material sits alongside it
 
 ---
 
-## Part 3 — Power needs no approximation at all
+## Part 3 — What the structural inequality proves, and what it does not
 
-Berry–Esseen is about the *size* of the test. The *power* side needs nothing:
+Berry–Esseen is about calibration under a safe probe. A different, exact fact gives the direction
+in which an overshooting estimate moves. Since the estimator always lies in its principal range,
 
-```
-sqrt(p_0) in [0,1]   =>   arccos(sqrt(p_0)) <= pi/2   =>   N phi_hat <= pi/2
-```
+$$
+0\leq \hat\phi_N
+=\frac{1}{N}\arccos\!\sqrt{\frac{K}{m'}}
+\leq \frac{\pi}{2N}.
+$$
 
-and "N has overshot" means `N phi > pi/2`. Chaining,
+If $N$ has overshot, then $N\phi>\pi/2$, and therefore
 
-```
-phi_hat  <=  pi/(2N)  <  phi.
-```
+$$
+\hat\phi_N\leq\frac{\pi}{2N}<\phi.
+$$
 
-**An overshooting probe always reads below the truth** — every outcome `K`, every `N > N_opt`, every
-shot count. Verified over 200,000 random overshooting configurations: `max(phi_hat - phi) < 0`,
-never positive; asserted in the script.
+Thus, **every overshooting probe reports a value below the true phase**. This statement is exact for
+every outcome $K$ and every shot count $m'$. It was checked over 200,000 random overshooting
+configurations, with no violation.
 
-So against a known `phi` the rule could never miss an overshoot. It misses only because it compares
-against `phi_hat_acc`, which is itself an estimate. That is the whole failure mode, and it is a
-statement about the reference, not about Gaussianity.
+However, this proves only the *direction* of the change. It does **not** prove that the implemented
+rule detects every overshoot. The rule fires when
+
+$$
+\hat\phi_N<\phi_1,
+\qquad
+\phi_1=\hat\phi_{\mathrm{acc}}+z_\alpha\sigma_N,
+\qquad
+\sigma_N=\frac{1}{2N\sqrt{m'}},
+$$
+
+where $z_\alpha=\Phi^{-1}(\alpha)$ and $\alpha=1-\mathrm{conf}$. Even with a perfect reference
+$\hat\phi_{\mathrm{acc}}=\phi$, the condition is
+
+$$
+\hat\phi_N<\phi+z_\alpha\sigma_N.
+$$
+
+For $\alpha<1/2$, we have $z_\alpha<0$, so the threshold lies *below* the true phase. A marginal
+overshoot can therefore satisfy
+
+$$
+\phi+z_\alpha\sigma_N\leq\hat\phi_N<\phi
+$$
+
+and be missed. Only at $\alpha=1/2$, where $z_\alpha=0$, would a perfect reference make the exact
+inequality $\hat\phi_N<\phi$ sufficient to detect every strict overshoot. A noisy, adaptively
+selected reference introduces another source of misses and false alarms.
+
+At the exact boundary $N\phi=\pi/2$, $p_0=0$, hence $K=0$ almost surely and
+$\hat\phi_N=\pi/(2N)=\phi$. The estimator is not Gaussian there, but the rule remains perfectly
+well-defined. With a perfect reference and $\alpha<1/2$, it does not fire. That is appropriate if
+the boundary itself is counted as non-aliasing; the difficulty is distinguishing points just below
+from points just above the boundary. Their single-probe binomial laws become arbitrarily similar,
+so no threshold can simultaneously have negligible false alarms immediately below the boundary and
+perfect power immediately above it.
 
 ---
 
-## Part 4 — Where exactly the Gaussian threshold lands (closed form)
+## Part 4 — Where exactly the Gaussian threshold lands on the count scale
 
-Berry–Esseen bounds the normal approximation to `K`. But your threshold is not chosen on the `K`
-scale — it is chosen on the `phi` scale, as `phi_1 = phi_hat_acc + z sigma_N` with
-`sigma_N = 1/(2N sqrt(m'))`. To connect the two we need to know where that lands as a cut on `K`.
-This is exact algebra, no approximation.
+This part answers one precise question: if the phase threshold is constructed with a normal
+quantile, where does that threshold land when expressed in units of the binomial count's standard
+deviation?
 
-Write `theta = N phi` and `delta = N z sigma_N = z/(2 sqrt(m'))`. Then `N phi_1 = theta + delta`
-(taking the reference at the true `phi` for now), and
+### 4.1 Scope of the calculation
 
-```
-k*/m'  =  cos^2(theta + delta).
-```
+For the moment, make two idealizations:
 
-Using `cos A - cos B = -2 sin((A+B)/2) sin((A-B)/2)` with `A = 2theta + 2delta`, `B = 2theta`, and
-`cos^2 u = (1 + cos 2u)/2`:
+1. the candidate is on the identifiable branch, $0<N\phi<\pi/2$; and
+2. the accepted reference equals the true phase, $\hat\phi_{\mathrm{acc}}=\phi$.
 
-```
-k*/m' - p_0  =  [cos(2theta + 2delta) - cos(2theta)]/2  =  -sin(2 theta + delta) sin(delta)
-```
+The second assumption isolates the normal-quantile calibration from reference noise. Part 6 puts
+the reference back. Define
 
-**Exact.** Verified: `max |LHS - RHS| = 3.6e-16` over 200,000 random `(m', z, theta)`.
+$$
+\theta:=N\phi,
+\qquad
+p_0:=\cos^2\theta,
+\qquad
+q_0:=1-p_0=\sin^2\theta.
+$$
 
-Now standardise. Since `p_0 = cos^2 theta` and `q_0 = sin^2 theta`, we have
-`sin(2 theta) = 2 sin theta cos theta = 2 sqrt(p_0 q_0)`, so
+The count then satisfies
 
-```
-u  :=  (k* - m' p_0)/sqrt(m' p_0 q_0)
-    =  -m' sin(2theta+delta) sin(delta) / sqrt(m' p_0 q_0)
-    =  -2 sqrt(m') sin(delta) * sin(2 theta + delta)/sin(2 theta)
-    =  -z * A(m', z) * B(theta, delta)
-```
+$$
+K\sim\operatorname{Binomial}(m',p_0).
+$$
+
+The implemented lower phase threshold is
+
+$$
+\phi_1
+=\phi+z_\alpha\sigma_N,
+\qquad
+z_\alpha:=\Phi^{-1}(\alpha),
+\qquad
+\sigma_N:=\frac{1}{2N\sqrt{m'}}.
+$$
+
+It is helpful to measure the phase displacement after multiplication by $N$:
+
+$$
+\delta
+:=N(\phi_1-\phi)
+=Nz_\alpha\sigma_N
+=\frac{z_\alpha}{2\sqrt{m'}}.
+$$
+
+Therefore
+
+$$
+N\phi_1=\theta+\delta.
+$$
+
+For the usual settings $\alpha<1/2$, $z_\alpha<0$ and hence $\delta<0$: the lower phase threshold
+lies below the true phase.
+
+### 4.2 Convert the phase threshold into a count threshold
+
+On $[0,\pi/2]$, the map
+
+$$
+k\longmapsto \frac{1}{N}\arccos\!\sqrt{\frac{k}{m'}}
+$$
+
+is strictly decreasing. Provided $0<N\phi_1<\pi/2$, the rejection event is therefore
+
+$$
+\hat\phi_N<\phi_1
+\quad\Longleftrightarrow\quad
+K>m'\cos^2(N\phi_1).
+$$
+
+Define the real-valued cutoff
+
+$$
+k^*:=m'\cos^2(N\phi_1)
+=m'\cos^2(\theta+\delta).
+$$
+
+There is no rounding ambiguity in the probability statement: because $K$ is integer-valued,
+$\{K>k^*\}=\{K>\lfloor k^*\rfloor\}$.
+
+### 4.3 Measure the cutoff's displacement from the binomial mean
+
+The binomial mean is $m'p_0=m'\cos^2\theta$. Hence
+
+$$
+\frac{k^*}{m'}-p_0
+=\cos^2(\theta+\delta)-\cos^2\theta.
+$$
+
+Use
+
+$$
+\cos^2 x=\frac{1+\cos(2x)}{2}
+$$
+
+to obtain
+
+$$
+\cos^2(\theta+\delta)-\cos^2\theta
+=\frac{\cos(2\theta+2\delta)-\cos(2\theta)}{2}.
+$$
+
+Now apply
+
+$$
+\cos A-\cos B
+=-2\sin\!\left(\frac{A+B}{2}\right)
+     \sin\!\left(\frac{A-B}{2}\right)
+$$
+
+with $A=2\theta+2\delta$ and $B=2\theta$. This gives the exact identity
+
+$$
+\boxed{
+\frac{k^*}{m'}-p_0
+=-\sin(2\theta+\delta)\sin\delta
+}.
+$$
+
+No normal approximation or Taylor expansion has been used. Numerically, the identity agreed to
+within $3.6\times10^{-16}$ over 200,000 random parameter triples.
+
+### 4.4 Standardize the cutoff
+
+Berry–Esseen concerns the standardized count
+
+$$
+Z:=\frac{K-m'p_0}{\sqrt{m'p_0q_0}}.
+$$
+
+The count cutoff $k^*$ corresponds to
+
+$$
+u
+:=\frac{k^*-m'p_0}{\sqrt{m'p_0q_0}}.
+$$
+
+Substituting the exact displacement gives
+
+$$
+u
+=-\frac{m'\sin(2\theta+\delta)\sin\delta}
+        {\sqrt{m'p_0q_0}}.
+$$
+
+Since $0<\theta<\pi/2$,
+
+$$
+2\sqrt{p_0q_0}
+=2\sin\theta\cos\theta
+=\sin(2\theta).
+$$
+
+Therefore
+
+$$
+u
+=-2\sqrt{m'}\sin\delta\,
+  \frac{\sin(2\theta+\delta)}{\sin(2\theta)}.
+$$
+
+Finally, multiply and divide by $z_\alpha$:
+
+$$
+\boxed{
+u=-z_\alpha A(m',z_\alpha)B(\theta,\delta)
+}
+$$
 
 with
 
-```
-A(m', z) = 2 sqrt(m') sin(delta)/z        ->  1   as m' grows          (the sin d ~ d error)
-B(theta, delta) = sin(2theta+delta)/sin(2theta)  ->  1   as delta -> 0  (singular as sin 2theta -> 0)
-```
+$$
+A(m',z_\alpha)
+:=
+\begin{cases}
+\dfrac{2\sqrt{m'}\sin\delta}{z_\alpha},&z_\alpha\neq0,\\[6pt]
+1,&z_\alpha=0,
+\end{cases}
+$$
 
-Verified: `max |u + z A B| = 3.2e-13` over 200,000 draws.
+and
 
-**Read this off.** A perfectly placed cut would give `u = -z` exactly, hence size exactly `Phi(z)`.
-The two correction factors say precisely how the delta method errs:
+$$
+B(\theta,\delta)
+:=\frac{\sin(2\theta+\delta)}{\sin(2\theta)}.
+$$
 
-- `A` is the error from linearising `sin(delta) ~ delta`. It depends only on `m'` and `z`, never on
-  where you are, and it is tiny: at `m' = 50, z = -1.645`, `A = 0.9978`.
-- `B` is the error from linearising `cos^2` around `theta`. It is the one that matters, and it
-  degrades as `sin(2 theta) -> 0`, i.e. as `theta -> 0` or `theta -> pi/2`. **`theta -> pi/2` is the
-  aliasing boundary.** So the closed form independently rediscovers the boundary problem — and
-  localises it in one factor.
+The value $A=1$ at $z_\alpha=0$ is the continuous extension of the quotient. This detail matters
+because the thesis reports $\mathrm{conf}=0.5$, for which $\alpha=0.5$ and $z_\alpha=0$.
+
+### 4.5 What would perfect placement look like?
+
+The rejection event is $Z>u$. Under an exact standard normal law, its probability would be
+
+$$
+\mathbb P(Z>u)\approx1-\Phi(u)=\Phi(-u).
+$$
+
+The nominal lower-tail level is
+
+$$
+\alpha=\Phi(z_\alpha).
+$$
+
+Thus a perfectly placed cutoff has
+
+$$
+u=-z_\alpha,
+$$
+
+because then
+
+$$
+1-\Phi(u)=1-\Phi(-z_\alpha)=\Phi(z_\alpha)=\alpha.
+$$
+
+The two factors $A$ and $B$ measure the departure from this ideal:
+
+- $A$ measures the error in replacing $\sin\delta$ by $\delta$. For fixed $z_\alpha$,
+  $A\to1$ as $m'\to\infty$.
+- $B$ measures the curvature of $\cos^2\theta$ at the operating point. For fixed interior
+  $\theta$, $B\to1$ as $m'\to\infty$ because $\delta\to0$.
+- The convergence is not uniform in $\theta$. The denominator $\sin(2\theta)$ tends to zero as
+  $\theta\to0$ or $\theta\to\pi/2$. The latter is the aliasing boundary.
+
+Consequently, the limit $u\to-z_\alpha$ is valid for a **fixed interior operating point**. It must
+not be read as a uniform statement up to the boundary.
+
+### 4.6 A numerical example
+
+Take $m'=200$, $\alpha=0.05$, and $\theta=\pi/4$, so $p_0=q_0=1/2$. Then
+
+$$
+z_\alpha=-1.64485,
+\qquad
+\delta=-0.05815,
+$$
+
+$$
+A=0.99944,
+\qquad
+B=0.99831,
+\qquad
+u=1.64115.
+$$
+
+The Gaussian upper tail at the actual cutoff is
+
+$$
+\Phi(-u)=0.05038,
+$$
+
+compared with the nominal $\alpha=0.05000$. At this interior point, the nonlinear threshold
+placement contributes only about $3.8\times10^{-4}$ absolute probability error. The next part adds
+the separate error from replacing the binomial count distribution by a normal distribution.
 
 ---
 
-## Part 5 — The complete error bound
+## Part 5 — The finite-sample error bound, step by step
 
-Combining Parts 2 and 4:
+### 5.1 Define the probability being bounded
 
-```
-| achieved size - nominal alpha |   <=   | Phi(-u) - Phi(z) |   +   C (p_0^2+q_0^2)/sqrt(m' p_0 q_0)
-                                          ^^^^^^^^^^^^^^^^^        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                                          threshold placement       normal vs binomial
-                                          (closed form, Part 4)     (Berry-Esseen, Part 2)
-```
+Under the idealized perfect reference of Part 4, let
 
-Both terms are computable; neither is asymptotic. **Verified on 294 grid points across
-`m' in {50,200,800}`, `conf in {0.5,0.66,0.95}` and safe depths inside the regularity region:
-0 violations**, asserted in the script.
+$$
+R:=\{\hat\phi_N<\phi_1\}=\{K>k^*\}=\{Z>u\}
+$$
 
-| `m'` | placement term | Berry–Esseen term | actual error |
+be the event that a safe probe is classified as an overshoot. Its achieved false-alarm probability
+at the fixed operating point $(m',p_0)$ is
+
+$$
+\beta(m',p_0):=\mathbb P_{p_0}(R)=\mathbb P_{p_0}(Z>u).
+$$
+
+The nominal probability is
+
+$$
+\alpha=\Phi(z_\alpha).
+$$
+
+Berry–Esseen gives, for $0<p_0<1$,
+
+$$
+\sup_{x\in\mathbb R}
+\left|
+\mathbb P_{p_0}(Z\leq x)-\Phi(x)
+\right|
+\leq
+\varepsilon_{\mathrm{BE}}(m',p_0),
+$$
+
+where
+
+$$
+\varepsilon_{\mathrm{BE}}(m',p_0)
+:=
+C\,
+\frac{p_0^2+q_0^2}{\sqrt{m'p_0q_0}}.
+$$
+
+Evaluate this inequality at the one cutoff the rule actually uses, $x=u$:
+
+$$
+\left|
+\mathbb P_{p_0}(Z\leq u)-\Phi(u)
+\right|
+\leq\varepsilon_{\mathrm{BE}}(m',p_0).
+$$
+
+Taking complements does not change the absolute difference, so
+
+$$
+\left|
+\mathbb P_{p_0}(Z>u)-\bigl(1-\Phi(u)\bigr)
+\right|
+\leq\varepsilon_{\mathrm{BE}}(m',p_0).
+$$
+
+Since $1-\Phi(u)=\Phi(-u)$, the triangle inequality yields
+
+$$
+\begin{aligned}
+|\beta(m',p_0)-\alpha|
+&\leq
+|\beta(m',p_0)-\Phi(-u)|
++|\Phi(-u)-\Phi(z_\alpha)|\\
+&\leq
+\varepsilon_{\mathrm{BE}}(m',p_0)
++|\Phi(-u)-\Phi(z_\alpha)|.
+\end{aligned}
+$$
+
+Therefore
+
+$$
+\boxed{
+|\text{achieved false-alarm probability}-\text{nominal }\alpha|
+\leq
+\underbrace{|\Phi(-u)-\Phi(z_\alpha)|}_{\text{threshold-placement error}}
++
+\underbrace{C\frac{p_0^2+q_0^2}{\sqrt{m'p_0q_0}}}_{\text{binomial-to-normal error}}
+}.
+$$
+
+The first term is the finite-sample effect of putting a delta-method phase threshold onto the count
+scale. The second is the Berry–Esseen bound for the count itself. Both terms are finite-sample and
+computable once $(m',p_0,\alpha)$ is fixed.
+
+The script checked this inequality at 294 grid points across
+$m'\in\{50,200,800\}$, $\mathrm{conf}\in\{0.5,0.66,0.95\}$, and the stated regularity region,
+with no violation.
+
+### 5.2 Numerical size of the two terms
+
+Using the same full regularity grid as the thesis table gives:
+
+| $m'$ | maximum placement term | maximum Berry–Esseen term | maximum actual size error |
 |---:|---:|---:|---:|
-| 50 | ≤ 0.017 | ≤ 0.110 | ≤ 0.073 |
-| 200 | ≤ 0.023 | ≤ 0.133 | ≤ 0.073 |
-| 800 | ≤ 0.013 | ≤ 0.104 | ≤ 0.033 |
+| 50 | 0.018 | 0.114 | 0.077 |
+| 200 | 0.024 | 0.139 | 0.081 |
+| 800 | 0.026 | 0.147 | 0.080 |
 
-**The placement term is negligible** — under 0.023 everywhere. The delta method puts the cut almost
-exactly where it should go; essentially all of the (conservative) bound is Berry–Esseen. And the
-error that actually materialises is smaller still, because Berry–Esseen is a worst case over all
-`x` while the size only uses one.
+The placement term is smaller than the conservative Berry–Esseen term on this grid. The realized
+size error is also smaller than the bound, as expected: Berry–Esseen controls the worst CDF error
+over *all* cutoffs, whereas the criterion uses one cutoff.
 
-### Why the residual does not vanish with more shots
+These numbers should not be described merely as "small." For example, an absolute CDF error of
+$0.08$ is modest on a $0$--$1$ scale but large relative to a nominal level of $0.05$. The scientific
+statement is the quantitative one: in the declared region the rigorous worst-case bound is at most
+$0.147$, the exactly enumerated Kolmogorov distance is at most about $0.084$, and the achieved size
+at the criterion's own cutoff differs from nominal by at most $0.081$ in the reported grid.
 
-The actual error stalls around 0.073 for `m' = 50` and `m' = 200`. That is **the discreteness of
-`K`**, not a central-limit error: `K` takes integer values, so the attainable sizes form a finite
-ladder and the achievable level cannot land exactly on `alpha`. Increasing `m'` refines the ladder
-but simultaneously admits smaller `p_0` into the region, which coarsens it again. Worth one sentence
-in the thesis, because a reader will otherwise ask why the numbers do not improve.
+### 5.3 Why Kolmogorov distance is the relevant metric
+
+The left-hand side of the Berry–Esseen theorem,
+
+$$
+d_{\mathrm K}(F_Z,\Phi)
+:=\sup_x|F_Z(x)-\Phi(x)|,
+$$
+
+is the Kolmogorov distance. It is not an unrelated normality diagnostic added after the fact. The
+overshoot rule is a one-sided threshold event, so its probability is a CDF or tail probability at a
+cutoff. A uniform CDF bound directly limits the absolute error of *every such threshold
+probability*. That is exactly the error notion the rule needs.
+
+The "true KS" column is not needed to make the theorem valid. It is useful because the
+Berry–Esseen bound is conservative: exact enumeration of the binomial distribution shows how much
+of the allowed error is actually attained. A histogram, Shapiro–Wilk test, or visual normality claim
+would be less directly connected to the decision probability.
+
+The implementation uses $C=0.4748$, which is a valid 2011 upper bound. A later result gives the
+slightly sharper universal i.i.d. bound $C\leq0.4690$. Replacing $0.4748$ by $0.4690$ would reduce the
+reported Berry–Esseen values by only about $1.2\%$ and would not change the interpretation.
+
+### 5.4 When is $m'$ large enough?
+
+There is no answer in terms of $m'$ alone. The bound also depends on the operating probability
+$p_0$. For a desired absolute CDF error tolerance $\eta$ at a fixed $p_0$, a sufficient condition is
+
+$$
+m'
+\geq
+\frac{C^2(p_0^2+q_0^2)^2}{\eta^2p_0q_0}.
+$$
+
+Using $C=0.4748$:
+
+| $p_0$ | $m'$ for bound $\leq0.10$ | $m'$ for bound $\leq0.05$ | $m'$ for bound $\leq0.01$ |
+|---:|---:|---:|---:|
+| 0.50 | 23 | 91 | 2,255 |
+| 0.20 | 66 | 261 | 6,516 |
+| 0.05 | 389 | 1,555 | 38,871 |
+
+As $p_0\to0$ or $p_0\to1$, the required $m'$ diverges. Hence no finite $m'$ makes the bound small
+uniformly all the way to either boundary.
+
+For fixed $p_0$, the bound scales as $m'^{-1/2}$. It is better to call this the classical
+square-root rate than a "fast" rate: halving the bound requires four times as many shots. Moreover,
+the thesis's region
+
+$$
+m'\min(p_0,1-p_0)\geq10
+$$
+
+expands toward more extreme $p_0$ as $m'$ grows. At its moving edge, the expected rare outcome count
+remains $10$, so the worst-case bound over the *whole region* need not decrease with $m'$.
+
+The number $10$ is a conventional expected-count marker, not a theorem saying that normality
+"starts" there. Berry–Esseen itself is valid for every $m'$ when $0<p_0<1$; the useful question is
+whether its right-hand side is below a tolerance chosen for the decision problem.
+
+### 5.5 What happens at the aliasing boundary?
+
+At $N\phi=\pi/2$, $p_0=0$ and the standardized variable $Z$ is undefined because its variance is
+zero. Berry–Esseen and the delta method do not apply there. Just inside the boundary, their bounds
+become poor because $m'p_0$ is small.
+
+This does not make the criterion undefined. The exact binomial law remains available, including the
+degenerate boundary case. What fails is **normal calibration**, not the count-based definition of
+the rule. Near the boundary, performance must therefore be justified by exact binomial
+probabilities, a convolution that includes the noisy reference, or end-to-end simulation. The
+Berry–Esseen table by itself does not establish near-boundary detector power.
+
+### 5.6 Why the displayed worst case does not improve with $m'$
+
+There are two interacting effects:
+
+1. $K$ is discrete, so its CDF has jumps and the attainable rejection probabilities form a ladder.
+2. As $m'$ increases, the condition $m'\min(p_0,q_0)\geq10$ admits operating points closer to the
+   boundary, where the rare expected count is still only $10$.
+
+At a fixed interior $p_0$, both the CDF jumps and the Berry–Esseen bound shrink with $m'$. The nearly
+constant worst-case values in the table arise because the domain over which the maximum is taken is
+changing with $m'$, not because the central limit theorem has stopped working.
 
 ---
 
 ## Part 6 — Should you replace the criterion with an exact binomial test?
 
-You could: choose `k*` directly as the exact binomial quantile so the size is `<= alpha` by
-construction, dropping the normal entirely. **My recommendation is no**, for three reasons, in
-increasing order of force.
+There is an important qualification to the phrase "exact binomial test." The true count law is
 
-**(1) It fixes the smaller of the two errors.** The size deviates from nominal for two independent
-reasons: the normal-placed cut (what an exact test removes), and the reference `phi_hat_acc` being a
-noisy estimate rather than `phi` (which it does not touch). At `m' = 200`:
+$$
+K\mid\phi\sim\operatorname{Binomial}\!\left(m',\cos^2(N\phi)\right),
+$$
 
-| nominal `alpha` | normal approximation of the cut | reference = late probe | reference = first probe |
+but $\phi$ is unknown. Replacing the normal quantile by a binomial quantile computed from
+
+$$
+p_{\mathrm{ref}}:=\cos^2(N\hat\phi_{\mathrm{acc}})
+$$
+
+would be exact only **conditional on treating the reference as the truth**. It would remove the
+count-normal and phase-to-count placement approximations, but it would not remove:
+
+- noise in $\hat\phi_{\mathrm{acc}}$;
+- adaptive selection of the deepest accepted reference;
+- the possibility that the accepted reference has itself overshot; or
+- the fundamental near-boundary similarity between the safe and aliased branches.
+
+Thus, a plug-in binomial quantile would not make the implemented adaptive procedure an exact
+level-$\alpha$ test under the composite null "the candidate is safe."
+
+The numerical error budget illustrates the point. At $m'=200$ and the representative operating
+points used by the script:
+
+| nominal $\alpha$ | normal placement of the cut | late-reference effect | first-reference effect |
 |---:|---:|---:|---:|
 | 0.50 | 0.061 | 0.001 | 0.022 |
 | 0.34 | 0.047 | 0.042 | 0.105 |
 | 0.05 | 0.015 | 0.063 | 0.319 |
 
-At the operating points that matter the reference term is comparable or much larger. At
-`conf = 0.95` it is **21× larger**. An exact test would remove the middle column and leave the rest.
+These are illustrative pointwise differences, not uniform guarantees. They show that correcting the
+normal cutoff can leave an error of comparable or larger size from the estimated reference.
 
-**(2) The nominal level is a tuning knob, not a quantity anyone acts on.** `conf` is chosen by grid
-search against convergence rate. If the achieved size is 0.42 when the label says 0.50, the grid
-search simply selects the label that lands where it wants. Making the label exact renames the knob;
-it does not move the setting. This is different from a scientific context where `alpha = 0.05` is
-reported as a guarantee — you never report it as one.
+There is also a practical reason not to change the current thesis algorithm now: $\mathrm{conf}$ is
+tuned against end-to-end convergence rather than reported as a calibrated coverage guarantee. A
+different cutoff changes the algorithm and would require re-tuning and re-evaluating all reported
+results.
 
-**(3) The cost is a full re-tune and re-sweep**, and every number in Chapter 4, Appendix B and
-Appendix C changes. You would be spending that to remove a `<= 0.06` miscalibration in a parameter
-that is tuned anyway, while the dominant term survives untouched.
+The defensible conclusion is therefore:
 
-**What I would do instead** — and this costs nothing — is say in one sentence that the exact
-binomial size is available in closed form and that the normal quantile is used because it is
-cheaper, with the discrepancy bounded as in Part 5. That converts an unexamined approximation into
-a deliberate, quantified choice, which is exactly what the criticism asked for.
-
-*If you later want the exact version anyway, it is a two-line change in
-`_binary_search_explore`: replace `norm.ppf` with `scipy.stats.binom.ppf` on the count scale and
-compare `K` directly. The surrounding algorithm, the safeguard and the bracket logic are untouched.
-But do it as future work, not for this thesis.*
+> Keep the present rule for this thesis, describe its cutoff calibration quantitatively, and retain
+> the caveat that the adaptive plug-in rule is not an exact confidence test. If exact calibration of
+> the full history becomes the objective, use the exact likelihood or posterior for all probe counts
+> rather than merely replacing one normal quantile by a plug-in binomial quantile.
 
 ---
 
-## Part 7 — Thesis edits
+## Part 7 — What the current thesis contains, and what is still missing
 
-The numbered, copy-pasteable edit list lives in
-[`OVERSHOOT_CRITERION.md`](OVERSHOOT_CRITERION.md) so there is one place to work from: four required
-edits (Section 2.7 passage, label Eq. (3.6), the new paragraph, the table), three recommended ones
-(Lemma 2.6.3's hypothesis, a stale cross-reference, the bracket-walk sentence), and an explicit list
-of what to leave alone.
+The current thesis already incorporates most of the material that is necessary for the
+Berry–Esseen justification of the binary-search overshoot threshold:
 
-Nothing in that list changes the algorithm, any tuned parameter, or any number in Chapter 4.
+1. Lemma 2.6.3 restricts the delta-method normal approximation to the interior
+   $0<N\phi<\pi/2$.
+2. Section 3.2.2 states the exact monotone equivalence between the phase comparison and the count
+   cutoff.
+3. It gives the Bernoulli Berry–Esseen bound and defines $p_0=\cos^2(N\phi)$.
+4. Equations (3.7)--(3.8) contain the closed-form threshold map derived in Part 4.
+5. Table 3.1 separates the rigorous Berry–Esseen bound, the exactly enumerated Kolmogorov distance,
+   and the achieved size error.
+6. The prose explicitly says that the noisy, adaptively selected reference prevents the detector
+   from being an exact confidence test.
+7. The statistical-safeguard section separately labels its depth score as an asymptotic plug-in
+   approximation and discloses the selection bias of the deepest accepted binary-search pilot.
+
+The thesis does **not** need to reproduce every calculation or diagnostic in this note. It does,
+however, still need six clarifications to make the logical scope unambiguous:
+
+1. **Distinguish the two mechanisms.** Berry–Esseen justifies the normal quantile in the
+   binary-search *overshoot classifier*. The later *statistical safeguard* is a different rule that
+   uses a truncated-normal plug-in posterior to choose the exploitation value $N^*$.
+2. **State the non-uniformity.** The limit in Equation (3.8) is for fixed
+   $0<\theta<\pi/2$; it is not uniform as $\theta\to\pi/2$. Table 3.1 intentionally excludes the
+   boundary through $m'\min(p_0,1-p_0)\geq10$.
+3. **Handle $z_\alpha=0$.** Equation (3.8) contains a quotient by $z_\alpha$, but the thesis reports
+   $\alpha=0.5$, for which $z_\alpha=0$. The quotient must be declared to have its continuous value
+   $1$ at zero, as in Part 4.4.
+4. **Do not turn directionality into a power guarantee.** The exact inequality
+   $\hat\phi_N<\phi$ after overshooting does not imply
+   $\hat\phi_N<\phi+z_\alpha\sigma_N$, and it says nothing about comparison with a noisy reference.
+5. **State the threshold-range condition.** The equivalence
+   $\hat\phi_N<\phi_1\Longleftrightarrow K>m'\cos^2(N\phi_1)$ uses the monotonicity of $\arccos$ on
+   the principal branch and requires $0<N\phi_1<\pi/2$. If the adaptive threshold falls outside the
+   estimator's range, the event is instead empty or automatic and should be handled directly.
+6. **Do not equate the approximate safeguard score with the exact success probability.** In
+   Theorem 3.2.2, the truncated-normal CDF and Gaussian accuracy factor define an approximate score.
+   The second line of Equation (3.20) should therefore define the maximizer of that score, rather
+   than be written as an exact equality to the maximizer of the unknown finite-sample probability.
+
+For the statistical safeguard itself, the algebra is correct **under its working Gaussian model**:
+the uniform prior and phase-independent asymptotic variance produce a truncated-normal plug-in
+posterior, and the displayed objective is the product of approximate validity and accuracy factors.
+It is not a finite-sample theorem about the implemented adaptive procedure. In particular, the
+delta-method approximation used for the accuracy factor is not uniform at the branch boundary, and
+the binary-search pilot is selected from the same exploration history. The thesis acknowledges the
+second issue and repeatedly calls the score approximate; adding the first boundary qualification
+would make the limitation complete.
 
 ---
 
 ## Part 8 — Reproducing all of it
 
-```
+```powershell
 python analysis/consolidated/overshoot_criterion.py
 ```
 
 Asserts, and fails loudly if any breaks:
 
 1. the binomial restatement is exact (0 disagreements in 300,000 draws);
-2. an overshooting probe always reads below the truth (200,000 draws);
+2. an overshooting probe always reads below the truth (200,000 draws), which verifies direction but
+   not perfect detector power;
 3. the Berry–Esseen bound is respected by the true distance;
 4. the two-part error bound holds at all 294 regularity-region grid points.
 
 | File | Contents |
 |---|---|
 | [`overshoot_size.csv`](overshoot_size.csv) | achieved vs nominal size, Berry–Esseen bound and true distance, per `(m', conf)` |
-| [`overshoot_error_bound.csv`](overshoot_error_bound.csv) | the two-part decomposition point by point, incl. the `A` and `B` factors of Part 4 |
-| [`overshoot_power.csv`](overshoot_power.csv) | exact `P(rule fires)` vs depth, per `(m', conf, reference)` |
-| [`overshoot_bracket_walk.csv`](overshoot_bracket_walk.csv) | the probe sequences behind the Part 7 #9 sentence |
+| [`overshoot_error_bound.csv`](overshoot_error_bound.csv) | the two-part decomposition point by point, including the $A$ and $B$ factors of Part 4 |
+| [`overshoot_power.csv`](overshoot_power.csv) | exact $\mathbb P(\text{rule fires})$ versus depth, per $(m',\mathrm{conf},\mathrm{reference})$ |
+| [`overshoot_bracket_walk.csv`](overshoot_bracket_walk.csv) | the probe sequences used to assess reference quality as the bracket narrows |
 | [`tex/thesis/tab_overshoot_operating.tex`](tex/thesis/tab_overshoot_operating.tex) | the generated table |

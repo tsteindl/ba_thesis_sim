@@ -239,20 +239,22 @@ the staged reports, tables, figures, budget audits, and appendix-code verificati
 
 ## Thesis follow-up after the rerun
 
-The current thesis truthfully describes the implementation used for its present numbers: search
-from 1, geometric refinement, and the smooth `m approximately B/N` score. After the new results are
-accepted, update all of the following together:
+The thesis theorem, pseudocode, explanatory paragraph, and appendix listing have already been
+updated in advance to describe the target exhaustive implementation. Treat them as the intended
+specification; do not restore the old search from 1 or the geometric refinement. After the new
+implementation and results are accepted, verify all of the following together:
 
-- Theorem `thm:stat-safeguard`: both argmax expressions become
+- Theorem `thm:stat-safeguard`: both argmax expressions remain
   `N' = N_min, ..., N_max`.
 - The accuracy variance remains
   `sigma(N') = 1 / (2 N' sqrt(floor(B/N')))`, matching the new score exactly.
-- The safeguard pseudocode loop starts at `N_min`, not 1.
-- Remove the paragraph about geometric coarse-to-fine search and the smooth approximation.
+- The safeguard pseudocode loop and appendix code both start at `N_min`, not 1.
+- No paragraph or generated report still describes geometric coarse-to-fine search or the smooth
+  approximation.
 - State that vectorized enumeration returns the exact maximizer of the discretized approximate
   score over the constrained interval. “Exact” modifies the numerical maximization, not the
   Gaussian/statistical model.
-- Remove Binary Search's redundant post-safeguard floor.
+- Binary Search has no redundant post-safeguard floor.
 - Regenerate the appendix Python listings, tables, figures, and all quoted results.
 
 The rerun is scientifically necessary. Changing the safeguard changes both algorithms' outcomes
