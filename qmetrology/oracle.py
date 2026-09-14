@@ -7,74 +7,14 @@ exactly over the discrete N_opt distribution of a uniform prior, and `oracle_bud
 the smallest integer budget reaching a requested convergence probability. Neither function draws
 artificial estimator errors.
 
-`convergence_prob` is the exact-binomial probability at one depth, used by the linear-search
-detector study; `ceiling_rate` and `heisenberg_rate` are the looser analytic ceilings the broad-prior
-study plots.
+`ceiling_rate` and `heisenberg_rate` are the analytic ceilings the tables report alongside the
+measured protocols.
 """
 import numpy as np
 from scipy.special import ndtr, ndtri   # standard normal CDF and inverse CDF, vectorised
 from scipy.stats import binom
 
 
-def convergence_prob(N, phi, budget, eps):
-    """Exact P(|phi_hat - phi| < eps) at depth N with m = floor(budget/N) shots.
-
-    Vectorised over N. Returns 0 where the depth is infeasible (m = 0) or the convergence window is
-    empty (N(phi-eps) >= pi/2, i.e. even the shallowest admissible reading aliases).
-    """
-    N = np.atleast_1d(np.asarray(N, dtype=np.int64))
-    m = np.asarray(budget, dtype=np.int64) // N
-
-    lo_ang = N * (phi - eps)                           # A, unclipped
-    hi_ang = N * (phi + eps)                           # B, unclipped
-    # arccos(.) always lands in [0, pi/2]: a bound outside that range is simply not binding, and
-    # must NOT be clipped onto pi/2 — that would drop the K = 0 reading, which is exactly the one
-    # taken when the depth sits at the aliasing edge.
-    feasible = (m >= 1) & (lo_ang < np.pi / 2)
-    if not feasible.any():
-        return np.zeros(N.shape)
-
-    m_safe = np.where(feasible, m, 1)
-    p0 = np.cos(N * phi) ** 2
-    # K <= k_hi  <=>  arccos(sqrt(K/m)) > A   (no constraint when A <= 0)
-    k_hi = np.where(lo_ang > 0, np.ceil(m_safe * np.cos(np.minimum(lo_ang, np.pi / 2)) ** 2) - 1, m_safe)
-    p = binom.cdf(k_hi, m_safe, p0)
-    # K >  k_lo  <=>  arccos(sqrt(K/m)) < B   (no constraint when B >= pi/2, the common case at
-    # large N — skipping the second CDF there is worth it, it dominates the cost of the whole search)
-    binding = hi_ang < np.pi / 2
-    if binding.any():
-        k_lo = np.where(binding, np.floor(m_safe * np.cos(np.minimum(hi_ang, np.pi / 2)) ** 2), -1.0)
-        p = p - binom.cdf(k_lo, m_safe, p0)
-    return np.where(feasible, np.clip(p, 0.0, 1.0), 0.0)
-
-
-
-
-
-
-
-
-
-
-# --------------------------------------------------------------------------------------------
-# The exact oracle above degenerates, and the reason is worth stating precisely.
-#
-# At the aliasing edge the readout is deterministic: with p0 = cos^2(N phi) ~ 0 every shot returns
-# K = 0, so phi_hat = pi/(2N) *regardless of the data*. An oracle that knows phi can therefore choose
-# N = floor(pi/(2 phi)) and have the answer handed to it by that constant, to absolute accuracy
-#
-#     |pi/(2 floor(pi/2phi)) - phi|  ~  2 phi^2 / pi,
-#
-# using a handful of shots and no averaging at all. Whenever phi < sqrt(pi eps / 2) that error is
-# already below the tolerance, and the "budget needed" collapses to almost nothing — at
-# phi ~ U(0.001,0.01), eps = 1e-4 the whole prior is in that regime and the oracle reports a
-# meaningless ~400x advantage.
-#
-# This is a property of the model, not a bug: the depth is a continuous-valued choice, so choosing it
-# with exact knowledge of phi smuggles phi into the estimate. It makes the exact oracle a valid but
-# vacuous bound there. The useful ceiling is the one where the accuracy has to come from the
-# *statistics* rather than from the choice of N, i.e. the asymptotic law of Eq. (3.4) evaluated at the
-# best admissible depth — which is exactly Eq. (3.7) of the thesis with N = N_opt.
 def heisenberg_prob(phi, budget, eps):
     """P(converge) at depth N = floor(pi/(2 phi)) under Eq. (3.4): 2 Phi(2 eps sqrt(N C)) - 1.
 

@@ -823,74 +823,6 @@ def tab_diag_detector(D):
 
 
 
-def tab_linear_detector(D):
-    """Linear search under alternative stopping rules (from linear_detector_study.py).
-
-    Restored after being lost in an edit; reconstructed from linear_detector_bakeoff.csv and
-    verified to reproduce the previously rendered table exactly, numbers and bold marks alike.
-    """
-    rows = load("linear_detector_bakeoff.csv")
-    if not rows:
-        return None
-    COLS = [("narrow_e3", "10000", r"$\epsilon = 10^{-3}$,\ $B = 10{,}000$"),
-            ("narrow_e3", "41326", r"$\epsilon = 10^{-3}$,\ $B = 41{,}326$"),
-            ("narrow_e4", "2917365", r"$\epsilon = 10^{-4}$,\ $B = 2{,}917{,}365$")]
-    ORDER = [("published", "cumulative mean, as published"),
-             ("cumulative", "cumulative mean, re-tuned"),
-             None,
-             ("window", r"moving window of width $w$"),
-             ("prepost", "pre/post windows, noise threshold"),
-             ("threshold", r"Eq.~(\ref{eq:overshoot-threshold}) at lag $w$"),
-             ("pooled", r"Eq.~(\ref{eq:overshoot-threshold}) vs.\ pooled reference"),
-             ("cusum", "CUSUM on the pooled reference")]
-    cells = {}
-    for sid, budget, _ in COLS:
-        cells[(sid, budget)] = {r["rule"]: r for r in rows
-                                if r["scenario_id"] == sid and r["budget"] == budget}
-    body = [r"\setlength{\tabcolsep}{5pt}", r"\begin{tabular}{lcccccc}", r"\toprule",
-            "Stopping rule"]
-    for _, _, head in COLS:
-        body.append(rf"& \multicolumn{{2}}{{c}}{{{head}}}")
-    body.append(r"\\")
-    body.append(r"\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}")
-    body.append(r"& Converged & False alarm & Converged & False alarm & Converged "
-                r"& False alarm \\")
-    body.append(r"\midrule")
-    for entry in ORDER:
-        if entry is None:
-            body.append(r"\midrule")
-            continue
-        rule, label = entry
-        line = [label]
-        for sid, budget, _ in COLS:
-            sub = cells[(sid, budget)]
-            if rule not in sub:
-                line += ["& --", "& --"]
-                continue
-            r = sub[rule]
-            rate, fa = f(r["rate"]), f(r["false_alarm_rate"])
-            base = max(f(sub["published"]["rate"]), f(sub["cumulative"]["rate"]))
-            bold = (rule not in ("published", "cumulative")
-                    and 100 * (rate - base) > 2 * f(r["delta_se_pp"]))
-            txt = rf"\textbf{{{100*rate:.2f}\%}}" if bold else rf"{100*rate:.2f}\%"
-            line += [f"& {txt}", rf"& {100*fa:.1f}\%"]
-        body.append(" ".join(line) + r" \\")
-    cap = (r"Linear search under alternative stopping rules. Every rule replaces only the "
-           r"\emph{overshoot verdict} of Algorithm~\ref{alg:linear-search}; the scan, the "
-           r"backtracking and the safeguard are unchanged, and each rule is tuned over the same "
-           r"$(m', \mathrm{inc}, s)$ grids on the same two tuning blocks before being scored on "
-           r"the same 50{,}000 held-out trials. The first row is the configuration the sweep "
-           r"froze, and the second is the same cumulative-mean rule re-tuned here, so the gap "
-           r"between them is what better tuning alone is worth and the rows below it are what "
-           r"changing the rule is worth. Convergence is the exact probability "
-           r"$P(|\hat\phi-\phi|<\epsilon)$ of the depth each run selects, averaged over trials, "
-           r"which removes the exploitation coin flip from the comparison. Bold marks an "
-           r"improvement over the better of those two cumulative-mean rows by more than two "
-           r"standard errors of the paired difference. False-alarm rates are trial-level, as in "
-           r"Table~\ref{tab:diag-detector}.")
-    return wrap(body, cap, "tab:linear-detector", size="small")
-
-
 def tab_overshoot_operating(D):
     """How well the normal-placed threshold is justified, two ways: a bound and a measurement.
 
@@ -960,12 +892,6 @@ def main():
     made.append(write("tab_diag_exploration.tex", tab_diag_exploration(D)))
     made.append(write("tab_diag_downstream.tex", tab_diag_downstream(D)))
     made.append(write("tab_diag_detector.tex", tab_diag_detector(D)))
-    _ld = tab_linear_detector(D)
-    if _ld:
-        made.append(write("tab_linear_detector.tex", _ld))
-    else:
-        print("!! linear_detector_bakeoff.csv absent — run "
-              "`python analysis/linear_detector_study.py` first.")
 
     _oc = tab_overshoot_operating(D)
     if _oc:

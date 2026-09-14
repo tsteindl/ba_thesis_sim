@@ -611,36 +611,6 @@ A.~\ref{alg:binary-search}: BS
 \end{table}
 
 
-% ---- tab_linear_detector.tex -------------------------------------
-\begin{table}[ht]
-\centering
-\small
-\caption{Linear search under alternative stopping rules. Every rule replaces only the \emph{overshoot verdict} of Algorithm~\ref{alg:linear-search}; the scan, the backtracking and the safeguard are unchanged, and each rule is tuned over the same $(m', \mathrm{inc}, s)$ grids on the same two tuning blocks before being scored on the same 50{,}000 held-out trials. The first row is the configuration the sweep froze, and the second is the same cumulative-mean rule re-tuned here, so the gap between them is what better tuning alone is worth and the rows below it are what changing the rule is worth. Convergence is the exact probability $P(|\hat\phi-\phi|<\epsilon)$ of the depth each run selects, averaged over trials, which removes the exploitation coin flip from the comparison. Bold marks an improvement over the better of those two cumulative-mean rows by more than two standard errors of the paired difference. False-alarm rates are trial-level, as in Table~\ref{tab:diag-detector}.}
-\label{tab:linear-detector}
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{lcccccc}
-\toprule
-Stopping rule
-& \multicolumn{2}{c}{$\epsilon = 10^{-3}$,\ $B = 10{,}000$}
-& \multicolumn{2}{c}{$\epsilon = 10^{-3}$,\ $B = 41{,}326$}
-& \multicolumn{2}{c}{$\epsilon = 10^{-4}$,\ $B = 2{,}917{,}365$}
-\\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
-& Converged & False alarm & Converged & False alarm & Converged & False alarm \\
-\midrule
-cumulative mean, as published & 57.49\% & 77.7\% & 89.69\% & 52.1\% & 90.27\% & 30.2\% \\
-cumulative mean, re-tuned & 58.00\% & 77.7\% & 89.50\% & 42.7\% & 90.24\% & 30.4\% \\
-\midrule
-moving window of width $w$ & \textbf{64.68\%} & 93.9\% & \textbf{92.65\%} & 96.5\% & 88.92\% & 37.0\% \\
-pre/post windows, noise threshold & \textbf{62.28\%} & 76.5\% & \textbf{92.91\%} & 86.9\% & 89.63\% & 96.6\% \\
-Eq.~(\ref{eq:overshoot-threshold}) at lag $w$ & \textbf{64.50\%} & 90.1\% & \textbf{92.84\%} & 35.8\% & 89.95\% & 18.5\% \\
-Eq.~(\ref{eq:overshoot-threshold}) vs.\ pooled reference & \textbf{61.31\%} & 42.8\% & \textbf{92.33\%} & 45.0\% & \textbf{90.95\%} & 46.8\% \\
-CUSUM on the pooled reference & \textbf{59.77\%} & 19.9\% & \textbf{91.27\%} & 43.8\% & 90.16\% & 26.2\% \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-
 % ---- tab_overshoot_operating.tex ---------------------------------
 \begin{table}[ht]
 \centering

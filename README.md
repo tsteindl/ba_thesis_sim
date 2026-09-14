@@ -36,7 +36,7 @@ python analysis/run.py --max --resume        # continue an interrupted sweep
 python analysis/run.py --max --report-only   # rebuild the derived tables, no simulation
 
 python analysis/thesis_tables.py     # the thesis tables -> results/tex/ (--long -> results/tex_long/)
-python analysis/thesis_figures.py    # all 12 figures (--only NAME,NAME for a subset)
+python analysis/thesis_figures.py    # all 11 figures (--only NAME,NAME for a subset)
 python analysis/error_curves.py      # |φ̂−φ| quantiles behind fig_error
 python analysis/variance_curves.py   # estimator variance vs budget
 

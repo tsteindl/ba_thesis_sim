@@ -179,9 +179,9 @@ ALGORITHMS = {
         # mean_window is the width of the mean the stopping rule tests. 0 is the cumulative mean
         # the algorithm was published with, so the grid CONTAINS the previous rule and the tuner
         # can never do worse than it; w > 0 averages only the last w probes. The axis was added
-        # after the detector study found a moving window to help at tight budgets and hurt
-        # slightly at loose ones, i.e. neither rule dominates and the choice belongs in the tuning
-        # grid rather than in the algorithm.
+        # because neither rule dominates -- a moving window helps at tight budgets and hurts
+        # slightly at loose ones -- so the choice belongs in the tuning grid rather than being
+        # fixed in the algorithm. w = 0 recovers the published cumulative rule exactly.
         discrete=dict(lookback_window=[1, 2, 3, 4, 5, 6, 8, 12, 20],
                       safeguard=[0, 1, 2, 3, 4, 6, 8, 12, 16, 24],
                       inc=[1, 2, 3, 5, 8],

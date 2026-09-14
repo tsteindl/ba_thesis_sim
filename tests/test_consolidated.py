@@ -12,7 +12,6 @@ Covered:
  4 definition checks         9 thesis/code parity
  5 eligibility accounting   10 quick/full modes and resume
 
-Plus the replay invariants of analysis/linear_detector_study.py, whose whole argument
 is that replaying a recorded probe stream reproduces Algorithm 4 exactly.
 """
 import csv
@@ -510,128 +509,6 @@ def test_reproducibility_and_resume():
 
 
 # ------------------------------------------------------- linear-search detector replay (11)
-def _lds():
-    import linear_detector_study as L
-    return L
-
-
-def test_lds_conv_prob_matches_oracle():
-    """The analytic exploitation must be the same quantity the oracle rows are built from."""
-    L = _lds()
-    rng = np.random.default_rng(11)
-    for _ in range(80):
-        phi = float(rng.uniform(0.001, 0.5))
-        N, B = int(rng.integers(1, 400)), int(rng.integers(100, 10 ** 6))
-        eps = float(10.0 ** rng.uniform(-6, -2))
-        a = float(O.convergence_prob(N, phi, B, eps)[0])
-        b = float(L.conv_prob(np.array([N]), np.array([phi]), np.array([B]), eps)[0])
-        assert abs(a - b) < 1e-12, f"conv_prob disagrees with the oracle at N={N}, phi={phi}"
-
-
-def test_lds_moving_window_is_a_lagged_comparison():
-    """Once the trailing window is full, 'the window mean fell' IS 'phi_hat_k < phi_hat_{k-w}'.
-
-    The study relies on this to describe the supervisor's moving-window rule as a member of the
-    Eq. (3.6) family rather than as an averaging rule.
-    """
-    L = _lds()
-    P = np.random.default_rng(3).random((500, 30))
-    for w in (1, 2, 3, 5, 8):
-        fell = L._falls(L._trailing_mean(P, w))
-        direct = np.zeros_like(fell)
-        direct[:, w:] = P[:, w:] < P[:, :-w]
-        assert (fell[:, w:] == direct[:, w:]).all(), f"window identity fails at w={w}"
-
-
-def test_lds_replay_reproduces_algorithm_4():
-    """Replaying a recorded scan must give Algorithm 4's own N_guess and N_star, exactly.
-
-    This is the load-bearing assumption of the bake-off: the depths a scan can afford are fixed
-    before any datum is seen, so every candidate rule can be scored on one recorded probe stream.
-    """
-    L = _lds()
-    pmin, pmax, eps = 0.01, 0.1, 1e-3
-    checked = 0
-    for B in (10_000, 41_326):
-        for cfg in ({"m_exploration": 2, "lookback_window": 4, "safeguard": 1, "inc": 1},
-                    {"m_exploration": 15, "lookback_window": 3, "safeguard": 2, "inc": 2},
-                    {"m_exploration": 9, "lookback_window": 1, "safeguard": 0, "inc": 3}):
-            depths = L.scan_depths(max(1, int(np.pi // (2 * pmax))),
-                                   max(1, int(np.pi // (2 * pmin))),
-                                   cfg["inc"], cfg["m_exploration"], B)
-            C = L.context(depths, cfg["m_exploration"], cfg["inc"])
-            for seed in range(40):
-                tr = AlgorithmTrace(algorithm="linear")
-                rng = np.random.default_rng(seed)
-                phi = float(rng.uniform(pmin, pmax))
-                tr.nominal_budget = float(B)
-                out = ALG.find_phi_fixed_budget_linear_search(
-                    rng, phi, pmax, pmin, trace=tr, budget=B, **cfg)
-                tr.finalize(phi, out[0], out[1], eps)
-                n = len(tr.probes)
-                assert list(depths[:n]) == [p.N for p in tr.probes], \
-                    "scan_depths does not reproduce the depths the algorithm probes"
-                # pad the unseen tail with +inf: it can neither fall nor fire, so a rule that did
-                # not fire within the recorded probes still does not fire here
-                Pm = np.full((1, len(depths)), np.inf)
-                Pm[0, :n] = [p.phi_hat for p in tr.probes]
-                fire, back = L.rule_cumulative(Pm, C, cfg["lookback_window"])
-                o = L.outcome(fire, back, C, np.array([phi]), Pm, cfg["safeguard"], eps, B)
-                assert int(o["N_guess"][0]) == int(tr.N_guess), \
-                    f"replayed N_guess {o['N_guess'][0]} != {tr.N_guess} (B={B}, cfg={cfg})"
-                if tr.N_star is not None:
-                    assert int(o["N_star"][0]) == int(tr.N_star), \
-                        f"replayed N_star {o['N_star'][0]} != {tr.N_star} (B={B}, cfg={cfg})"
-                assert bool(o["false_alarm"][0]) == bool(run_record(tr, True)["false_alarm"]), \
-                    "replayed false-alarm verdict differs from the trace's"
-                assert bool(o["miss"][0]) == bool(run_record(tr, True)["miss"]), \
-                    "replayed miss verdict differs from the trace's"
-                checked += 1
-    assert checked >= 200, "the replay check did not run over enough trials"
-
-
-def test_lds_replay_reproduces_lagged_variant():
-    """The sweep-ready lagged variant and the bake-off's model of it must be the same algorithm.
-
-    `find_phi_fixed_budget_linear_search_lagged` is what a production sweep would run if the
-    stopping rule were replaced; `rule_threshold` is what the bake-off scored. If they ever drift
-    apart, the measured gain would not be the gain a re-run would deliver.
-    """
-    L = _lds()
-    pmin, pmax, eps = 0.01, 0.1, 1e-3
-    checked = 0
-    for B in (10_000, 41_326):
-        for cfg in ({"m_exploration": 2, "lookback_window": 4, "safeguard": 1, "inc": 1,
-                     "lag": 2, "conf": 0.5},
-                    {"m_exploration": 9, "lookback_window": 6, "safeguard": 2, "inc": 2,
-                     "lag": 3, "conf": 0.95}):
-            depths = L.scan_depths(max(1, int(np.pi // (2 * pmax))),
-                                   max(1, int(np.pi // (2 * pmin))),
-                                   cfg["inc"], cfg["m_exploration"], B)
-            C = L.context(depths, cfg["m_exploration"], cfg["inc"])
-            for seed in range(40):
-                tr = AlgorithmTrace(algorithm="linear_lagged")
-                rng = np.random.default_rng(seed)
-                phi = float(rng.uniform(pmin, pmax))
-                tr.nominal_budget = float(B)
-                out = ALG.find_phi_fixed_budget_linear_search_lagged(
-                    rng, phi, pmax, pmin, trace=tr, budget=B, **cfg)
-                tr.finalize(phi, out[0], out[1], eps)
-                n = len(tr.probes)
-                Pm = np.full((1, len(depths)), np.inf)
-                Pm[0, :n] = [p.phi_hat for p in tr.probes]
-                fire, back = L.rule_threshold(Pm, C, alpha=1 - cfg["conf"],
-                                              l=cfg["lookback_window"], lag=cfg["lag"])
-                o = L.outcome(fire, back, C, np.array([phi]), Pm, cfg["safeguard"], eps, B)
-                assert int(o["N_guess"][0]) == int(tr.N_guess), \
-                    f"lagged replay N_guess {o['N_guess'][0]} != {tr.N_guess} (B={B}, cfg={cfg})"
-                if tr.N_star is not None:
-                    assert int(o["N_star"][0]) == int(tr.N_star), \
-                        f"lagged replay N_star {o['N_star'][0]} != {tr.N_star}"
-                checked += 1
-    assert checked >= 150, "the lagged replay check did not run over enough trials"
-
-
 def test_linear_mean_window_default_is_cumulative():
     """`mean_window` must be a strict generalisation: w = 0 reproduces the published Algorithm 4.
 
@@ -655,35 +532,6 @@ def test_linear_mean_window_default_is_cumulative():
     # and the grid really does contain it, so the tuner can fall back on it
     assert 0 in M.ALGORITHMS["linear"]["discrete"]["mean_window"], \
         "the mean_window grid must contain 0, the cumulative-mean rule"
-
-
-def test_linear_mean_window_matches_the_bakeoff_rule():
-    """A finite `mean_window` must be the same rule the detector study scored as `window`."""
-    L = _lds()
-    pmin, pmax, eps = 0.01, 0.1, 1e-3
-    B, checked = 10_000, 0
-    for w, l, s_, m, inc in ((3, 6, 0, 1, 1), (2, 4, 0, 5, 2), (6, 12, 3, 1, 2)):
-        depths = L.scan_depths(max(1, int(np.pi // (2 * pmax))), max(1, int(np.pi // (2 * pmin))),
-                               inc, m, B)
-        C = L.context(depths, m, inc)
-        for seed in range(40):
-            tr = AlgorithmTrace(algorithm="linear")
-            rng = np.random.default_rng(seed)
-            phi = float(rng.uniform(pmin, pmax))
-            tr.nominal_budget = float(B)
-            out = ALG.find_phi_fixed_budget_linear_search(
-                rng, phi, pmax, pmin, trace=tr, budget=B, m_exploration=m, lookback_window=l,
-                safeguard=s_, inc=inc, mean_window=w)
-            tr.finalize(phi, out[0], out[1], eps)
-            n = len(tr.probes)
-            Pm = np.full((1, len(depths)), np.inf)
-            Pm[0, :n] = [p.phi_hat for p in tr.probes]
-            fire, back = L.rule_window(Pm, C, w=w, l=l)
-            o = L.outcome(fire, back, C, np.array([phi]), Pm, s_, eps, B)
-            assert int(o["N_guess"][0]) == int(tr.N_guess), \
-                f"mean_window={w} disagrees with the bake-off's `window` rule"
-            checked += 1
-    assert checked >= 100
 
 
 def main():
