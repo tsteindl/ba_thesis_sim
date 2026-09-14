@@ -134,16 +134,17 @@ def tex_int(x, decimal_places=None):
     return f"{int(round(x)):,}".replace(",", "{,}")
 
 
-CI_GAP = "4pt"  # vertical gap between a cell's value and its confidence interval
+CI_GAP = r"\hspace{0.45em}"  # gap between a cell's value and its confidence interval
 
 
 def ci_cell(value, interval):
-    """Stack a value over its confidence interval, with room to breathe between the lines.
+    """A value followed by its confidence interval, on one line, with a gap between them.
 
-    ``\makecell`` leaves the cell exactly as wide as its widest line, so enlarging the
-    gap is purely vertical and cannot push a column past the text width.
+    Set on one line because the cells live in `c` columns: the interval trails the number it
+    belongs to instead of floating between two rows. The gap is a fixed `\hspace`, so it adds
+    the same sub-em amount to every cell and cannot pull a column past the text width.
     """
-    return rf"\makecell{{{value} \\[{CI_GAP}] {{\scriptsize {interval}}}}}"
+    return rf"{value}{CI_GAP}{{\scriptsize {interval}}}"
 
 
 def eps_tex(e):
