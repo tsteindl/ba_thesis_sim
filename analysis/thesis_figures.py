@@ -432,36 +432,6 @@ def _gaussian_kde(samples, grid):
     return np.exp(-0.5 * z**2).mean(axis=1) / (np.sqrt(2 * np.pi) * bandwidth)
 
 
-def fig_broad(d):
-    sids = [s["id"] for s in M.SCENARIOS
-            if "broad_prior" in s["families"] and s["id"] in d.scen]
-    if not sids:
-        return None
-    fig, axes = plt.subplots(1, len(sids), figsize=(5.0*len(sids), 3.8), sharey=True)
-    axes = np.atleast_1d(axes)
-    for ax, sid in zip(axes, sids):
-        for a in ORDER:
-            b, r, lo, hi = d.curve(sid, a)
-            if not b.size:
-                continue
-            ax.plot(b, 100*r, **style(a))
-            ok = np.isfinite(lo)
-            if ok.any():
-                ax.fill_between(b[ok], 100*lo[ok], 100*hi[ok], color=COL[a], alpha=0.15, lw=0)
-        ax.set_xscale("log")
-        ax.axhline(90, color="k", lw=0.7, ls="--", alpha=0.6)
-        ax.set_xlabel("Budget $C = N \\cdot m$")
-        ax.set_title(f"{d.scen[sid]['label']}   ($N_{{min}} = {d.scen[sid]['N_min']}$)",
-                     fontsize=9.5)
-    axes[0].set_ylabel("Converged (%)")
-    axes[0].set_ylim(0, 101)
-    axes[-1].legend(fontsize=8, loc="upper left")
-    fig.tight_layout(rect=(0, 0.05, 1, 1))
-    _foot(fig, d, bands="shaded bands are 95% Wilson intervals")
-    fig.savefig(out_path("fig_broad.png"), bbox_inches="tight")
-    plt.close(fig)
-    return "fig_broad.png"
-
 
 def _overshoot_curves():
     """(m, conf, reference) -> (x grid, power). Analytic, from overshoot_criterion.py."""

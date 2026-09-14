@@ -12,7 +12,6 @@ under resource constraints".
   diagnostics.py  exploration / safeguard / detector telemetry
   trace.py        the neutral per-probe instrumentation the diagnostics read
   uncertainty.py  Wilson + bootstrap intervals and the curve crossing
-  ladder.py       phase-unwrapping ladder, a protocol beyond the thesis (results/LADDER.md)
 
 Entry point for every reported number: python analysis/run.py --max
 """

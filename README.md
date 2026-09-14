@@ -118,23 +118,18 @@ At a fixed budget of 10,000 (ε=10⁻³): brute 56.1%, linear 64.1%, binary 65.1
 
 ## Beyond the thesis
 
-Three studies extend past what the thesis reports. They read the package and `results/` read-only
-and write their own files into `results/`.
+The **exact posterior** is the Bayesian direction the thesis names in its Outlook (Section 5): the
+likelihood `p(D|φ)` is not limited by `Nφ < π/2`, so no expensively simulated probe has to be
+discarded after an overshoot. `qmetrology/posterior.py` implements the depth criterion and
+`algorithms.py` carries a `*_post` variant of each adaptive protocol; none of them is in `ORDER`, so
+the thesis sweep never evaluates them. These scripts read the package and `results/` read-only and
+write their own files into `results/`:
 
 ```bash
-python analysis/ladder_study.py         # phase-unwrapping ladder      -> results/LADDER.md
-python analysis/posterior_all_study.py  # exact posterior, all 3 algos -> results/posterior_all.csv
-python analysis/posterior_explain.py    # the POSTERIOR.md figures
-python analysis/binary_rescue_study.py  # can bisection inform the depth rule at all
-python analysis/broad_dist_study.py     # broad priors                 -> results/broad_dist.csv
+python analysis/posterior_all_study.py  # exact posterior, all 3 algorithms -> posterior_all.csv
+python analysis/binary_rescue_study.py  # can bisection inform the depth rule -> binary_rescue.csv
+python analysis/posterior_explain.py    # the five fig_posterior_*/fig_binary_cap_cost figures
 ```
 
-The **ladder** (`qmetrology/ladder.py`) is the one that changes the scaling class. Every thesis
-algorithm inverts a single batch and is therefore capped at `N ≤ π/2φ`, so brute force and every
-adaptive protocol alike cost `~1/ε²` and the advantage saturates — the plateau above is that
-invertibility cap, not a physical limit. Unwrapping each measurement with the previous, coarser
-estimate lifts the cap and recovers `~1/ε` scaling, so the budget ratio keeps growing with
-precision instead of flattening. See [results/LADDER.md](results/LADDER.md).
-
-The **exact posterior** is the Bayesian direction the thesis names in its Outlook: the likelihood
-`p(D|φ)` is not limited by `Nφ < π/2`, so no expensively simulated probe has to be discarded.
+Run `binary_rescue_study.py` before `posterior_explain.py` — two of its figures read
+`binary_rescue.csv`.

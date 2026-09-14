@@ -12,8 +12,8 @@ Scenario families (all four are Chapter 4 families already in use, not new exper
                          low-precision standard scenario; the budget to reach p* comes from the
                          swept convergence curve.
   precision_sweep        U(0.01, 0.1) over eps = 1e-3 .. 1e-8.
-  broad_prior            U(0.01, pi/2) and U(0.01, pi/4) at eps = 1e-3, on the budget curve of
-                         results/broad_dist.csv (3e3 .. 2e6), which 04-broad-dist.tex reports.
+  broad_prior            U(0.01, pi/2) and U(0.01, pi/4) at eps = 1e-3, on a 3e3 .. 2e6
+                         budget curve.
 
 REPORTED ALGORITHMS. Exactly the four that are settled:
 
