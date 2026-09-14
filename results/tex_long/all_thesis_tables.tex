@@ -23,7 +23,7 @@ A.~\ref{alg:binary-search}: Binary search
 & 65.07\%
 & 32{,}400 \\
 A.~\ref{alg:reverse-engineering}: Reverse engineering
-& 66.25\%
+& 66.30\%
 & 29{,}800 \\
 \midrule
 Separable protocol ($N=1$)
@@ -52,21 +52,21 @@ Algorithm
 & \makecell{Budget for $90\%$ \\ convergence} \\
 \midrule
 A.~\ref{alg:brute-force}: Brute force baseline
-& 56.09\% \newline {\scriptsize [55.66, 56.53]}
-& 45{,}900 \newline {\scriptsize [45{,}300, 46{,}500]} \\
+& 56.09\%\hspace{0.45em}{\scriptsize [55.66, 56.53]}
+& 45{,}900\hspace{0.45em}{\scriptsize [45{,}300, 46{,}500]} \\
 A.~\ref{alg:linear-search}: Linear search
-& 64.10\% \newline {\scriptsize [63.68, 64.52]}
-& 35{,}500 \newline {\scriptsize [34{,}900, 36{,}000]} \\
+& 64.10\%\hspace{0.45em}{\scriptsize [63.68, 64.52]}
+& 35{,}500\hspace{0.45em}{\scriptsize [34{,}900, 36{,}000]} \\
 A.~\ref{alg:binary-search}: Binary search
-& 65.07\% \newline {\scriptsize [64.65, 65.49]}
-& 32{,}400 \newline {\scriptsize [32{,}000, 32{,}900]} \\
+& 65.07\%\hspace{0.45em}{\scriptsize [64.65, 65.49]}
+& 32{,}400\hspace{0.45em}{\scriptsize [32{,}000, 32{,}900]} \\
 A.~\ref{alg:reverse-engineering}: Reverse engineering
-& 66.25\% \newline {\scriptsize [65.84, 66.67]}
-& 29{,}800 \newline {\scriptsize [29{,}200, 30{,}300]} \\
+& 66.30\%\hspace{0.45em}{\scriptsize [65.88, 66.71]}
+& 29{,}800\hspace{0.45em}{\scriptsize [29{,}200, 30{,}300]} \\
 \midrule
 Separable protocol ($N=1$)
-& 15.68\% \newline {\scriptsize [15.36, 16.00]}
-& 680{,}000 \newline {\scriptsize [669{,}000, 691{,}000]} \\
+& 15.68\%\hspace{0.45em}{\scriptsize [15.36, 16.00]}
+& 680{,}000\hspace{0.45em}{\scriptsize [669{,}000, 691{,}000]} \\
 \midrule
 Oracle ($N_\text{opt}$)
 & 73.48\%
@@ -222,51 +222,51 @@ Algorithm
 & \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.001,0.1)$} \\
 \midrule
 A.~\ref{alg:brute-force}: BF
-& 45.9 \newline {\scriptsize [45.3, 46.5]}
-& 4{,}530 \newline {\scriptsize [4{,}460, 4{,}590]}
-& 451{,}000 \newline {\scriptsize [444{,}000, 457{,}000]}
-& 45{,}100{,}000 \newline {\scriptsize [44{,}500{,}000, 45{,}700{,}000]}
-& $4.51\times10^{9}$ \newline {\scriptsize [$4.45\times10^{9}$, $4.57\times10^{9}$]}
-& $4.51\times10^{11}$ \newline {\scriptsize [$4.45\times10^{11}$, $4.57\times10^{11}$]}
-& 441 \newline {\scriptsize [436, 447]}
-& 4{,}520 \newline {\scriptsize [4{,}460, 4{,}580]} \\
+& 45.9\hspace{0.45em}{\scriptsize [45.3, 46.5]}
+& 4{,}530\hspace{0.45em}{\scriptsize [4{,}460, 4{,}590]}
+& 451{,}000\hspace{0.45em}{\scriptsize [444{,}000, 457{,}000]}
+& 45{,}100{,}000\hspace{0.45em}{\scriptsize [44{,}500{,}000, 45{,}700{,}000]}
+& $4.51\times10^{9}$\hspace{0.45em}{\scriptsize [$4.45\times10^{9}$, $4.57\times10^{9}$]}
+& $4.51\times10^{11}$\hspace{0.45em}{\scriptsize [$4.45\times10^{11}$, $4.57\times10^{11}$]}
+& 441\hspace{0.45em}{\scriptsize [436, 447]}
+& 4{,}520\hspace{0.45em}{\scriptsize [4{,}460, 4{,}580]} \\
 A.~\ref{alg:linear-search}: LS
-& 35.5 \newline {\scriptsize [34.9, 36]}
-& 2{,}910 \newline {\scriptsize [2{,}860, 2{,}960]}
-& 276{,}000 \newline {\scriptsize [272{,}000, 280{,}000]}
-& 27{,}300{,}000 \newline {\scriptsize [26{,}900{,}000, 27{,}700{,}000]}
-& $2.70\times10^{9}$ \newline {\scriptsize [$2.67\times10^{9}$, $2.74\times10^{9}$]}
-& $2.72\times10^{11}$ \newline {\scriptsize [$2.69\times10^{11}$, $2.76\times10^{11}$]}
-& 325 \newline {\scriptsize [321, 329]}
-& 3{,}190 \newline {\scriptsize [3{,}150, 3{,}240]} \\
+& 35.5\hspace{0.45em}{\scriptsize [34.9, 36]}
+& 2{,}910\hspace{0.45em}{\scriptsize [2{,}860, 2{,}960]}
+& 276{,}000\hspace{0.45em}{\scriptsize [272{,}000, 280{,}000]}
+& 27{,}300{,}000\hspace{0.45em}{\scriptsize [26{,}900{,}000, 27{,}700{,}000]}
+& $2.70\times10^{9}$\hspace{0.45em}{\scriptsize [$2.67\times10^{9}$, $2.74\times10^{9}$]}
+& $2.72\times10^{11}$\hspace{0.45em}{\scriptsize [$2.69\times10^{11}$, $2.76\times10^{11}$]}
+& 325\hspace{0.45em}{\scriptsize [321, 329]}
+& 3{,}190\hspace{0.45em}{\scriptsize [3{,}150, 3{,}240]} \\
 A.~\ref{alg:binary-search}: BS
-& 32.4 \newline {\scriptsize [32, 32.9]}
-& 2{,}830 \newline {\scriptsize [2{,}800, 2{,}870]}
-& 257{,}000 \newline {\scriptsize [254{,}000, 261{,}000]}
-& 25{,}400{,}000 \newline {\scriptsize [25{,}000{,}000, 25{,}700{,}000]}
-& $2.52\times10^{9}$ \newline {\scriptsize [$2.48\times10^{9}$, $2.55\times10^{9}$]}
-& $2.55\times10^{11}$ \newline {\scriptsize [$2.53\times10^{11}$, $2.58\times10^{11}$]}
-& 334 \newline {\scriptsize [330, 338]}
-& 2{,}450 \newline {\scriptsize [2{,}420, 2{,}480]} \\
+& 32.4\hspace{0.45em}{\scriptsize [32, 32.9]}
+& 2{,}830\hspace{0.45em}{\scriptsize [2{,}800, 2{,}870]}
+& 257{,}000\hspace{0.45em}{\scriptsize [254{,}000, 261{,}000]}
+& 25{,}400{,}000\hspace{0.45em}{\scriptsize [25{,}000{,}000, 25{,}700{,}000]}
+& $2.52\times10^{9}$\hspace{0.45em}{\scriptsize [$2.48\times10^{9}$, $2.55\times10^{9}$]}
+& $2.55\times10^{11}$\hspace{0.45em}{\scriptsize [$2.53\times10^{11}$, $2.58\times10^{11}$]}
+& 334\hspace{0.45em}{\scriptsize [330, 338]}
+& 2{,}450\hspace{0.45em}{\scriptsize [2{,}420, 2{,}480]} \\
 A.~\ref{alg:reverse-engineering}: RE
-& 29.8 \newline {\scriptsize [29.2, 30.3]}
-& 2{,}600 \newline {\scriptsize [2{,}570, 2{,}630]}
-& 251{,}000 \newline {\scriptsize [248{,}000, 254{,}000]}
-& 25{,}100{,}000 \newline {\scriptsize [24{,}700{,}000, 25{,}400{,}000]}
-& $2.49\times10^{9}$ \newline {\scriptsize [$2.46\times10^{9}$, $2.52\times10^{9}$]}
-& $2.48\times10^{11}$ \newline {\scriptsize [$2.45\times10^{11}$, $2.51\times10^{11}$]}
-& 303 \newline {\scriptsize [298, 307]}
-& 2{,}450 \newline {\scriptsize [2{,}420, 2{,}480]} \\
+& 29.8\hspace{0.45em}{\scriptsize [29.2, 30.3]}
+& 2{,}600\hspace{0.45em}{\scriptsize [2{,}570, 2{,}630]}
+& 251{,}000\hspace{0.45em}{\scriptsize [248{,}000, 254{,}000]}
+& 25{,}100{,}000\hspace{0.45em}{\scriptsize [24{,}700{,}000, 25{,}400{,}000]}
+& $2.49\times10^{9}$\hspace{0.45em}{\scriptsize [$2.46\times10^{9}$, $2.52\times10^{9}$]}
+& $2.48\times10^{11}$\hspace{0.45em}{\scriptsize [$2.45\times10^{11}$, $2.51\times10^{11}$]}
+& 303\hspace{0.45em}{\scriptsize [298, 307]}
+& 2{,}450\hspace{0.45em}{\scriptsize [2{,}420, 2{,}480]} \\
 \midrule
 Sep. ($N=1$)
-& 680 \newline {\scriptsize [669, 691]}
-& 67{,}200 \newline {\scriptsize [66{,}300, 68{,}300]}
-& 6{,}710{,}000 \newline {\scriptsize [6{,}620{,}000, 6{,}840{,}000]}
-& 671{,}000{,}000 \newline {\scriptsize [662{,}000{,}000, 684{,}000{,}000]}
-& $6.72\times10^{10}$ \newline {\scriptsize [$6.63\times10^{10}$, $6.83\times10^{10}$]}
-& $6.72\times10^{12}$ \newline {\scriptsize [$6.63\times10^{12}$, $6.83\times10^{12}$]}
+& 680\hspace{0.45em}{\scriptsize [669, 691]}
+& 67{,}200\hspace{0.45em}{\scriptsize [66{,}300, 68{,}300]}
+& 6{,}710{,}000\hspace{0.45em}{\scriptsize [6{,}620{,}000, 6{,}840{,}000]}
+& 671{,}000{,}000\hspace{0.45em}{\scriptsize [662{,}000{,}000, 684{,}000{,}000]}
+& $6.72\times10^{10}$\hspace{0.45em}{\scriptsize [$6.63\times10^{10}$, $6.83\times10^{10}$]}
+& $6.72\times10^{12}$\hspace{0.45em}{\scriptsize [$6.63\times10^{12}$, $6.83\times10^{12}$]}
 & --
-& 67{,}300 \newline {\scriptsize [66{,}300, 68{,}500]} \\
+& 67{,}300\hspace{0.45em}{\scriptsize [66{,}300, 68{,}500]} \\
 \midrule
 Oracle ($N_\text{opt}$)
 & 24.4
@@ -350,34 +350,34 @@ Precision $\epsilon$
 & Oracle ($N_\text{opt}$) \\
 \midrule
 $10^{-3}$
-& 1.29\texttimes \newline {\scriptsize [1.27, 1.32]}
-& 1.42\texttimes \newline {\scriptsize [1.39, 1.44]}
-& 1.54\texttimes \newline {\scriptsize [1.51, 1.58]}
+& 1.29\texttimes\hspace{0.45em}{\scriptsize [1.27, 1.32]}
+& 1.42\texttimes\hspace{0.45em}{\scriptsize [1.39, 1.44]}
+& 1.54\texttimes\hspace{0.45em}{\scriptsize [1.51, 1.58]}
 & 1.88\texttimes \\
 $10^{-4}$
-& 1.56\texttimes \newline {\scriptsize [1.52, 1.59]}
-& 1.60\texttimes \newline {\scriptsize [1.57, 1.63]}
-& 1.74\texttimes \newline {\scriptsize [1.71, 1.78]}
+& 1.56\texttimes\hspace{0.45em}{\scriptsize [1.52, 1.59]}
+& 1.60\texttimes\hspace{0.45em}{\scriptsize [1.57, 1.63]}
+& 1.74\texttimes\hspace{0.45em}{\scriptsize [1.71, 1.78]}
 & 1.85\texttimes \\
 $10^{-5}$
-& 1.64\texttimes \newline {\scriptsize [1.60, 1.67]}
-& 1.75\texttimes \newline {\scriptsize [1.72, 1.79]}
-& 1.80\texttimes \newline {\scriptsize [1.76, 1.83]}
+& 1.64\texttimes\hspace{0.45em}{\scriptsize [1.60, 1.67]}
+& 1.75\texttimes\hspace{0.45em}{\scriptsize [1.72, 1.79]}
+& 1.80\texttimes\hspace{0.45em}{\scriptsize [1.76, 1.83]}
 & 1.85\texttimes \\
 $10^{-6}$
-& 1.65\texttimes \newline {\scriptsize [1.62, 1.69]}
-& 1.78\texttimes \newline {\scriptsize [1.75, 1.81]}
-& 1.80\texttimes \newline {\scriptsize [1.77, 1.83]}
+& 1.65\texttimes\hspace{0.45em}{\scriptsize [1.62, 1.69]}
+& 1.78\texttimes\hspace{0.45em}{\scriptsize [1.75, 1.81]}
+& 1.80\texttimes\hspace{0.45em}{\scriptsize [1.77, 1.83]}
 & 1.85\texttimes \\
 $10^{-7}$
-& 1.67\texttimes \newline {\scriptsize [1.64, 1.70]}
-& 1.79\texttimes \newline {\scriptsize [1.76, 1.83]}
-& 1.81\texttimes \newline {\scriptsize [1.78, 1.84]}
+& 1.67\texttimes\hspace{0.45em}{\scriptsize [1.64, 1.70]}
+& 1.79\texttimes\hspace{0.45em}{\scriptsize [1.76, 1.83]}
+& 1.81\texttimes\hspace{0.45em}{\scriptsize [1.78, 1.84]}
 & 1.85\texttimes \\
 $10^{-8}$
-& 1.66\texttimes \newline {\scriptsize [1.62, 1.69]}
-& 1.77\texttimes \newline {\scriptsize [1.74, 1.80]}
-& 1.82\texttimes \newline {\scriptsize [1.78, 1.85]}
+& 1.66\texttimes\hspace{0.45em}{\scriptsize [1.62, 1.69]}
+& 1.77\texttimes\hspace{0.45em}{\scriptsize [1.74, 1.80]}
+& 1.82\texttimes\hspace{0.45em}{\scriptsize [1.78, 1.85]}
 & 1.85\texttimes \\
 \bottomrule
 \end{tabular}
@@ -401,8 +401,8 @@ Scenario
 & \makecell{$95\%$ convergence} \\
 \midrule
 \makecell[l]{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon=10^{-3}$}
-& \makecell{1.50\texttimes \\ {\scriptsize [1.46, 1.53]} \\ {\scriptsize RE}}
-& \makecell{1.53\texttimes \\ {\scriptsize [1.50, 1.55]} \\ {\scriptsize RE}}
+& \makecell{1.51\texttimes \\ {\scriptsize [1.47, 1.55]} \\ {\scriptsize RE}}
+& \makecell{1.54\texttimes \\ {\scriptsize [1.51, 1.56]} \\ {\scriptsize RE}}
 & \makecell{1.54\texttimes \\ {\scriptsize [1.51, 1.58]} \\ {\scriptsize RE}}
 & \makecell{1.48\texttimes \\ {\scriptsize [1.44, 1.52]} \\ {\scriptsize RE}} \\
 \makecell[l]{$\phi \sim \mathcal{U}(0.01,0.1)$ \\ $\epsilon=10^{-4}$}
@@ -431,7 +431,7 @@ Scenario
 & \makecell{1.82\texttimes \\ {\scriptsize [1.78, 1.85]} \\ {\scriptsize RE}}
 & \makecell{1.71\texttimes \\ {\scriptsize [1.67, 1.74]} \\ {\scriptsize RE}} \\
 \makecell[l]{$\phi \sim \mathcal{U}(0.001,0.01)$ \\ $\epsilon=10^{-4}$}
-& \makecell{1.42\texttimes \\ {\scriptsize [1.39, 1.45]} \\ {\scriptsize RE}}
+& \makecell{1.43\texttimes \\ {\scriptsize [1.40, 1.47]} \\ {\scriptsize RE}}
 & \makecell{1.47\texttimes \\ {\scriptsize [1.45, 1.50]} \\ {\scriptsize RE}}
 & \makecell{1.46\texttimes \\ {\scriptsize [1.43, 1.49]} \\ {\scriptsize RE}}
 & \makecell{1.39\texttimes \\ {\scriptsize [1.36, 1.42]} \\ {\scriptsize RE}} \\
@@ -463,7 +463,7 @@ Linear search
 Binary search
 & \texttt{m\_exploration=114, conf=0.5} \\
 Reverse engineering
-& \texttt{m\_exploration=54}, $m'N_{\min}/B=8.10\%$ \\
+& \texttt{m\_exploration=44}, $m'N_{\min}/B=6.60\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -538,8 +538,8 @@ A.~\ref{alg:binary-search}: BS
 & 30.7\% / 5.6\% \\
 A.~\ref{alg:reverse-engineering}: RE
 & 1.00
-& 87.9\%
-& 22.9\%
+& 87.6\%
+& 23.9\%
 & 1.0
 & 0.77\%
 & -- \\
@@ -581,11 +581,11 @@ A.~\ref{alg:binary-search}: BS
 & 1.5 \\
 A.~\ref{alg:reverse-engineering}: RE
 & 1.00
-& 0.12
-& 17.2\%
-& 61.3\%
-& 37.9\%
-& 1.1 \\
+& 0.14
+& 16.5\%
+& 59.7\%
+& 41.0\%
+& 1.0 \\
 \midrule
 \multicolumn{7}{l}{\itshape U(0.01,0.1), eps=1e-04} \\
 A.~\ref{alg:linear-search}: LS
@@ -737,11 +737,11 @@ A.~\ref{alg:binary-search}: BS
 & 1.0 \\
 A.~\ref{alg:reverse-engineering}: RE
 & 0.99
-& 0.12
+& 0.14
 & 1.6\%
-& 62.2\%
-& 42.7\%
-& 1.1 \\
+& 61.5\%
+& 45.9\%
+& 1.0 \\
 \midrule
 \multicolumn{7}{l}{\itshape U(0.001,0.1), eps=1e-04} \\
 A.~\ref{alg:linear-search}: LS
@@ -760,10 +760,10 @@ A.~\ref{alg:binary-search}: BS
 & 1.0 \\
 A.~\ref{alg:reverse-engineering}: RE
 & 1.00
-& 0.04
-& 43.8\%
-& 90.5\%
-& 27.6\%
+& 0.06
+& 43.6\%
+& 90.3\%
+& 28.9\%
 & 1.0 \\
 \bottomrule
 \end{tabular}
@@ -806,9 +806,9 @@ A.~\ref{alg:binary-search}: BS
 A.~\ref{alg:reverse-engineering}: RE
 & 1.00
 & 0.96
-& 0.43\%
-& 98.6\%
-& 63.8\% \\
+& 0.65\%
+& 98.2\%
+& 63.9\% \\
 \bottomrule
 \end{tabular}
 \end{table}
