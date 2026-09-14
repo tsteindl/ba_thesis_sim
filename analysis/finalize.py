@@ -1,4 +1,4 @@
-"""Derived outputs: budget crossings, headline tables, appendix parameters, tex/.
+"""Derived outputs: budget crossings, headline tables, appendix parameters.
 
 Reads only what the sweep already wrote (results/*.csv) -- no simulation happens here,
 so the report can be rebuilt after the fact with `--report-only`.
@@ -258,119 +258,17 @@ SHORT = {"brute": "Brute force", "linear": "Linear search", "binary_deep": "Bina
          "reverse_eng_risk": "Reverse engineering"}
 
 
-def _tex(name, body):
-    with open(path("tex", name), "w") as fh:
-        fh.write(body)
-
-
-def pct(x, d=1):
-    return f"{100*f(x):.{d}f}" if np.isfinite(f(x)) else "--"
-
-
-def num(x, d=2):
-    return f"{f(x):.{d}f}" if np.isfinite(f(x)) else "--"
-
-
-def bud(x):
-    """Budgets to ~3 significant figures, in LaTeX scientific notation when large."""
-    v = f(x)
-    if not np.isfinite(v):
-        return "--"
-    if v >= 1e6:
-        m, e = f"{v:.2e}".split("e")
-        return rf"${m}\times 10^{{{int(e)}}}$"
-    return f"{v:,.0f}"
-
-
-def tex_tables(head, cross, params):
-    # 1. exploration table -----------------------------------------------------------------
-    L = [r"\begin{tabular}{llrrrrrrr}", r"\toprule",
-         r"Scenario & $B$ & Algorithm & \makecell{median\\$N_{\rm guess}/N_{\rm opt}$ (IQR)} & "
-         r"exact & $\pm10\%$ & \makecell{guess\\overshoot} & "
-         r"\makecell{median expl.\\budget share} & probes \\", r"\midrule"]
-    for r in head:
-        if r["algorithm"] == "brute":
-            continue
-        L.append(f"{r['setting']} & {bud(r['budget'])} & "
-                 f"{SHORT.get(r['algorithm'], r['algorithm'])} & "
-                 f"{num(r['guess_ratio_median'])} ({num(r['guess_ratio_q1'])}--"
-                 f"{num(r['guess_ratio_q3'])}) & {pct(r['guess_exact'])}\\% & "
-                 f"{pct(r['guess_within10'])}\\% & {pct(r['guess_overshoot'])}\\% & "
-                 f"{pct(r['exploration_share_median'], 2)}\\% & {num(r['n_probes_mean'],1)} \\\\")
-    L += [r"\bottomrule", r"\end{tabular}"]
-    _tex("exploration_table.tex", "\n".join(L) + "\n")
-
-    # 2. guess -> final depth ---------------------------------------------------------------
-    L = [r"\begin{tabular}{llrrrrrr}", r"\toprule",
-         r"Scenario & $B$ & Algorithm & \makecell{median\\$N_{\rm guess}/N_{\rm opt}$} & "
-         r"\makecell{median\\$N_*/N_{\rm opt}$} & \makecell{final\\overshoot} & "
-         r"\makecell{converged\\$\mid$ safe depth} & converged \\", r"\midrule"]
-    for r in head:
-        L.append(f"{r['setting']} & {bud(r['budget'])} & "
-                 f"{SHORT.get(r['algorithm'], r['algorithm'])} & "
-                 f"{num(r['guess_ratio_median'])} & {num(r['star_ratio_median'])} & "
-                 f"{pct(r['star_overshoot'],2)}\\% & {pct(r['conv_given_safe_depth'])}\\% & "
-                 f"{pct(r['rate'])}\\% \\\\")
-    L += [r"\bottomrule", r"\end{tabular}"]
-    _tex("downstream_table.tex", "\n".join(L) + "\n")
-
-    # 3. detector table ----------------------------------------------------------------------
-    L = [r"\begin{tabular}{llrrrrr}", r"\toprule",
-         r"Scenario & $B$ & Algorithm & \makecell{false-alarm\\rate} & \makecell{miss\\rate} & "
-         r"probes/trial & eligible runs \\", r"\midrule"]
-    for r in head:
-        if not np.isfinite(f(r["false_alarm_rate"])):
-            continue
-        L.append(f"{r['setting']} & {bud(r['budget'])} & "
-                 f"{SHORT.get(r['algorithm'], r['algorithm'])} & "
-                 f"{pct(r['false_alarm_rate'])}\\% & {pct(r['miss_rate'])}\\% & "
-                 f"{num(r['n_probes_mean'],1)} & {r['detector_eligible_n']} \\\\")
-    L += [r"\bottomrule", r"\end{tabular}"]
-    _tex("detector_table.tex", "\n".join(L) + "\n")
-
-    # 4. budget crossings ---------------------------------------------------------------------
-    L = [r"\begin{tabular}{llrrr}", r"\toprule",
-         r"Scenario & Algorithm & $p^*$ & $B(p^*)$ [95\% CI] & ratio vs.\ brute [95\% CI] \\",
-         r"\midrule"]
-    sid_order = {sc["id"]: i for i, sc in enumerate(M.SCENARIOS)}
-    for c in sorted(cross, key=lambda c: (sid_order.get(c["scenario_id"], 99),
-                                          M.ORDER.index(c["algorithm"])
-                                          if c["algorithm"] in M.ORDER else 9)):
-        if int(c["threshold_pct"]) != 90 or c["budget_to_reach"] in ("", "nan"):
-            continue
-        lo, hi = c["budget_to_reach_lo"], c["budget_to_reach_hi"]
-        rr = (f"{c['ratio_vs_brute']} [{c['ratio_lo']}, {c['ratio_hi']}]"
-              if c["ratio_vs_brute"] != "" else "--")
-        L.append(f"{c['setting']} & {SHORT.get(c['algorithm'], c['algorithm'])} & 90\\% & "
-                 f"{f(c['budget_to_reach']):.3g} [{f(lo):.3g}, {f(hi):.3g}] & {rr} \\\\")
-    L += [r"\bottomrule", r"\end{tabular}"]
-    _tex("budget_crossings.tex", "\n".join(L) + "\n")
-
-    # 5. appendix parameter table --------------------------------------------------------------
-    L = [r"\begin{tabular}{llrll}", r"\toprule",
-         r"Scenario & Algorithm & Budget & Frozen configuration & Note \\", r"\midrule"]
-    for p in params:
-        if p["reported_for"] == "tested_budget" or p["algorithm"] == "brute":
-            continue
-        cfg = p["params"].replace("_", r"\_").replace("{", "").replace("}", "").replace('"', "")
-        L.append(f"{p['setting']} & {SHORT.get(p['algorithm'], p['algorithm'])} & "
-                 f"{int(f(p['budget'])):,} & {cfg} & {p['reported_for'].replace('_', ' ')} \\\\")
-    L += [r"\bottomrule", r"\end{tabular}"]
-    _tex("optimal_params.tex", "\n".join(L) + "\n")
-
-
 def main(mode="full"):
+    # each of these writes its CSV as a side effect; the return values are no longer needed
     regime = operating_points()
-    cross = crossings(mode)
-    params = optimal_params(cross)
-    head = headline(regime)
-    tex_tables(head, cross, params)
+    optimal_params(crossings(mode))
+    headline(regime)
     try:
-        import figures
-        figures.main()
+        import thesis_figures
+        thesis_figures.main(only={"diagnostics_vs_budget", "guess_vs_final_depth"})
     except Exception as ex:      # a missing matplotlib must not invalidate the numbers
         print(f"(figures skipped: {type(ex).__name__}: {ex})")
-    print("wrote budget_crossings.csv, optimal_params.csv, diagnostics_headline.csv, tex/")
+    print("wrote budget_crossings.csv, optimal_params.csv, diagnostics_headline.csv")
 
 
 if __name__ == "__main__":

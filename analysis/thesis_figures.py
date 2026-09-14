@@ -675,9 +675,100 @@ def fig_linear_detector(d):
     return "fig_linear_detector.png"
 
 
-def main():
-    only = None
-    if "--only" in sys.argv:
+def fig_diagnostics_vs_budget(d):
+    """Exploration cost and depth quality as the available budget grows.
+
+    Budgets are normalised per scenario (B / B_median) so scenarios of wildly different scale sit on
+    one axis, then binned on that axis so each panel shows a trend rather than a scatter.
+    """
+    rows = d.diag
+    if not rows:
+        print("   (fig_diagnostics_vs_budget skipped: no diagnostics_by_point.csv)")
+        return None
+    sids = [sc["id"] for sc in M.SCENARIOS if any(r["scenario_id"] == sc["id"] for r in rows)]
+    fig, axes = plt.subplots(1, 3, figsize=(11, 3.2))
+    for algo in M.ORDER:
+        xs, sh, gr, ov = [], [], [], []
+        for sid in sids:
+            rs = sorted([r for r in rows if r["scenario_id"] == sid and r["algorithm"] == algo],
+                        key=lambda r: f(r["budget"]))
+            if not rs:
+                continue
+            b = np.array([f(r["budget"]) for r in rs])
+            xs += list(b / np.median(b))
+            sh += [f(r["exploration_share_median"]) for r in rs]
+            gr += [f(r["guess_ratio_median"]) for r in rs]
+            ov += [f(r["star_overshoot"]) for r in rs]
+        if not xs:
+            continue
+        o = np.argsort(xs)
+        x = np.array(xs)[o]
+        for ax, y, lab in ((axes[0], np.array(sh)[o], "median exploration budget share"),
+                           (axes[1], np.array(gr)[o], r"median $N_{guess}/N_{opt}$"),
+                           (axes[2], np.array(ov)[o], r"final overshoot $P(N_*>N_{opt})$")):
+            m = np.isfinite(y)
+            if not m.any():
+                continue
+            edges = np.geomspace(max(x[m].min(), 1e-3), x[m].max(), 9)
+            idx = np.clip(np.digitize(x[m], edges) - 1, 0, len(edges) - 2)
+            cx = np.sqrt(edges[:-1] * edges[1:])
+            cy = np.array([np.nanmedian(y[m][idx == i]) if (idx == i).any() else np.nan
+                           for i in range(len(cx))])
+            ax.plot(cx, cy, MARK[algo] + "-", color=COL[algo], ms=4, lw=1.4,
+                    label=M.ALGORITHMS[algo]["label"])
+            ax.set_ylabel(lab)
+    for ax in axes:
+        ax.set_xscale("log")
+        ax.set_xlabel(r"budget / scenario median budget")
+    axes[1].axhline(1.0, color="k", lw=0.8, ls=":")
+    axes[0].set_yscale("log")
+    axes[0].legend(fontsize=7, loc="best")
+    fig.suptitle("Exploration cost and depth quality vs. available budget "
+                 f"({len(sids)} scenarios, held-out seed {M.SEED_TEST})", fontsize=9)
+    fig.tight_layout()
+    fig.savefig(out_path("fig_diagnostics_vs_budget.png"), bbox_inches="tight")
+    plt.close(fig)
+    return "fig_diagnostics_vs_budget.png"
+
+
+def fig_guess_vs_final_depth(d):
+    """What the safeguard does to the exploration's guess, and how the final depth maps onto
+    convergence. One point per operating point."""
+    rows = d.diag
+    if not rows:
+        print("   (fig_guess_vs_final_depth skipped: no diagnostics_by_point.csv)")
+        return None
+    fig, axes = plt.subplots(1, 2, figsize=(8, 3.2))
+    for algo in M.ORDER:
+        g = np.array([f(r["guess_ratio_median"]) for r in rows if r["algorithm"] == algo])
+        st = np.array([f(r["star_ratio_median"]) for r in rows if r["algorithm"] == algo])
+        m = np.isfinite(g) & np.isfinite(st)
+        if m.any():
+            axes[0].scatter(g[m], st[m], s=12, alpha=0.55, color=COL[algo],
+                            marker=MARK[algo], label=M.ALGORITHMS[algo]["label"])
+        rate = np.array([f(r["rate"]) for r in rows if r["algorithm"] == algo])
+        ms = np.isfinite(st) & np.isfinite(rate)
+        if ms.any():
+            axes[1].scatter(st[ms], 100 * rate[ms], s=12, alpha=0.55, color=COL[algo],
+                            marker=MARK[algo])
+    lim = axes[0].get_xlim()
+    axes[0].plot(lim, lim, "k:", lw=0.8)
+    axes[0].axhline(1.0, color="k", lw=0.6, ls="--")
+    axes[0].axvline(1.0, color="k", lw=0.6, ls="--")
+    axes[0].set_xlabel(r"median $N_{guess}/N_{opt}$")
+    axes[0].set_ylabel(r"median $N_*/N_{opt}$")
+    axes[0].legend(fontsize=7, loc="best")
+    axes[1].set_xlabel(r"median $N_*/N_{opt}$")
+    axes[1].set_ylabel("convergence (%)")
+    fig.suptitle("What the safeguard does to the exploration's guess", fontsize=9)
+    fig.tight_layout()
+    fig.savefig(out_path("fig_guess_vs_final_depth.png"), bbox_inches="tight")
+    plt.close(fig)
+    return "fig_guess_vs_final_depth.png"
+
+
+def main(only=None):
+    if only is None and "--only" in sys.argv:
         only = set(sys.argv[sys.argv.index("--only") + 1].split(","))
     os.makedirs(OUT, exist_ok=True)
     d = D()
@@ -692,7 +783,9 @@ def main():
                         ("variance", lambda: fig_variance(d)),
                         ("error_variance", lambda: fig_error_variance(d)),
                         ("overshoot", lambda: fig_overshoot_criterion(d)),
-                        ("linear_detector", lambda: fig_linear_detector(d))):
+                        ("linear_detector", lambda: fig_linear_detector(d)),
+                        ("diagnostics_vs_budget", lambda: fig_diagnostics_vs_budget(d)),
+                        ("guess_vs_final_depth", lambda: fig_guess_vs_final_depth(d))):
             if only and tag not in only:
                 continue
             n = fn()

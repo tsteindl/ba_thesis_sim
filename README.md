@@ -36,7 +36,7 @@ python analysis/run.py --max --resume        # continue an interrupted sweep
 python analysis/run.py --max --report-only   # rebuild the derived tables, no simulation
 
 python analysis/thesis_tables.py     # the thesis tables -> results/tex/ (--long -> results/tex_long/)
-python analysis/thesis_figures.py    # the Chapter-4 figures
+python analysis/thesis_figures.py    # all 12 figures (--only NAME,NAME for a subset)
 python analysis/error_curves.py      # |φ̂−φ| quantiles behind fig_error
 python analysis/variance_curves.py   # estimator variance vs budget
 
@@ -115,6 +115,24 @@ Headline: for φ ~ U(0.01, 0.1) all three adaptive algorithms beat brute force a
 the advantage grows with precision, plateauing near **1.85×** less budget for reverse engineering.
 At a fixed budget of 10,000 (ε=10⁻³): brute 56.1%, linear 64.1%, binary 65.1%, reverse engineering
 **66.3%**, against an attainable ceiling of 73.5%.
+
+## Appendix code listings
+
+`thesis_code/` holds a compact, executable implementation of the algorithms exactly as the thesis
+presents them (Listings A.1-A.6). Tracing, tuning, compatibility variants and report generation are
+deliberately omitted; the only dependencies are NumPy and `scipy.special.ndtr`. Use those files
+directly with `\lstinputlisting` rather than filtering the production package. The statistical
+safeguard is its own listing because both Binary Search and Reverse Engineering call it.
+
+```bash
+python thesis_code/verify.py   # 200 fixed seeds per algorithm, vs qmetrology/algorithms.py
+```
+
+`verify.py` is a guard against drift, not a listing: it checks each compact function trial-for-trial
+against the measured implementation on the headline scenario. The listings track the pseudocode of
+`BA_Steindl.pdf`: Algorithm 4 carries `inc` and `w` in its signature, initialises the window mean to
+zero and clamps the increment with `N <- min(N + inc, N_max)`; Algorithm 7 takes a single pilot
+batch, without the `phi_hat_0 = 0` retry loop.
 
 ## Beyond the thesis
 
