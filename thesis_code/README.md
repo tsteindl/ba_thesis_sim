@@ -15,10 +15,6 @@ python thesis_code/verify.py   # 200 fixed seeds per algorithm, vs qmetrology/al
 `verify.py` is a guard against drift, not a listing: it checks each compact function trial-for-trial
 against the measured implementation on the headline scenario.
 
-**Two pseudocode details still to reconcile in the .tex:**
-
-1. Linear Search takes an `increment` parameter in the experiments, but the pseudocode signature
-   omits it and writes `N <- N + 1`.
-2. The pseudocode initialises the previous running mean to infinity, which counts the first probe as
-   a decrease. The measured implementation initialises it to zero, so only decreases between two
-   actual estimates count.
+Both listings track the pseudocode of `BA_Steindl.pdf`: Algorithm 4 carries `inc` and `w` in its
+signature, initialises the window mean to zero and clamps the increment with `N <- min(N + inc,
+N_max)`; Algorithm 7 takes a single pilot batch, without the `phi_hat_0 = 0` retry loop.

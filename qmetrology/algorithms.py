@@ -54,7 +54,9 @@ def find_phi_fixed_budget_brute_force(rng, phi, phi_max, phi_min, budget, trace=
 def _linear_search_explore(rng, phi, phi_max, phi_min, m_exploration, budget, lookback_window, inc,
                            mean_window=0, trace=None):
     """Exploration scan of Algorithm 4 — probe N = N_min, N_min+inc, ... until the mean of the
-    estimates falls `lookback_window` times in a row (the overshoot verdict).
+    estimates falls `lookback_window` times in a row (the overshoot verdict). The increment is
+    clamped, N <- min(N + inc, N_max), so an inc > 1 cannot step the scan past the admissible
+    interval and probe a depth the prior support already rules out.
 
     `mean_window` is the width of that mean: 0 (the default) averages every estimate collected so
     far, which is the cumulative mean of the published algorithm; w > 0 averages only the last w.
@@ -111,7 +113,7 @@ def _linear_search_explore(rng, phi, phi_max, phi_min, m_exploration, budget, lo
         elif N >= N_max or budget_used >= budget:
             done = True
         else:
-            N += inc
+            N = min(N + inc, N_max)  # increment without leaving the admissible interval
 
     return phi_hat_list, N_list, budget_used, counter >= lookback_window
 
@@ -229,7 +231,7 @@ def _linear_search_explore_lagged(rng, phi, phi_max, phi_min, m_exploration, bud
         elif N >= N_max or budget_used >= budget:
             done = True
         else:
-            N += inc
+            N = min(N + inc, N_max)  # increment without leaving the admissible interval
 
     return phi_hat_list, N_list, budget_used, counter >= lookback_window
 
@@ -467,16 +469,14 @@ def find_phi_fixed_budget_binary_search_deep(rng, phi, phi_max, phi_min, m_explo
 def find_phi_fixed_budget_reverse_engineering(rng, phi, phi_max, phi_min, m_exploration,
                                               budget, safeguard=0.9):
     N_min = max(np.pi // (2 * phi_max), 1)
+    N_max = max(np.pi // (2 * phi_min), 1)
     if m_exploration * N_min > budget:
         return np.inf, budget
-    phi_hat = 0
-    budget_used = 0
-    while phi_hat == 0:
-        if budget_used + m_exploration * N_min > budget:
-            return np.inf, budget_used  # cannot afford another pilot retry
-        phi_hat = simulate_errors(rng, phi, m_exploration, N_min)
-        budget_used += m_exploration * N_min
-    N = int(np.pi // (2 * phi_hat) * safeguard)
+    phi_hat = simulate_errors(rng, phi, m_exploration, N_min)
+    budget_used = m_exploration * N_min
+    # phi_hat_0 == 0 (all m' shots read "0") inverts to an unbounded depth: report it at N_max.
+    # Nonzero pilots keep the constant-C form's deliberate lack of an upper bound.
+    N = int(N_max if phi_hat <= 0 else np.pi // (2 * phi_hat) * safeguard)
     remaining_budget = budget - budget_used
     if remaining_budget <= 0 or N <= 1:
         return phi_hat, budget_used
@@ -502,24 +502,17 @@ def find_phi_fixed_budget_reverse_engineering_risk(rng, phi, phi_max, phi_min, m
         if trace is not None:
             trace.set_exploration(0.0, status="refused_pilot_unaffordable")
         return np.inf, budget
-    phi_hat = 0
-    budget_used = 0
-    while phi_hat == 0:
-        if budget_used + m_exploration * N_min > budget:
-            if trace is not None:
-                # every attempt is charged: repeated pilots are part of B_exploration
-                trace.set_exploration(budget_used, status="pilot_retries_exhausted_budget")
-            return np.inf, budget_used  # cannot afford another pilot retry
-        phi_hat = simulate_errors(rng, phi, m_exploration, N_min)
-        budget_used += m_exploration * N_min
-        if trace is not None:
-            # reverse engineering has no overshoot detector: declared_overshoot stays None
-            trace.probe(N_min, m_exploration, phi_hat)
+    phi_hat = simulate_errors(rng, phi, m_exploration, N_min)
+    budget_used = m_exploration * N_min
     if trace is not None:
+        # reverse engineering has no overshoot detector: declared_overshoot stays None
+        trace.probe(N_min, m_exploration, phi_hat)
         trace.opening_pilot_N, trace.opening_pilot_phi_hat = int(N_min), float(phi_hat)
         trace.accepted_pilot_N, trace.accepted_pilot_phi_hat = int(N_min), float(phi_hat)
-        # the thesis definition: the raw depth the pilot implies, before the safeguard
-        trace.set_exploration(budget_used, N_guess=max(int(np.pi // (2 * phi_hat)), 1), status="ok")
+        # the thesis definition: the raw depth the pilot implies, before the safeguard. A pilot of
+        # exactly zero implies an unbounded depth, which is reported at the deepest admissible N.
+        N_guess = int(N_max) if phi_hat <= 0 else max(int(np.pi // (2 * phi_hat)), 1)
+        trace.set_exploration(budget_used, N_guess=N_guess, status="ok")
     remaining_budget = budget - budget_used
     if remaining_budget <= 0:
         if trace is not None:
@@ -577,13 +570,10 @@ def find_phi_fixed_budget_reverse_engineering_post(rng, phi, phi_max, phi_min, m
     N_min = max(np.pi // (2 * phi_max), 1)
     if m_exploration * N_min > budget:
         return np.inf, budget
-    phi_hat = 0
-    budget_used = 0
-    while phi_hat == 0:
-        if budget_used + m_exploration * N_min > budget:
-            break
-        phi_hat = simulate_errors(rng, phi, m_exploration, N_min)
-        budget_used += m_exploration * N_min
+    # one pilot batch, as in Algorithm 7: the posterior reads the hit count directly, so a pilot of
+    # exactly zero needs no retry.
+    phi_hat = simulate_errors(rng, phi, m_exploration, N_min)
+    budget_used = m_exploration * N_min
     remaining_budget = budget - budget_used
     if remaining_budget <= 0 or not np.isfinite(phi_hat):
         return phi_hat, budget_used

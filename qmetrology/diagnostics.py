@@ -223,7 +223,7 @@ def point_diagnostics(A, statuses, spec, n_boot, boot_seed, ci=CI_LEVEL):
     # the specific reason "exploration consumed the available budget"
     st = np.array(statuses)
     starved = np.isin(st, ["no_exploitation_budget_exhausted", "no_exploitation_shots",
-                           "pilot_retries_exhausted_budget", "refused_pilot_unaffordable"])
+                           "refused_pilot_unaffordable"])
     p, l, h, n, k = share_ci(starved, all_runs)
     out["no_exploitation_budget"] = p; out["no_exploitation_budget_lo"] = l
     out["no_exploitation_budget_hi"] = h; out["no_exploitation_budget_n"] = n

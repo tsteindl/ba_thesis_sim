@@ -242,13 +242,10 @@ ALGO_DOC = {
     ),
     "reverse_eng_risk": (
         "Algorithm 6 — reverse engineering + statistical safeguard",
-        "Take a single pilot at `N_min` (retrying if it returns exactly zero, which happens when "
-        "`hits == m'`), invert it to a depth, and hand the pilot to the statistical safeguard. "
-        "Every pilot attempt is charged to the exploration budget.",
-        ["phi_hat_0 = 0",
-         "while phi_hat_0 == 0 and budget allows:",
-         "    phi_hat_0 = measure(N_min, m')               # retries are charged to B_exploration",
-         "N_guess = max(floor(pi / (2 phi_hat_0)), 1)      # the raw inverted depth",
+        "Take a single pilot at `N_min`, invert it to a depth, and hand the pilot to the "
+        "statistical safeguard. The pilot is charged to the exploration budget.",
+        ["phi_hat_0 = measure(N_min, m')                   # exactly one pilot batch",
+         "N_guess = max(floor(pi / (2 phi_hat_0)), 1)      # the raw inverted depth (N_max if 0)",
          "N_star  = risk_optimal_depth(phi_hat_0, sigma = 1/(2 N_min sqrt(m')),",
          "                             remaining_budget, eps,",
          "                             N_min = floor(pi/(2 phi_max)),",
@@ -422,10 +419,12 @@ def part_definitions():
       "raw, before `s` | `max(1, N_guess - s)` |")
     w("| `binary_deep` | `N_acc = L`, the deepest probe not classified as an overshoot | the "
       "safeguard's depth, floored at `N_min` |")
-    w("| `reverse_eng_risk` | `max(floor(pi/(2 phi_hat_0)), 1)` from the pilot | the safeguard's depth |")
+    w("| `reverse_eng_risk` | `max(floor(pi/(2 phi_hat_0)), 1)` from the pilot, `N_max` if the "
+      "pilot is exactly zero | the safeguard's depth |")
     w()
-    w("**Repeated pilots count.** Reverse engineering retries its pilot when the estimate is "
-      "exactly zero; every attempt is charged to `B_exploration`.")
+    w("**One pilot batch.** Reverse engineering takes exactly one pilot at `N_min`, charged to "
+      "`B_exploration`. A pilot of exactly zero (`hits == m'`) inverts to an unbounded depth and is "
+      "reported at `N_max`; the safeguard scores it like any other pilot.")
     w()
     w("**Probe classification.** Each probe carries the algorithm's own verdict "
       "(`declared_overshoot`) and the simulation truth (`true_overshoot = N_i > N_opt`).")
@@ -986,7 +985,7 @@ def part_exploration(man, diag):
     w("**Termination reasons** are recorded per cell in `diagnostics_by_point.csv` "
       "(`termination_reasons`, a `reason=count` list summing to R). The statuses are: `ok`, "
       "`detector_fired`, `scan_exhausted`, `no_exploitation_budget_exhausted`, "
-      "`no_exploitation_shots`, `pilot_retries_exhausted_budget`, `refused_pilot_unaffordable`.")
+      "`no_exploitation_shots`, `refused_pilot_unaffordable`.")
     w()
     w("---")
     w()
@@ -1307,7 +1306,8 @@ TESTS = [
      "are collected and reported, not clipped."),
     ("test_algorithm_definitions", "`N_guess`, `N_star` and `B_exploration` recomputed by hand from "
      "each run's own probe list must equal what the trace recorded — separately for all four "
-     "algorithms, including that brute force has a null guess and that RE charges pilot retries."),
+     "algorithms, including that brute force has a null guess and that RE takes exactly one "
+     "pilot batch."),
     ("test_run_record_detector_definitions", "Hand-constructed traces verify the false-alarm and "
      "miss definitions in all four confusion quadrants, and that a detector-less algorithm returns "
      "NaN rather than 0."),

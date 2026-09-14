@@ -6,7 +6,7 @@ from sim import simulate
 
 def estimate_phi_linear_search(rng, phi, phi_min, phi_max, budget,
                                exploration_shots, lookback, safeguard,
-                               increment=1):
+                               increment=1, mean_window=0):
     N_min = max(int(np.floor(np.pi / (2 * phi_max))), 1)
     N_max = max(int(np.floor(np.pi / (2 * phi_min))), 1)
     N = N_min
@@ -22,7 +22,8 @@ def estimate_phi_linear_search(rng, phi, phi_min, phi_max, budget,
         used_budget += exploration_shots * N
         N_guess = N
 
-        running_mean = np.mean(estimates)
+        mean_values = estimates[-mean_window:] if mean_window else estimates
+        running_mean = np.mean(mean_values)
         if len(estimates) >= 2 and running_mean < previous_mean:
             decreasing_steps += 1
         else:
@@ -35,7 +36,7 @@ def estimate_phi_linear_search(rng, phi, phi_min, phi_max, budget,
         if N >= N_max or used_budget >= budget:
             N_guess = N
             break
-        N = min(N + increment, N_max)
+        N = min(N + increment, N_max)  # stay within the admissible interval
 
     if not estimates:
         return np.nan

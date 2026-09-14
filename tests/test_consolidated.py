@@ -195,16 +195,19 @@ def test_algorithm_definitions():
                 if tr.N_star is not None:
                     assert 1 <= tr.N_star <= max(int(np.pi // (2 * pmin)), 1)
 
-            # ---- reverse engineering: N_guess = floor(pi / (2 phi_hat_0)); retries are charged
+            # ---- reverse engineering: N_guess = floor(pi / (2 phi_hat_0)) from ONE pilot batch
             tr = AlgorithmTrace()
             _run("reverse_eng_risk", s, pmin, pmax, eps, B, trace=tr)
             if tr.probes:
                 m = PARAMS["reverse_eng_risk"]["m_exploration"]
+                assert len(tr.probes) == 1          # the phi_hat_0 == 0 retry loop is gone
                 assert all(p.N == N_min for p in tr.probes)
-                assert tr.budget_exploration == len(tr.probes) * m * N_min
+                assert tr.budget_exploration == m * N_min
                 if tr.N_guess is not None:
                     ph = tr.probes[-1].phi_hat
-                    assert tr.N_guess == max(int(np.pi // (2 * ph)), 1)
+                    # a zero pilot inverts to an unbounded depth, reported at N_max
+                    N_max = max(int(np.pi // (2 * pmin)), 1)
+                    assert tr.N_guess == (N_max if ph <= 0 else max(int(np.pi // (2 * ph)), 1))
                     assert all(p.declared_overshoot is None for p in tr.probes)
 
 
