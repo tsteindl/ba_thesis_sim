@@ -151,6 +151,18 @@ def test_run_record_detector_definitions():
     assert n_opt(0.1) == 15 and n_opt(0.01) == 157 and n_opt(10.0) == 1
 
 
+def test_linear_scan_clamps_final_increment_to_N_max():
+    """An increment that does not divide the interval must not create an out-of-range probe."""
+    out = ALG._linear_search_explore(
+        np.random.default_rng(7), 0.05, 0.1, 0.01,
+        m_exploration=1, budget=100_000, lookback_window=10_000, inc=3)
+    assert out is not None
+    _phi_hats, depths, _budget_used, overshot = out
+    assert not overshot
+    assert depths[-2:] == [156, 157]
+    assert max(depths) <= 157
+
+
 def test_algorithm_definitions():
     """N_guess, N_star and B_exploration must equal their handoff definitions, recomputed
     independently from the probe list of the very same run."""

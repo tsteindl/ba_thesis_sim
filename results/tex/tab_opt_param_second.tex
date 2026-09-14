@@ -1,7 +1,7 @@
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Parameter configurations selected near the $90\%$-convergence budget. A budget crossing is interpolated between tested budgets; parameter dictionaries are not. Each entry is therefore the selected configuration at the nearest tested budget, not a configuration evaluated at the interpolated $B_{90}$. For Reverse Engineering, the planned exploration-shot count is additionally reported as $m'/B$ at that tested budget. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.}
+\caption{Parameter configurations selected near the $90\%$-convergence budget. A budget crossing is interpolated between tested budgets; parameter dictionaries are not. Each entry is therefore the selected configuration at the nearest tested budget, not a configuration evaluated at the interpolated $B_{90}$. For Reverse Engineering, the planned pilot cost is additionally reported as the resource share $m'N_{\min}/B$ at that tested budget. For Binary Search, the saved \texttt{conf} parameter is related to the detector level by $\alpha=1-\mathrm{conf}$. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.}
 \label{tab:opt-param-second-tab}
 \setlength{\tabcolsep}{2pt}
 \begin{tabular}{lllll}
@@ -25,10 +25,10 @@ BS
 & \makecell{\texttt{m\_exploration=2635}, \\ \texttt{conf=0.5}, \\ {\scriptsize $B=2{,}059{,}436$}} \\
 \midrule
 RE
-& \makecell{\texttt{m\_exploration=91}, \\ {\scriptsize $B=29{,}173$}, \\ {\scriptsize $m'/B=0.31\%$}}
-& \makecell{\texttt{m\_exploration=1286}, \\ {\scriptsize $B=2{,}917{,}365$}, \\ {\scriptsize $m'/B=0.04\%$}}
-& \makecell{\texttt{m\_exploration=58}, \\ {\scriptsize $B=278{,}729$}, \\ {\scriptsize $m'/B=0.02\%$}}
-& \makecell{\texttt{m\_exploration=2288}, \\ {\scriptsize $B=2{,}059{,}436$}, \\ {\scriptsize $m'/B=0.11\%$}} \\
+& \makecell{\texttt{m\_exploration=91}, \\ {\scriptsize $B=29{,}173$}, \\ {\scriptsize $m'N_{\min}/B=4.68\%$}}
+& \makecell{\texttt{m\_exploration=1286}, \\ {\scriptsize $B=2{,}917{,}365$}, \\ {\scriptsize $m'N_{\min}/B=0.66\%$}}
+& \makecell{\texttt{m\_exploration=58}, \\ {\scriptsize $B=278{,}729$}, \\ {\scriptsize $m'N_{\min}/B=3.27\%$}}
+& \makecell{\texttt{m\_exploration=2288}, \\ {\scriptsize $B=2{,}059{,}436$}, \\ {\scriptsize $m'N_{\min}/B=1.67\%$}} \\
 \bottomrule
 \end{tabular}
 \end{table}

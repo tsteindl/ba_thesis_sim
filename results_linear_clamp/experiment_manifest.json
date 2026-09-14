@@ -1,0 +1,665 @@
+{
+  "mode": "max",
+  "generated_by": "analysis/run.py",
+  "seeds": {
+    "tune_blocks": [
+      42,
+      43
+    ],
+    "test": 2024,
+    "bootstrap": 12345
+  },
+  "trials": {
+    "R_tune_per_block_stage1": 700,
+    "R_tune_per_block_stage2": 6000,
+    "R_test": 50000
+  },
+  "tuning": {
+    "procedure": "three-stage grid: (A) m' over the full box [1, B//N_min] against a 3-point-per-axis skeleton of the discrete grid; (B) the FULL discrete grid at m' within x4 of the stage-A winner; (C) refinement within x2 of the stage-B winner over the neighbouring discrete values, at R_tune2. Every stage is evaluated on every tuning block; the winner is the argmax of the MEAN block rate, ties broken toward the smaller exploration size",
+    "n_m_stage1": 24,
+    "n_m_stage2": 10,
+    "n_m_stage3": 15,
+    "held_out": "the frozen winner is re-evaluated on SEED_TEST only",
+    "boundary_reporting": "at_axis_bound flags a winner pinned at an endpoint of ANY axis (exploration size or a discrete axis), against the full grid"
+  },
+  "uncertainty": {
+    "ci_level": 95,
+    "n_boot": 2000,
+    "boot_seed": 12345,
+    "proportions": "Wilson score interval at the row's own R",
+    "continuous": "run-level percentile bootstrap",
+    "crossing_rule": "log-linear interpolation of the convergence-vs-budget curve (qmetrology.uncertainty.crossing)"
+  },
+  "safeguard": {
+    "implementation": "qmetrology/safeguard.py::risk_optimal_depth",
+    "selection_rule": "exact_enumeration_integer_shots",
+    "search": "every integer N in the closed interval [N_min, N_max], one vectorised pass, argmax taken directly; ties resolve to the smallest N",
+    "N_min": "floor(pi / (2 phi_max)) -- safe for the whole prior support; the search starts here, never at 1",
+    "N_max": "floor(pi / (2 phi_min)) -- beyond it P(no overshoot) is exactly 0",
+    "accuracy_factor": "2*Phi(2 eps N sqrt(m)) - 1 with m = floor(B/N) whole shots, 0 where m == 0",
+    "validity_factor": "truncated-normal posterior P(phi < pi/(2N) | pilot) on [phi_min, phi_max]",
+    "supersedes": "geometric_refine_smooth_shots (3 geometric rounds from a lower bound of 1, a 5-sigma search limit, and the smooth accuracy factor 2*Phi(2 eps sqrt(N B))-1)"
+  },
+  "thresholds_pct": [
+    50,
+    80,
+    90,
+    95
+  ],
+  "scenarios": [
+    {
+      "id": "narrow_e3",
+      "phi_min": 0.01,
+      "phi_max": 0.1,
+      "eps": 0.001,
+      "budget_rule": [
+        "brute90",
+        0.02,
+        30
+      ],
+      "pin_budgets": [
+        10000
+      ],
+      "families": [
+        "fixed_budget",
+        "budget_to_reliability",
+        "precision_sweep"
+      ],
+      "phi_dist": "uniform",
+      "label": "U(0.01,0.1), eps=1e-03",
+      "budgets": [
+        896,
+        1270,
+        1799,
+        2548,
+        3610,
+        5114,
+        7244,
+        10000,
+        10262,
+        14538,
+        20594,
+        29173,
+        41326,
+        58543,
+        82931,
+        117479,
+        166419,
+        235746,
+        333954,
+        473075,
+        670151,
+        949325,
+        1344800
+      ],
+      "N_min": 15,
+      "N_max": 157
+    },
+    {
+      "id": "narrow_e4",
+      "phi_min": 0.01,
+      "phi_max": 0.1,
+      "eps": 0.0001,
+      "budget_rule": [
+        "brute90",
+        0.02,
+        30
+      ],
+      "pin_budgets": [],
+      "families": [
+        "budget_to_reliability",
+        "precision_sweep"
+      ],
+      "phi_dist": "uniform",
+      "label": "U(0.01,0.1), eps=1e-04",
+      "budgets": [
+        89653,
+        127001,
+        179908,
+        254855,
+        361024,
+        511421,
+        724471,
+        1026274,
+        1453804,
+        2059436,
+        2917365,
+        4132694,
+        5854310,
+        8293124,
+        11747910,
+        16641905,
+        23574663,
+        33395498,
+        47307541,
+        67015122,
+        94932574,
+        134480000
+      ],
+      "N_min": 15,
+      "N_max": 157
+    },
+    {
+      "id": "narrow_e5",
+      "phi_min": 0.01,
+      "phi_max": 0.1,
+      "eps": 1e-05,
+      "budget_rule": [
+        "brute90",
+        0.02,
+        30
+      ],
+      "pin_budgets": [],
+      "families": [
+        "precision_sweep"
+      ],
+      "phi_dist": "uniform",
+      "label": "U(0.01,0.1), eps=1e-05",
+      "budgets": [
+        8965333,
+        12700150,
+        17990835,
+        25485535,
+        36102410,
+        51142110,
+        72447113,
+        102627447,
+        145380436,
+        205943651,
+        291736555,
+        413269439,
+        585431022,
+        829312426,
+        1174791008,
+        1664190563,
+        2357466314,
+        3339549897,
+        4730754135,
+        6701512293,
+        9493257466,
+        13447999999
+      ],
+      "N_min": 15,
+      "N_max": 157
+    },
+    {
+      "id": "narrow_e6",
+      "phi_min": 0.01,
+      "phi_max": 0.1,
+      "eps": 1e-06,
+      "budget_rule": [
+        "brute90",
+        0.02,
+        30
+      ],
+      "pin_budgets": [],
+      "families": [
+        "precision_sweep"
+      ],
+      "phi_dist": "uniform",
+      "label": "U(0.01,0.1), eps=1e-06",
+      "budgets": [
+        896533333,
+        1270015093,
+        1799083511,
+        2548553554,
+        3610241091,
+        5114211046,
+        7244711353,
+        10262744755,
+        14538043655,
+        20594365186,
+        29173655514,
+        41326943964,
+        58543102238,
+        82931242693,
+        117479100897,
+        166419056310,
+        235746631456,
+        333954989743,
+        473075413571,
+        670151229355,
+        949325746642,
+        1344800000000
+      ],
+      "N_min": 15,
+      "N_max": 157
+    },
+    {
+      "id": "narrow_e7",
+      "phi_min": 0.01,
+      "phi_max": 0.1,
+      "eps": 1e-07,
+      "budget_rule": [
+        "brute90",
+        0.02,
+        30
+      ],
+      "pin_budgets": [],
+      "families": [
+        "precision_sweep"
+      ],
+      "phi_dist": "uniform",
+      "label": "U(0.01,0.1), eps=1e-07",
+      "budgets": [
+        89653333333,
+        127001509327,
+        179908351108,
+        254855355420,
+        361024109144,
+        511421104605,
+        724471135335,
+        1026274475590,
+        1453804365525,
+        2059436518680,
+        2917365551411,
+        4132694396433,
+        5854310223842,
+        8293124269377,
+        11747910089773,
+        16641905631032,
+        23574663145682,
+        33395498974351,
+        47307541357178,
+        67015122935579,
+        94932574664214,
+        134480000000000
+      ],
+      "N_min": 15,
+      "N_max": 157
+    },
+    {
+      "id": "narrow_e8",
+      "phi_min": 0.01,
+      "phi_max": 0.1,
+      "eps": 1e-08,
+      "budget_rule": [
+        "brute90",
+        0.02,
+        30
+      ],
+      "pin_budgets": [],
+      "families": [
+        "precision_sweep"
+      ],
+      "phi_dist": "uniform",
+      "label": "U(0.01,0.1), eps=1e-08",
+      "budgets": [
+        8965333333333,
+        12700150932713,
+        17990835110839,
+        25485535542077,
+        36102410914495,
+        51142110460546,
+        72447113533589,
+        102627447559047,
+        145380436552546,
+        205943651868068,
+        291736555141147,
+        413269439643361,
+        585431022384237,
+        829312426937782,
+        1174791008977376,
+        1664190563103208,
+        2357466314568226,
+        3339549897435170,
+        4730754135717893,
+        6701512293557939,
+        9493257466421480,
+        13447999999999998
+      ],
+      "N_min": 15,
+      "N_max": 157
+    },
+    {
+      "id": "small_e4",
+      "phi_min": 0.001,
+      "phi_max": 0.01,
+      "eps": 0.0001,
+      "budget_rule": [
+        "brute90",
+        0.02,
+        30
+      ],
+      "pin_budgets": [],
+      "families": [
+        "budget_to_reliability"
+      ],
+      "phi_dist": "uniform",
+      "label": "U(0.001,0.01), eps=1e-04",
+      "budgets": [
+        8565,
+        12133,
+        17188,
+        24349,
+        34492,
+        48861,
+        69216,
+        98051,
+        138898,
+        196761,
+        278729,
+        394843,
+        559329,
+        792336,
+        1122411,
+        1589990,
+        2252356,
+        3190652,
+        4519828,
+        6402718,
+        9069991,
+        12848407
+      ],
+      "N_min": 157,
+      "N_max": 1570
+    },
+    {
+      "id": "wide_e4",
+      "phi_min": 0.001,
+      "phi_max": 0.1,
+      "eps": 0.0001,
+      "budget_rule": [
+        "brute90",
+        0.02,
+        30
+      ],
+      "pin_budgets": [],
+      "families": [
+        "budget_to_reliability"
+      ],
+      "phi_dist": "uniform",
+      "label": "U(0.001,0.1), eps=1e-04",
+      "budgets": [
+        89653,
+        127001,
+        179908,
+        254855,
+        361024,
+        511421,
+        724471,
+        1026274,
+        1453804,
+        2059436,
+        2917365,
+        4132694,
+        5854310,
+        8293124,
+        11747910,
+        16641905,
+        23574663,
+        33395498,
+        47307541,
+        67015122,
+        94932574,
+        134480000
+      ],
+      "N_min": 15,
+      "N_max": 1570
+    },
+    {
+      "id": "broad_pi4_e3",
+      "phi_min": 0.01,
+      "phi_max": 0.7853981633974483,
+      "eps": 0.001,
+      "budget_rule": [
+        "explicit_log",
+        3000,
+        2000000
+      ],
+      "pin_budgets": [],
+      "families": [
+        "broad_prior"
+      ],
+      "phi_dist": "uniform",
+      "label": "U(0.01,pi/4), eps=1e-03",
+      "budgets": [
+        3000,
+        4088,
+        5572,
+        7595,
+        10351,
+        14108,
+        19228,
+        26207,
+        35718,
+        48681,
+        66349,
+        90429,
+        123248,
+        167979,
+        228942,
+        312031,
+        425275,
+        579619,
+        789977,
+        1076679,
+        1467432,
+        2000000
+      ],
+      "N_min": 2,
+      "N_max": 157
+    },
+    {
+      "id": "broad_pi2_e3",
+      "phi_min": 0.01,
+      "phi_max": 1.5707963267948966,
+      "eps": 0.001,
+      "budget_rule": [
+        "explicit_log",
+        3000,
+        2000000
+      ],
+      "pin_budgets": [],
+      "families": [
+        "broad_prior"
+      ],
+      "phi_dist": "uniform",
+      "label": "U(0.01,pi/2), eps=1e-03",
+      "budgets": [
+        3000,
+        4088,
+        5572,
+        7595,
+        10351,
+        14108,
+        19228,
+        26207,
+        35718,
+        48681,
+        66349,
+        90429,
+        123248,
+        167979,
+        228942,
+        312031,
+        425275,
+        579619,
+        789977,
+        1076679,
+        1467432,
+        2000000
+      ],
+      "N_min": 1,
+      "N_max": 157
+    }
+  ],
+  "algorithms": {
+    "brute": {
+      "variant": "qmetrology.algorithms.find_phi_fixed_budget_brute_force",
+      "label": "Brute force",
+      "adaptive": false,
+      "has_detector": false,
+      "has_guess": false,
+      "fixed_params": {},
+      "role": "protocol"
+    },
+    "linear": {
+      "variant": "qmetrology.algorithms.find_phi_fixed_budget_linear_search",
+      "label": "Linear search",
+      "adaptive": true,
+      "has_detector": true,
+      "has_guess": true,
+      "fixed_params": {},
+      "discrete": {
+        "lookback_window": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          8,
+          12,
+          20
+        ],
+        "safeguard": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          12,
+          16,
+          24
+        ],
+        "inc": [
+          1,
+          2,
+          3,
+          5,
+          8
+        ],
+        "mean_window": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          12
+        ]
+      },
+      "role": "protocol"
+    },
+    "binary_deep": {
+      "variant": "qmetrology.algorithms.find_phi_fixed_budget_binary_search_deep",
+      "label": "Binary search (stat. safeguard, deepest probe)",
+      "adaptive": true,
+      "has_detector": true,
+      "has_guess": true,
+      "fixed_params": {
+        "eps_target": "eps"
+      },
+      "discrete": {
+        "conf": [
+          0.5,
+          0.52,
+          0.55,
+          0.58,
+          0.62,
+          0.66,
+          0.7,
+          0.75,
+          0.8,
+          0.85,
+          0.9,
+          0.95,
+          0.99
+        ]
+      },
+      "role": "protocol"
+    },
+    "reverse_eng_risk": {
+      "variant": "qmetrology.algorithms.find_phi_fixed_budget_reverse_engineering_risk",
+      "label": "Reverse engineering (stat. safeguard)",
+      "adaptive": true,
+      "has_detector": false,
+      "has_guess": true,
+      "fixed_params": {
+        "eps_target": "eps"
+      },
+      "discrete": {},
+      "role": "protocol"
+    },
+    "separable": {
+      "variant": "qmetrology.algorithms.find_phi_fixed_budget_separable",
+      "label": "Separable protocol (N=1)",
+      "adaptive": false,
+      "has_detector": false,
+      "has_guess": false,
+      "fixed_params": {},
+      "role": "baseline"
+    },
+    "oracle_hl": {
+      "variant": "qmetrology.oracle.oracle_rate (analytic QCRB rate at N_opt)",
+      "label": "Oracle N_opt",
+      "adaptive": false,
+      "has_detector": false,
+      "has_guess": false,
+      "fixed_params": {},
+      "role": "oracle"
+    },
+    "_binary_risk_audit": {
+      "variant": "qmetrology.algorithms.find_phi_fixed_budget_binary_search_risk",
+      "label": "Binary search (stat. safeguard, deepest probe)",
+      "adaptive": true,
+      "has_detector": true,
+      "has_guess": true,
+      "fixed_params": {
+        "eps_target": "eps"
+      },
+      "discrete": {
+        "conf": [
+          0.5,
+          0.52,
+          0.55,
+          0.58,
+          0.62,
+          0.66,
+          0.7,
+          0.75,
+          0.8,
+          0.85,
+          0.9,
+          0.95,
+          0.99
+        ]
+      }
+    }
+  },
+  "algorithm_order": [
+    "brute",
+    "linear",
+    "binary_deep",
+    "reverse_eng_risk"
+  ],
+  "selection": {
+    "partial": true,
+    "algorithms": [
+      "linear"
+    ],
+    "scenarios": [
+      "narrow_e3",
+      "narrow_e4",
+      "narrow_e5",
+      "narrow_e6",
+      "narrow_e7",
+      "narrow_e8",
+      "small_e4",
+      "wide_e4",
+      "broad_pi4_e3",
+      "broad_pi2_e3"
+    ],
+    "algorithms_omitted": [
+      "brute",
+      "binary_deep",
+      "reverse_eng_risk"
+    ],
+    "scenarios_omitted": [],
+    "note": "PARTIAL RUN -- these tables cover the selected cells only. add_baselines and finalize were NOT run; merge into a complete staging dataset first."
+  }
+}

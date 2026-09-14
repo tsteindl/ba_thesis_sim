@@ -9,3 +9,4 @@ venv
 results_partial/
 results_staging/
 sweep.log
+*.pyc

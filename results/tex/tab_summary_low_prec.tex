@@ -1,12 +1,12 @@
 \begin{table}[ht]
 \centering
-\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}.}
+\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to reach \(90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}.}
 \label{tab:summary-low-prec}
 \begin{tabular}{lcc}
 \toprule
 Algorithm
 & \makecell{Avg. \% converged \\ (budget = 10{,}000)}
-& \makecell{Budget for $>90\%$ \\ convergence} \\
+& \makecell{Budget for $90\%$ \\ convergence} \\
 \midrule
 A.~\ref{alg:brute-force}: Brute force baseline
 & 56.09\%
