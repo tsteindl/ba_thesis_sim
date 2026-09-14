@@ -128,7 +128,7 @@ def ceiling_prob(phi, budget, eps, n_max=None):
     m = floor(budget/N) whole shots, so N*m <= budget, and `heisenberg_prob`'s 1/(4 N budget)
     silently assumes fractional shots.
 
-    The difference is at most ~0.3 pp, and only at the lowest budgets where m is a handful of shots;
+    The difference shows up only at the lowest budgets, where m is a handful of shots;
     `heisenberg_prob` is a valid but slightly loose (optimistic) bound everywhere.
     """
     phi = np.asarray(phi, dtype=float)

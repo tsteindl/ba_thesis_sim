@@ -62,11 +62,7 @@ EXPECTED_SELECTION_RULE = "exact_enumeration_integer_shots"
 INDEPENDENT_PREFIXES = ("linear_detector_", "overshoot_")
 INDEPENDENT_EXACT = {
     "linear_degenerate_zone.csv",   # linear_detector_study.py
-    "linear_search_claims.csv",     # linear_search_claims.py -- see the note it prints
 }
-
-# Written fresh by the partial run itself, so its copy is the current one.
-FROM_PARTIAL = ("algorithm_code_audit.md",)
 
 
 def is_independent(name):
@@ -275,7 +271,6 @@ def main():
     #   INDEPENDENT own simulations that never touch the replaced algorithms' rows (the linear-search
     #              detector bake-off and the overshoot-criterion study). The depth rule cannot move
     #              them, and they cost far more to rebuild than this merge. Carried over as-is.
-    #   FROM_PARTIAL  written fresh by the rerun itself; the partial run's copy wins.
     stale, kept_files = [], []
     for fn in sorted(os.listdir(out)):
         fp = os.path.join(out, fn)
@@ -290,22 +285,10 @@ def main():
     os.makedirs(os.path.join(out, "tex"), exist_ok=True)   # finalize writes into it, but does not
                                                            # create it (run.py's ensure_dirs does)
 
-    from_partial = []
-    for fn in FROM_PARTIAL:
-        src = os.path.join(part, fn)
-        if os.path.exists(src):
-            shutil.copy2(src, os.path.join(out, fn))
-            from_partial.append(fn)
-
     print(f"\n{total_kept} rows kept, {total_new} replaced")
     print(f"removed {len(stale)} derived file(s) -- regenerate them against {out}")
     print(f"carried over {len(kept_files)} file(s) from independent studies "
           f"(linear detector, overshoot criterion) that the depth rule cannot affect")
-    print(f"took {len(from_partial)} file(s) from the partial run: {from_partial}")
-    if any(fn == "linear_search_claims.csv" for fn in kept_files):
-        print("  NOTE linear_search_claims.csv reads the raw tables. It is carried over because "
-              "rebuilding it re-simulates; re-run linear_search_claims.py if its numbers are "
-              "quoted anywhere that must reflect the new rows.")
     print("\nnext:\n"
           f"  export RESULTS_OUT={out}\n"
           "  python analysis/add_baselines.py\n"

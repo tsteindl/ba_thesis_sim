@@ -41,10 +41,10 @@ the thesis (Section 3.2.2).
       marginal law is a mixture over N rather than the single Gaussian assumed.
 
   A7  The chosen operating point stays inside A1's validity region.
-      NOT ENFORCED, and checked empirically instead: it holds at moderate/high budget (<2% of trials
-      outside), but ~24% of trials at budget 1e4 land where m*p0 < 10. The rule still wins there
-      (+5.0 pp), so the failure is benign -- those trials would mostly have failed at any depth --
-      but the low-budget result is empirically, not theoretically, justified.
+      NOT ENFORCED, and checked empirically instead: it holds at moderate and high budget, and a
+      minority of low-budget trials land outside it. The rule still wins there, so the failure is
+      benign -- those trials would mostly have failed at any depth -- but the low-budget result is
+      empirically, not theoretically, justified. The measured shares are in the thesis.
 
 Both the reverse-engineering safety factor `C_safe` (Eq. 3.6) and the binary-search decrement `s`
 exist for one reason: the depth inferred from a pilot estimate may overshoot N_opt = floor(pi/2phi),
@@ -104,7 +104,7 @@ THE ADMISSIBLE SET IS [N_min, N_max], AND BOTH ENDS ARE DELIBERATE.
 
 Because m is now a floor, the score is not monotone below N_min and no proof is offered that some
 smaller integer could never carry a marginally larger numerical score; the claim is that N* is the
-exact maximiser over the CONSTRAINED range. On the 177 active scenario/budget points of the thesis
+exact maximiser over the CONSTRAINED range. On the active scenario/budget points of the thesis
 matrix a direct integer audit found N_min's accuracy factor to be at least as large as that of every
 N < N_min anyway, so nothing is excluded that would have won.
 
@@ -182,10 +182,9 @@ def risk_optimal_depth(phi_hat, sigma, budget, eps, *, N_min, N_max, support=Non
                      keyword-only and mandatory so that no call site can silently fall back to a
                      lower bound of 1 and pick a depth shallower than the guaranteed-safe baseline.
     support        : optional (phi_min, phi_max). Given, the overshoot factor uses the exact
-                     truncated-normal posterior instead of the untruncated one. Off by default:
-                     analysis/truncation_check.py measures the difference as <= 0.14 pp of
-                     convergence (SE 0.25 pp) at every operating point the thesis reports, because
-                     the prior spans pi*sqrt(m')*(1 - phi_min/phi_max) >= 14 sigma there.
+                     truncated-normal posterior instead of the untruncated one. Off by default: the
+                     difference is negligible at the operating points the thesis reports, because
+                     the prior spans many sigma of the pilot there.
 
     Returns N_min on invalid input (non-finite pilot, non-positive sigma/budget/eps) -- the
     guaranteed-safe baseline, never 1. If the remaining budget cannot buy a single shot even at

@@ -50,7 +50,7 @@ SEED_BOOT = 12345             # bootstrap / resampling seed for the uncertainty 
 # R_tune  trials per tuning block in stages A and B (locate m', then scan the full discrete grid)
 # R_tune2 trials per tuning block in stage C, the final refinement -- this is what controls the
 #         VARIANCE of which configuration wins, the one uncertainty component that cannot be
-#         recovered from stored output afterwards (analysis/tuning_stability.py)
+#         recovered from stored output afterwards
 # n_m1/2/3  exploration-size grid points in stages A / B / C
 MODES = {
     "smoke": dict(R_tune=40, R_tune2=60, R_test=200, n_budgets=2, n_m1=3, n_m2=3, n_m3=3,
@@ -179,9 +179,9 @@ ALGORITHMS = {
         # mean_window is the width of the mean the stopping rule tests. 0 is the cumulative mean
         # the algorithm was published with, so the grid CONTAINS the previous rule and the tuner
         # can never do worse than it; w > 0 averages only the last w probes. The axis was added
-        # after the detector study measured a moving window to be worth up to
-        # +7 pp at tight budgets and about -1 pp at eps = 1e-4, i.e. neither rule dominates and the
-        # choice belongs in the tuning grid rather than in the algorithm.
+        # after the detector study found a moving window to help at tight budgets and hurt
+        # slightly at loose ones, i.e. neither rule dominates and the choice belongs in the tuning
+        # grid rather than in the algorithm.
         discrete=dict(lookback_window=[1, 2, 3, 4, 5, 6, 8, 12, 20],
                       safeguard=[0, 1, 2, 3, 4, 6, 8, 12, 16, 24],
                       inc=[1, 2, 3, 5, 8],

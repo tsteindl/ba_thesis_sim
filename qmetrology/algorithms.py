@@ -367,18 +367,17 @@ def find_phi_fixed_budget_binary_search_risk(rng, phi, phi_max, phi_min, m_explo
                                              eps_target, conf=0.95, depth_cap="support"):
     """Algorithm 5 with the tuned decrement `s` replaced by the risk-optimal depth (safeguard.py).
 
-    PILOT: the OPENING probe (phi_0, N_min), not the deepest non-flagged one. Measured over 468
-    equal-cost operating points of the full sweep (analysis/binary_pilot_sweep.py): +0.30 +/- 0.06 pp
-    on the mean, driven by the wide-prior scenarios (+1.7 to +2.9 pp) and never materially worse in
-    the narrow ones (-0.38 pp at worst). The opening probe cannot be aliased -- N_min*phi <= pi/2 for
-    every admissible phi -- whereas the deepest *accepted* probe is selected for having read high and
-    carries a 0.87 sigma bias that Eq. (3.4) does not model. Same pilot as reverse engineering.
+    PILOT: the OPENING probe (phi_0, N_min), not the deepest non-flagged one. It wins on the mean
+    over the equal-cost operating points of the full sweep, driven by the wide-prior scenarios and
+    never materially worse in the narrow ones. The opening probe cannot be aliased -- N_min*phi <=
+    pi/2 for every admissible phi -- whereas the deepest *accepted* probe is selected for having
+    read high and carries a bias that Eq. (3.4) does not model. Same pilot as reverse engineering.
 
     depth_cap selects the upper end of the Eq. (3.8) search ("N_guess" in the pseudocode):
         "support"  N_max = floor(pi/(2 phi_min)) from the prior -- the bisection only buys the pilot
         "L"        the bisection's lower bound (the deepest probe not flagged)
         "min"      min of the two
-    See analysis/binary_depth_sweep.py for the measurement behind the default.
+    The default is the one the sweep selected.
     """
     out = _binary_search_explore(rng, phi, phi_max, phi_min, m_exploration, budget, conf)
     if out is None:

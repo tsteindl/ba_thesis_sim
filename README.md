@@ -112,9 +112,9 @@ one document (`results/tex_long/` is the per-scenario long form). The CSVs behin
 | `experiment_manifest.json` | every scenario/algorithm/seed/R the run used |
 
 Headline: for φ ~ U(0.01, 0.1) all three adaptive algorithms beat brute force already at ε=10⁻³, and
-the advantage grows with precision, plateauing near **1.85×** less budget for reverse engineering.
-At a fixed budget of 10,000 (ε=10⁻³): brute 56.1%, linear 64.1%, binary 65.1%, reverse engineering
-**66.3%**, against an attainable ceiling of 73.5%.
+the advantage grows with precision before plateauing, with reverse engineering needing the least
+budget. The numbers themselves live in `BA_Steindl.pdf` and in the generated tables — deliberately
+not restated here, so there is only one copy to keep current.
 
 ## Appendix code listings
 

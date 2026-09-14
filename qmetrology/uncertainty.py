@@ -26,7 +26,7 @@ one does — **overstates** the ratio's uncertainty. The intervals are conservat
 What is *not* covered: the sampling variance of the grid search itself (which configuration wins is
 random, tuned at R_TUNE = 2,000). De-biasing removes its bias — the winner is re-validated on an
 independent seed — but not its variance. Quantifying that needs repeated tuning seeds; see
-analysis/tuning_stability.py, which does it for the headline cells only.
+a dedicated re-tuning experiment, which this pipeline does not run.
 """
 import numpy as np
 
