@@ -134,6 +134,18 @@ def tex_int(x, decimal_places=None):
     return f"{int(round(x)):,}".replace(",", "{,}")
 
 
+CI_GAP = "4pt"  # vertical gap between a cell's value and its confidence interval
+
+
+def ci_cell(value, interval):
+    """Stack a value over its confidence interval, with room to breathe between the lines.
+
+    ``\makecell`` leaves the cell exactly as wide as its widest line, so enlarging the
+    gap is purely vertical and cannot push a column past the text width.
+    """
+    return rf"\makecell{{{value} \\[{CI_GAP}] {{\scriptsize {interval}}}}}"
+
+
 def eps_tex(e):
     return rf"$10^{{{int(round(np.log10(f(e))))}}}$"
 
@@ -239,10 +251,10 @@ def tab_summary_low_prec(D, ci=False):
             body.append(r"\midrule")
         c1 = f"{100*r:.2f}\\%"
         if ci and np.isfinite(lo):
-            c1 += f" \\newline {{\\scriptsize [{100*lo:.2f}, {100*hi:.2f}]}}"
+            c1 = ci_cell(c1, f"[{100*lo:.2f}, {100*hi:.2f}]")
         c2 = tex_int(x) if np.isfinite(x) else "--"
         if ci and np.isfinite(xlo):
-            c2 += f" \\newline {{\\scriptsize [{tex_int(xlo)}, {tex_int(xhi)}]}}"
+            c2 = ci_cell(c2, f"[{tex_int(xlo)}, {tex_int(xhi)}]")
         body += [lab(a), f"& {c1}", f"& {c2} \\\\", ""]
     cap = (r"Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for "
            r"$\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ "
@@ -351,7 +363,9 @@ def tab_summary_all(D, ci=False):
             # c = f"& {tex_int(x)} (\\texttimes {base[sid]/x:.2f})"
             c = f"& {tex_int(x, decimal_places=1)}"
             if ci and np.isfinite(xlo):
-                c += f" \\newline {{\\scriptsize [{tex_int(xlo, decimal_places=1)}, {tex_int(xhi, decimal_places=1)}]}}"
+                c = "& " + ci_cell(tex_int(x, decimal_places=1),
+                                   f"[{tex_int(xlo, decimal_places=1)}, "
+                                   f"{tex_int(xhi, decimal_places=1)}]")
             cells.append(c)
         if not any(c != "& --" for c in cells):
             continue
@@ -392,7 +406,7 @@ def tab_scaling_with_prec(D, ci=False):
             # cells.append(rf"& \makecell{{{Bb/Ba:.2f}\texttimes"
                                     #  rf"{{\scriptsize ({Ba/Bc:.2f}\texttimes\ opt.)}}}}")
             if ci and np.isfinite(rl):
-                c += f" \\newline {{\\scriptsize [{rl:.2f}, {rh:.2f}]}}"
+                c = "& " + ci_cell(f"{rat:.2f}\\texttimes", f"[{rl:.2f}, {rh:.2f}]")
             cells.append(c)
         cells[-1] += r" \\"
         body += [eps_tex(D.scen[sid]["eps"])] + cells
