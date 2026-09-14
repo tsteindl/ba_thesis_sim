@@ -5,13 +5,13 @@
 % ---- tab_summary_low_prec.tex ------------------------------------
 \begin{table}[ht]
 \centering
-\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}.}
+\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to reach \(90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}.}
 \label{tab:summary-low-prec}
 \begin{tabular}{lcc}
 \toprule
 Algorithm
 & \makecell{Avg. \% converged \\ (budget = 10{,}000)}
-& \makecell{Budget for $>90\%$ \\ convergence} \\
+& \makecell{Budget for $90\%$ \\ convergence} \\
 \midrule
 A.~\ref{alg:brute-force}: Brute force baseline
 & 56.09\%
@@ -43,13 +43,13 @@ Oracle ($N_\text{opt}$)
 % ---- tab_summary_low_prec_ci.tex ---------------------------------
 \begin{table}[ht]
 \centering
-\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to achieve \(>90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}. Brackets give 95\% intervals (Wilson for rates, bootstrap for budgets); the deterministic oracle reference carries none.}
+\caption{Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for $\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ and the budget required to reach \(90\%\) convergence. Improvement factors relative to the baseline are collected in Table~\ref{tab:ratios}. The Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true $N_\text{opt}$ and is evaluated deterministically using the large-$m$ normal approximation in Lemma~\ref{lemma:asymp-dist-est}. Brackets give 95\% intervals (Wilson for rates, bootstrap for budgets); the deterministic oracle reference carries none.}
 \label{tab:summary-low-prec-ci}
 \begin{tabular}{lcc}
 \toprule
 Algorithm
 & \makecell{Avg. \% converged \\ (budget = 10{,}000)}
-& \makecell{Budget for $>90\%$ \\ convergence} \\
+& \makecell{Budget for $90\%$ \\ convergence} \\
 \midrule
 A.~\ref{alg:brute-force}: Brute force baseline
 & 56.09\% \newline {\scriptsize [55.66, 56.53]}
@@ -125,19 +125,19 @@ Oracle ($N_\text{opt}$)
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Budget required to achieve $>90\%$ convergence for selected precision settings and prior intervals. Values are budgets in thousands; smaller values indicate a lower required budget.}
+\caption{Budget required to reach $90\%$ convergence for selected precision settings and prior intervals. Values are budgets in thousands; smaller values indicate a lower required budget.}
 \label{tab:summary-all}
 \begin{tabular}{l c c c c c c c c}
 \toprule
 Algorithm
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-3}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-5}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-6}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-7}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-8}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.001,0.01)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.001,0.1)$} \\
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-3}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-5}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-6}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-7}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-8}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.001,0.01)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.001,0.1)$} \\
 \midrule
 A.~\ref{alg:brute-force}: BF
 & 45.9
@@ -207,19 +207,19 @@ Oracle ($N_\text{opt}$)
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
-\caption{Budget required to achieve $>90\%$ convergence for selected precision settings and prior intervals. Values are budgets in thousands; smaller values indicate a lower required budget. Brackets give 95\% bootstrap intervals.}
+\caption{Budget required to reach $90\%$ convergence for selected precision settings and prior intervals. Values are budgets in thousands; smaller values indicate a lower required budget. Brackets give 95\% bootstrap intervals.}
 \label{tab:summary-all-ci}
 \begin{tabular}{l c c c c c c c c}
 \toprule
 Algorithm
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-3}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-5}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-6}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-7}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-8}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.001,0.01)$}
-& \makecell{Budget in thousands\\ ($>90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.001,0.1)$} \\
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-3}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-5}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-6}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-7}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-8}}$ \\ $\phi \sim \mathcal{U}(0.01,0.1)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.001,0.01)$}
+& \makecell{Budget in thousands\\ ($90\%$ conv.) \\ $\epsilon={10^{-4}}$ \\ $\phi \sim \mathcal{U}(0.001,0.1)$} \\
 \midrule
 A.~\ref{alg:brute-force}: BF
 & 45.9 \newline {\scriptsize [45.3, 46.5]}
@@ -339,7 +339,7 @@ $10^{-8}$
 \begin{table}[ht]
 \centering
 \small
-\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the oracle column gives the corresponding deterministic large-$m$ reference. Brackets give 95\% bootstrap intervals; these are conservative (the two curves are resampled independently despite being seed-paired).}
+\caption{Improvement factor over the brute-force baseline as the precision requirement tightens, at $\phi\sim\mathcal{U}(0.01,0.1)$ and $90\%$ convergence. The advantage grows with precision and then saturates; the oracle column gives the corresponding deterministic large-$m$ reference. Brackets give 95\% bootstrap intervals obtained by resampling the two curves independently; they do not use the dependence induced by shared simulation seeds.}
 \label{tab:scaling-with-prec-ci}
 \begin{tabular}{lcccc}
 \toprule
@@ -390,7 +390,7 @@ $10^{-8}$
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Robustness of the adaptive advantage across target convergence probabilities. Each cell reports $\max_a B_{\mathrm{BF}}(p^\ast)/B_a(p^\ast)$ over the three adaptive algorithms, followed by its pointwise 95\% bootstrap interval and the algorithm attaining the maximum. Values greater than one mean that the selected adaptive algorithm requires less budget than brute force. The maximizing algorithm is selected separately at each threshold.}
+\caption{Robustness of the adaptive advantage across target convergence probabilities. Each cell reports $\max_a B_{\mathrm{BF}}(p^\ast)/B_a(p^\ast)$ over the three adaptive algorithms, followed by its pointwise 95\% bootstrap interval and the algorithm attaining the maximum. Values greater than one mean that the selected adaptive algorithm requires less budget than brute force. The maximizing algorithm is selected separately at each threshold. The intervals are not adjusted for selecting the maximizing algorithm or for examining multiple thresholds. The table is therefore exploratory and should not be interpreted as a confirmatory comparison.}
 \label{tab:robustness-across-thresholds}
 \begin{tabular}{lcccc}
 \toprule
@@ -451,7 +451,7 @@ Scenario
 \begin{table}[ht]
 \centering
 \footnotesize
-\caption{Parameter configurations selected for Table~\ref{tab:summary-low-prec-ci} at fixed budget $10{,}000$ ($\epsilon=10^{-3}$, $\phi\sim\mathcal{U}(0.01,0.1)$). For Reverse Engineering, the planned exploration-shot count is additionally reported as the fraction $m'/B$. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.}
+\caption{Parameter configurations selected for Table~\ref{tab:summary-low-prec-ci} at fixed budget $10{,}000$ ($\epsilon=10^{-3}$, $\phi\sim\mathcal{U}(0.01,0.1)$). For Reverse Engineering, the planned pilot cost is additionally reported as the resource share $m'N_{\min}/B$. For Binary Search, the saved \texttt{conf} parameter is related to the detector level by $\alpha=1-\mathrm{conf}$. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.}
 \label{tab:opt-param-first-tab}
 \begin{tabular}{ll}
 \toprule
@@ -463,7 +463,7 @@ Linear search
 Binary search
 & \texttt{m\_exploration=114, conf=0.5} \\
 Reverse engineering
-& \texttt{m\_exploration=54}, $m'/B=0.54\%$ \\
+& \texttt{m\_exploration=54}, $m'N_{\min}/B=8.10\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -473,7 +473,7 @@ Reverse engineering
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Parameter configurations selected near the $90\%$-convergence budget. A budget crossing is interpolated between tested budgets; parameter dictionaries are not. Each entry is therefore the selected configuration at the nearest tested budget, not a configuration evaluated at the interpolated $B_{90}$. For Reverse Engineering, the planned exploration-shot count is additionally reported as $m'/B$ at that tested budget. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.}
+\caption{Parameter configurations selected near the $90\%$-convergence budget. A budget crossing is interpolated between tested budgets; parameter dictionaries are not. Each entry is therefore the selected configuration at the nearest tested budget, not a configuration evaluated at the interpolated $B_{90}$. For Reverse Engineering, the planned pilot cost is additionally reported as the resource share $m'N_{\min}/B$ at that tested budget. For Binary Search, the saved \texttt{conf} parameter is related to the detector level by $\alpha=1-\mathrm{conf}$. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.}
 \label{tab:opt-param-second-tab}
 \setlength{\tabcolsep}{2pt}
 \begin{tabular}{lllll}
@@ -497,10 +497,10 @@ Binary search
 & \makecell{\texttt{m\_exploration=2635}, \\ \texttt{conf=0.5}, \\ {\scriptsize $B=2{,}059{,}436$}} \\
 \midrule
 Reverse engineering
-& \makecell{\texttt{m\_exploration=91}, \\ {\scriptsize $B=29{,}173$}, \\ {\scriptsize $m'/B=0.31\%$}}
-& \makecell{\texttt{m\_exploration=1286}, \\ {\scriptsize $B=2{,}917{,}365$}, \\ {\scriptsize $m'/B=0.04\%$}}
-& \makecell{\texttt{m\_exploration=58}, \\ {\scriptsize $B=278{,}729$}, \\ {\scriptsize $m'/B=0.02\%$}}
-& \makecell{\texttt{m\_exploration=2288}, \\ {\scriptsize $B=2{,}059{,}436$}, \\ {\scriptsize $m'/B=0.11\%$}} \\
+& \makecell{\texttt{m\_exploration=91}, \\ {\scriptsize $B=29{,}173$}, \\ {\scriptsize $m'N_{\min}/B=4.68\%$}}
+& \makecell{\texttt{m\_exploration=1286}, \\ {\scriptsize $B=2{,}917{,}365$}, \\ {\scriptsize $m'N_{\min}/B=0.66\%$}}
+& \makecell{\texttt{m\_exploration=58}, \\ {\scriptsize $B=278{,}729$}, \\ {\scriptsize $m'N_{\min}/B=3.27\%$}}
+& \makecell{\texttt{m\_exploration=2288}, \\ {\scriptsize $B=2{,}059{,}436$}, \\ {\scriptsize $m'N_{\min}/B=1.67\%$}} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -886,7 +886,7 @@ CUSUM on the pooled reference & \textbf{59.77\%} & 19.9\% & \textbf{91.27\%} & 4
 \setlength{\tabcolsep}{6pt}
 \begin{tabular}{r cc ccc}
 \toprule
-$m'$ & \makecell{Berry--Esseen \\ bound} & \makecell{True distance \\ to normal} & \makecell{$\mathrm{conf} = 0.5$ \\ ($\alpha = 0.5$)} & \makecell{$\mathrm{conf} = 0.66$ \\ ($\alpha = 0.34$)} & \makecell{$\mathrm{conf} = 0.95$ \\ ($\alpha = 0.05$)} \\
+$m'$ & \makecell{Berry--Esseen \\ bound} & \makecell{Exact Kolmogorov distance \\ to normal approximation} & \makecell{$\mathrm{conf} = 0.5$ \\ ($\alpha = 0.5$)} & \makecell{$\mathrm{conf} = 0.66$ \\ ($\alpha = 0.34$)} & \makecell{$\mathrm{conf} = 0.95$ \\ ($\alpha = 0.05$)} \\
 \cmidrule(lr){2-3}\cmidrule(lr){4-6}
 & \multicolumn{2}{c}{normal approximation to $K$} & \multicolumn{3}{c}{largest deviation of the achieved size} \\
 \midrule

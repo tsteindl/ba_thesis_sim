@@ -1,7 +1,7 @@
 \begin{table}[ht]
 \centering
 \footnotesize
-\caption{Parameter configurations selected for Table~\ref{tab:summary-low-prec-ci} at fixed budget $10{,}000$ ($\epsilon=10^{-3}$, $\phi\sim\mathcal{U}(0.01,0.1)$). For Reverse Engineering, the planned exploration-shot count is additionally reported as the fraction $m'/B$. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.}
+\caption{Parameter configurations selected for Table~\ref{tab:summary-low-prec-ci} at fixed budget $10{,}000$ ($\epsilon=10^{-3}$, $\phi\sim\mathcal{U}(0.01,0.1)$). For Reverse Engineering, the planned pilot cost is additionally reported as the resource share $m'N_{\min}/B$. For Binary Search, the saved \texttt{conf} parameter is related to the detector level by $\alpha=1-\mathrm{conf}$. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.}
 \label{tab:opt-param-first-tab}
 \begin{tabular}{ll}
 \toprule
@@ -13,7 +13,7 @@ Linear search
 Binary search
 & \texttt{m\_exploration=114, conf=0.5} \\
 Reverse engineering
-& \texttt{m\_exploration=54}, $m'/B=0.54\%$ \\
+& \texttt{m\_exploration=54}, $m'N_{\min}/B=8.10\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}

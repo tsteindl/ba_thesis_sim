@@ -111,7 +111,7 @@ def _linear_search_explore(rng, phi, phi_max, phi_min, m_exploration, budget, lo
         elif N >= N_max or budget_used >= budget:
             done = True
         else:
-            N += inc
+            N = min(N + inc, N_max)
 
     return phi_hat_list, N_list, budget_used, counter >= lookback_window
 
@@ -229,7 +229,7 @@ def _linear_search_explore_lagged(rng, phi, phi_max, phi_min, m_exploration, bud
         elif N >= N_max or budget_used >= budget:
             done = True
         else:
-            N += inc
+            N = min(N + inc, N_max)
 
     return phi_hat_list, N_list, budget_used, counter >= lookback_window
 

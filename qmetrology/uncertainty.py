@@ -95,8 +95,8 @@ def ratio_ci(budgets, rates_ref, rates_alg, T, R, n_boot=2000, seed=0, ci=95, bu
     abscissae (the omniscient ceilings get extra low-budget points, since their crossing can fall
     below the grid the sweep chose around brute force).
 
-    The two curves are resampled independently, which ignores the seed pairing between algorithms and
-    therefore yields a conservative (too wide) interval.
+    The two curves are resampled independently, which ignores the seed pairing between algorithms;
+    the result is an unpaired Monte-Carlo interval with no general conservative-coverage guarantee.
     """
     b_a = budgets if budgets_alg is None else budgets_alg
     b_ref, b_alg = crossing(budgets, rates_ref, T), crossing(b_a, rates_alg, T)

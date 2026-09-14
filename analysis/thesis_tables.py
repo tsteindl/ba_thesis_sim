@@ -228,7 +228,7 @@ def tab_summary_low_prec(D, ci=False):
     sid, B = "narrow_e3", 10_000
     body = [r"\begin{tabular}{lcc}", r"\toprule", "Algorithm",
             r"& \makecell{Avg. \% converged \\ (budget = 10{,}000)}",
-            r"& \makecell{Budget for $>90\%$ \\ convergence} \\",
+            r"& \makecell{Budget for $90\%$ \\ convergence} \\",
             r"\midrule"]
     for a in ROWS:
         r, lo, hi = D.rate(sid, B, a)
@@ -246,7 +246,7 @@ def tab_summary_low_prec(D, ci=False):
         body += [lab(a), f"& {c1}", f"& {c2} \\\\", ""]
     cap = (r"Algorithm performance under low-precision constraints $\epsilon=10^{-3}$ for "
            r"$\phi\sim\mathcal{U}(0.01,0.1)$: the convergence rate at fixed budget $C=10{,}000$ "
-           r"and the budget required to achieve \(>90\%\) convergence. Improvement factors "
+           r"and the budget required to reach \(90\%\) convergence. Improvement factors "
            r"relative to the baseline are collected in Table~\ref{tab:ratios}. The "
            r"Oracle ($N_\text{opt}$) row is not an implementable protocol: it is given the true "
            r"$N_\text{opt}$ and is evaluated deterministically using the large-$m$ normal "
@@ -265,7 +265,7 @@ def tab_ratios(D):
     from the oracle reference. Each cell therefore carries two numbers, and both are
     ratios of the SAME quantity (the budget to reach 90%), so no new unit is introduced:
 
-        top     B_brute / B_alg       the factor less budget than the baseline (>1 is better)
+        top     B_brute / B_alg       the improvement factor over the baseline (>1 is better)
         bottom  B_alg / B_oracle     budget relative to the oracle reference
                                       (1.00 = equal oracle budget)
 
@@ -335,7 +335,7 @@ def tab_summary_all(D, ci=False):
     head = ["Algorithm"]
     for sid in cols:
         s = D.scen[sid]
-        head.append(rf"& \makecell{{Budget in thousands\\ ($>90\%$ conv.) \\ "
+        head.append(rf"& \makecell{{Budget in thousands\\ ($90\%$ conv.) \\ "
                     rf"$\epsilon={{10^{{{int(round(np.log10(f(s['eps']))))}}}}}$ \\ {prior_tex(s)}}}")
     head[-1] += r" \\"
     body = [r"\begin{tabular}{l" + " c" * len(cols) + "}", r"\toprule"] + head + [r"\midrule"]
@@ -359,7 +359,7 @@ def tab_summary_all(D, ci=False):
             body.append(r"\midrule")
         cells[-1] += r" \\"
         body += [lab(a, narrow=True)] + cells + [""]
-    cap = (r"Budget required to achieve $>90\%$ convergence for selected precision settings and "
+    cap = (r"Budget required to reach $90\%$ convergence for selected precision settings and "
            r"prior intervals. Values are budgets in thousands; smaller values indicate a lower "
            r"required budget.")
     if ci:
@@ -401,7 +401,8 @@ def tab_scaling_with_prec(D, ci=False):
            r"precision and then saturates; the oracle column gives the corresponding deterministic "
            r"large-$m$ reference.")
     if ci:
-        cap += r" Brackets give 95\% bootstrap intervals; these are conservative (the two curves are resampled independently despite being seed-paired)."
+        cap += (r" Brackets give 95\% bootstrap intervals obtained by resampling the two curves "
+                r"independently; they do not use the dependence induced by shared simulation seeds.")
     return wrap(body, cap, "tab:scaling-with-prec" + ("-ci" if ci else ""), size="small",
                 foot=FOOT % f"{D.R:,}".replace(",", "{,}"))
 
@@ -483,7 +484,9 @@ def tab_robustness_across_thresholds(D):
            r"algorithms, followed by its pointwise 95\% bootstrap interval and the algorithm "
            r"attaining the maximum. Values greater than one mean that the selected adaptive "
            r"algorithm requires less budget than brute force. The maximizing algorithm is selected "
-           r"separately at each threshold.")
+           r"separately at each threshold. The intervals are not adjusted for selecting the "
+           r"maximizing algorithm or for examining multiple thresholds. The table is therefore "
+           r"exploratory and should not be interpreted as a confirmatory comparison.")
     tune = ", ".join(str(x) for x in D.man["seeds"]["tune_blocks"])
     test = D.man["seeds"]["test"]
     R_tex = f"{D.R:,}".replace(",", "{,}")
@@ -513,7 +516,7 @@ def _params_cell(params, budget=None, shot_fraction=None):
         B = f"{int(budget):,}".replace(",", "{,}")
         lines.append(r"{\scriptsize $B=" + B + "$}")
     if shot_fraction is not None:
-        lines.append(r"{\scriptsize $m'/B="
+        lines.append(r"{\scriptsize $m'N_{\min}/B="
                      + f"{100*shot_fraction:.2f}" + r"\%$}")
     return r"\makecell{" + r", \\ ".join(lines) + "}"
 
@@ -522,14 +525,14 @@ def _params_inline(params, shot_fraction=None):
     items = _parameter_items(params)
     out = r"\texttt{" + ", ".join(items) + "}" if items else "--"
     if shot_fraction is not None:
-        out += (r", $m'/B="
+        out += (r", $m'N_{\min}/B="
                 + f"{100*shot_fraction:.2f}" + r"\%$")
     return out
 
 
-def _re_shot_fraction(budget, params):
-    """Planned RE pilot shots as a fraction of the total resource budget."""
-    return float(params["m_exploration"] / budget)
+def _re_shot_fraction(budget, params, scenario):
+    """Planned RE pilot cost as a fraction of the total resource budget."""
+    return float(params["m_exploration"] * scenario["N_min"] / budget)
 
 
 def tab_opt_param_first(D):
@@ -538,12 +541,14 @@ def tab_opt_param_first(D):
             r"& Selected parameters \\", r"\midrule"]
     for a in ["linear", "binary_deep", "reverse_eng_risk"]:
         p, _ = D.winner(sid, B, a)
-        shot_fraction = _re_shot_fraction(B, p) if a == "reverse_eng_risk" else None
+        shot_fraction = _re_shot_fraction(B, p, D.scen[sid]) if a == "reverse_eng_risk" else None
         body += [head_label(a), f"& {_params_inline(p, shot_fraction)} \\\\"]
     cap = (r"Parameter configurations selected for "
            r"Table~\ref{tab:summary-low-prec-ci} at fixed budget $10{,}000$ "
            r"($\epsilon=10^{-3}$, $\phi\sim\mathcal{U}(0.01,0.1)$). For Reverse Engineering, "
-           r"the planned exploration-shot count is additionally reported as the fraction $m'/B$. "
+           r"the planned pilot cost is additionally reported as the resource share "
+           r"$m'N_{\min}/B$. For Binary Search, the saved \texttt{conf} parameter is related to "
+           r"the detector level by $\alpha=1-\mathrm{conf}$. "
            r"Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.")
     return wrap(body, cap, "tab:opt-param-first-tab", size="footnotesize")
 
@@ -570,7 +575,8 @@ def tab_opt_param_second(D):
             bb = np.array(buds, float)
             near = int(bb[int(np.argmin(np.abs(np.log(bb) - np.log(b90))))])
             p, _ = D.winner(sid, near, a)
-            shot_fraction = _re_shot_fraction(near, p) if a == "reverse_eng_risk" else None
+            shot_fraction = (_re_shot_fraction(near, p, D.scen[sid])
+                             if a == "reverse_eng_risk" else None)
             cells.append(f"& {_params_cell(p, near, shot_fraction)}")
         cells[-1] += r" \\"
         body += [head_label(a) if LONG else head_label_narrow(a)] + cells
@@ -582,8 +588,11 @@ def tab_opt_param_second(D):
            r"interpolated between tested budgets; parameter dictionaries are not. Each entry is "
            r"therefore the selected configuration at the nearest tested budget, "
            r"not a configuration evaluated at the interpolated $B_{90}$. For Reverse Engineering, "
-           r"the planned exploration-shot count is additionally reported as $m'/B$ at that tested "
-           r"budget. Exploration resource shares are reported in Table~\ref{tab:diag-downstream}.")
+           r"the planned pilot cost is additionally reported as the resource share "
+           r"$m'N_{\min}/B$ at that tested budget. For Binary Search, the saved \texttt{conf} "
+           r"parameter is related to the detector level by $\alpha=1-\mathrm{conf}$. "
+           r"Exploration resource shares are reported in "
+           r"Table~\ref{tab:diag-downstream}.")
     return wrap(body, cap, "tab:opt-param-second-tab", size="scriptsize")
 
 
@@ -878,7 +887,7 @@ def tab_overshoot_operating(D):
     confs = sorted({f(r["conf"]) for r in rows})
     ms = sorted({int(f(r["m_exploration"])) for r in rows})
     by = {(int(f(r["m_exploration"])), f(r["conf"])): r for r in rows}
-    head = ["$m'$", r"& \makecell{Berry--Esseen \\ bound}", r"& \makecell{True distance \\ to normal}"]
+    head = ["$m'$", r"& \makecell{Berry--Esseen \\ bound}", r"& \makecell{Exact Kolmogorov distance \\ to normal approximation}"]
     for c in confs:
         head.append(rf"& \makecell{{$\mathrm{{conf}} = {c:g}$ \\ ($\alpha = {1-c:g}$)}}")
     body = [r"\setlength{\tabcolsep}{6pt}",

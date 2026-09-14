@@ -133,7 +133,7 @@ def scan_depths(N_min, N_max, inc, m, budget):
         used += N * m
         if N >= N_max or used >= budget:
             break
-        N += inc
+        N = min(N + inc, N_max)
     return np.asarray(depths, dtype=np.int64)
 
 
