@@ -5,7 +5,7 @@
 # crash surfaces instead of looping forever.
 cd "$(dirname "$0")/.." || exit 1
 LOG=sweep.log
-DONE="wrote results/REPORT.md"
+DONE="wrote budget_crossings.csv"
 for attempt in $(seq 1 12); do
     if grep -q "$DONE" "$LOG" 2>/dev/null; then
         echo "[supervisor] sweep complete after $attempt attempt(s)" >> "$LOG"; exit 0
@@ -14,6 +14,6 @@ for attempt in $(seq 1 12); do
         sleep 60; continue
     fi
     echo "[supervisor] $(date -Is): run not active, (re)starting with --resume (attempt $attempt)" >> "$LOG"
-    python3 analysis/run.py --max --keep-traces --resume >> "$LOG" 2>&1
+    python3 analysis/run.py --max --resume >> "$LOG" 2>&1
 done
 echo "[supervisor] giving up after 12 attempts" >> "$LOG"
