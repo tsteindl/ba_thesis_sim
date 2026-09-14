@@ -11,7 +11,7 @@ binary_search_deep and reverse_engineering_risk. The rest are the reference prot
 the audit arm the deepest-vs-opening-probe comparison needs (binary_search_risk), the tuned-constant
 predecessors the broad-prior study reports next to them (binary_search, reverse_engineering), the
 lagged-detector variant of the linear-search bake-off, and the three exact-posterior arms
-(docs/POSTERIOR.md).
+.
 
 The omniscient ceilings are analytic and live in qmetrology/oracle.py -- they are rates, not
 runnable protocols.
@@ -68,7 +68,7 @@ def _linear_search_explore(rng, phi, phi_max, phi_min, m_exploration, budget, lo
     that enters and the one that leaves, so the test "the window mean fell" is identically
     phi_hat_k < phi_hat_{k-w}. A finite window therefore compares each probe with one a fixed depth
     behind it, while the cumulative mean compares against a reference whose effective lag keeps
-    growing as the scan approaches the aliasing boundary. See docs/LINEAR_SEARCH.md.
+    growing as the scan approaches the aliasing boundary.
 
     Returns (phi_hats, Ns, budget_used, overshot) or None if the first probe already exceeds the
     budget. Consumes the RNG in exactly the same order as the published algorithm, so the constant-`s`
@@ -245,7 +245,7 @@ def find_phi_fixed_budget_linear_search_lagged(rng, phi, phi_max, phi_min, m_exp
     backtracking by `lookback_window * inc`, the same safeguard N* = max(1, N_guess - s).
 
     It exists so that the alternative measured in
-    docs/LINEAR_SEARCH.md can be swept end to end without editing the published
+    the detector study can be swept end to end without editing the published
     algorithm. To report it, give it a manifest entry with a tuning grid over
     (m_exploration, lookback_window, safeguard, inc, lag, conf) and add its key to
     qmetrology.manifest.ORDER -- nothing else in the pipeline needs to change.

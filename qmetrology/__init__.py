@@ -3,8 +3,8 @@ under resource constraints".
 
   sim.py          circuit simulation + estimator
   algorithms.py   the fixed-budget phase-search algorithms (Chapter 3)
-  safeguard.py    exploitation depth derived from the asymptotic law (docs/SAFEGUARD_DERIVATION.md)
-  posterior.py    the exact-posterior depth criterion (docs/POSTERIOR.md)
+  safeguard.py    exploitation depth derived from the asymptotic law
+  posterior.py    the exact-posterior depth criterion
   oracle.py       the analytic omniscient ceilings
   manifest.py     scenarios, budget grids, tuning grids, seeds and trial counts -- one source
   pipeline.py     tune -> freeze -> held-out evaluation, in parallel

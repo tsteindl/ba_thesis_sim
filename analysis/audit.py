@@ -155,10 +155,5 @@ def build(run_comparison=True, R=20_000):
 
 
 if __name__ == "__main__":
-    from pipeline_io import ensure_dirs, path
-    ensure_dirs()
     quick = "--quick" in sys.argv
-    txt = build(run_comparison=True, R=2000 if quick else 20_000)
-    with open(path("algorithm_code_audit.md"), "w") as f:
-        f.write(txt)
-    print("wrote", path("algorithm_code_audit.md"))
+    print(build(run_comparison=True, R=2000 if quick else 20_000))

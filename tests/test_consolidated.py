@@ -457,8 +457,7 @@ def test_end_to_end_smoke_and_provenance():
                      "diagnostics_by_point.csv", "diagnostics_headline.csv", "optimal_params.csv",
                      "diagnostics_by_phase.csv"):
             assert _read(d, name), name
-        for name in ("REPORT.md", "experiment_manifest.json", "algorithm_code_audit.md"):
-            assert os.path.exists(os.path.join(d, name)) or name == "algorithm_code_audit.md"
+        assert os.path.exists(os.path.join(d, "experiment_manifest.json"))
         cross = _read(d, "budget_crossings.csv")
         perf_R = {int(r["R"]) for r in perf if r["R"]}
         assert {int(c["R"]) for c in cross if int(c["R"]) > 0} <= perf_R, \

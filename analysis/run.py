@@ -3,13 +3,13 @@
     python analysis/run.py --quick          # ~1 min smoke run, same code path
     python analysis/run.py --full           # production sweep
     python analysis/run.py --full --resume  # continue an interrupted sweep
-    python analysis/run.py --report-only    # rebuild the derived files + REPORT.md
+    python analysis/run.py --report-only    # rebuild the derived files
 
 SELECTIVE (PARTIAL) MODE. `--algorithms` and/or `--scenarios` restrict the sweep to a subset of
 cells, for reruns that only affect some algorithms:
 
     RESULTS_OUT=results_partial \\
-      python analysis/run.py --max --resume --keep-traces \\
+      python analysis/run.py --max --resume \\
         --algorithms binary_deep,reverse_eng_risk \\
         --scenarios narrow_e3,narrow_e4,narrow_e5,narrow_e6,narrow_e7,narrow_e8,small_e4,wide_e4
 
@@ -31,10 +31,8 @@ seed and trial count. For each (scenario, budget, algorithm) the pipeline
     tracing on -> emits the convergence rate, the exploration/safeguard diagnostics, the detector
     confusion and the budget audit from those same runs.
 
-So no performance number and its telemetry can refer to different trials. `--keep-traces` also
-writes the full probe list of the headline points to results/traces/*.jsonl.gz.
+So no performance number and its telemetry can refer to different trials.
 """
-import gzip
 import json
 import os
 import sys
@@ -49,11 +47,6 @@ from qmetrology import manifest as M
 from qmetrology import pipeline as P
 from pipeline_io import Table, ensure_dirs, path, scenario_keys, write_json
 
-# --keep-traces writes full probe lists for the headline points only, for the first TRACE_RUNS runs
-# of the held-out evaluation (a deterministic prefix of the same seeds -- the same trials, not new
-# ones). The aggregate rows already summarise all R runs; a full-sweep dump would be gigabytes, and
-# pickling every trace out of the workers costs more than the simulation.
-TRACE_RUNS = 2000
 
 PERF_FIELDS = ["setting", "scenario_id", "phi_min", "phi_max", "phi_distribution", "eps",
                "algorithm", "implementation_variant", "budget", "params", "R", "seed_test",
@@ -100,20 +93,8 @@ def diag_fields():
     return ID_FIELDS + rest
 
 
-def headline_budgets(scen, budgets, rates_by_algo):
-    """The compact subset the report inspects in detail: the pinned headline budgets, plus the
-    budget nearest each of 50/80/90% on the reference adaptive curve."""
-    pins = set(int(b) for b in scen.get("pin_budgets", ()))
-    ref = rates_by_algo.get("reverse_eng_risk")
-    if ref is not None and len(ref) == len(budgets):
-        for t in (0.5, 0.8, 0.9):
-            pins.add(int(budgets[int(np.argmin(np.abs(np.asarray(ref) - t)))]))
-    else:
-        pins.add(int(budgets[len(budgets) // 2]))
-    return pins
 
-
-def run_scenario(scen, mode, tables, keep_traces, algos=None):
+def run_scenario(scen, mode, tables, algos=None):
     algos = list(algos) if algos else list(M.ORDER)
     cfgm = M.MODES[mode]
     budgets = M.budgets_for(scen, cfgm["n_budgets"])
@@ -168,21 +149,6 @@ def run_scenario(scen, mode, tables, keep_traces, algos=None):
             del A
             _ = time.time() - t0
         print(line, flush=True)
-
-    if keep_traces:
-        for b in sorted(headline_budgets(scen, budgets, rates_by_algo)):
-            for algo in algos:
-                cfg = frozen.get((algo, int(b)))
-                if cfg is None:
-                    continue
-                _A, _s, tr = P.heldout(algo, scen, b, cfg, mode, keep_traces=True,
-                                       trace_R=TRACE_RUNS)
-                fp = path("traces", f"{scen['id']}__{algo}__B{int(b)}.jsonl.gz")
-                with gzip.open(fp, "wt") as f:
-                    for t in tr:
-                        f.write(json.dumps(t, default=float) + "\n")
-        print(f"   traces written for {len(headline_budgets(scen, budgets, rates_by_algo))} budgets",
-              flush=True)
 
     tables["perf"].rows(perf)
     tables["winners"].rows(wins)
@@ -270,7 +236,6 @@ def main():
     if "--max" in argv:
         mode = "max"
     resume = "--resume" in argv
-    keep_traces = "--keep-traces" in argv
     report_only = "--report-only" in argv
     algos, scens, partial = resolve_selection(argv)
     ensure_dirs()
@@ -294,11 +259,9 @@ def main():
 
     if not report_only:
         # preflight: which implementation is which thesis algorithm, and what the resolved
-        # binary-search pilot mismatch actually costs -- written BEFORE the production sweep
+        # binary-search pilot mismatch actually costs -- checked BEFORE the production sweep
         import audit
-        with open(path("algorithm_code_audit.md"), "w") as fh:
-            fh.write(audit.build(run_comparison=True, R=M.MODES[mode]["R_audit"]))
-        print("wrote", path("algorithm_code_audit.md"), flush=True)
+        print(audit.build(run_comparison=True, R=M.MODES[mode]["R_audit"]), flush=True)
 
         done = set()
         if resume:
@@ -318,7 +281,7 @@ def main():
             if scen["id"] in done:
                 continue
             try:
-                run_scenario(scen, mode, tables, keep_traces, algos)
+                run_scenario(scen, mode, tables, algos)
             except Exception as ex:     # never let one scenario kill an unattended sweep
                 import traceback
                 print(f"   !! scenario {scen['id']} FAILED: {type(ex).__name__}: {ex}", flush=True)

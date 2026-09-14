@@ -89,7 +89,7 @@ def test_partial_run_writes_all_six_tables_and_skips_finalize():
             assert {r["algorithm"] for r in rows} == want, name
 
         # finalize's outputs must NOT exist -- that is what makes the partial directory safe
-        for derived in ("REPORT.md", "budget_crossings.csv", "optimal_params.csv",
+        for derived in ("budget_crossings.csv", "optimal_params.csv",
                         "diagnostics_headline.csv"):
             assert not os.path.exists(os.path.join(d, derived)), derived
 
@@ -176,7 +176,7 @@ def _fake_base(base, part, algos=("binary_deep", "reverse_eng_risk")):
     with open(os.path.join(base, "experiment_manifest.json"), "w") as f:
         json.dump(man, f, indent=2)
     # a derived file the merge must strip, because it describes the OLD numbers
-    open(os.path.join(base, "REPORT.md"), "w").write("stale report\n")
+    open(os.path.join(base, "diagnostics_headline.csv"), "w").write("stale,derived\n")
 
 
 def test_merge_builds_a_complete_dataset():
@@ -212,7 +212,8 @@ def test_merge_builds_a_complete_dataset():
                                                                   "reverse_eng_risk"]
         assert set(man["merge_provenance"]["scenarios_dropped"]) >= {"broad_pi4_e3",
                                                                      "broad_pi2_e3"}
-        assert not os.path.exists(os.path.join(out, "REPORT.md")), "stale derived file survived"
+        assert not os.path.exists(os.path.join(out, "diagnostics_headline.csv")), \
+            "stale derived file survived"
 
 
 def test_merge_refuses_mismatches():

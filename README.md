@@ -20,7 +20,6 @@ discovering a usable `N`, then commits the rest to one measurement there.
 qmetrology/     the package: simulation, the algorithms, the safeguard, the manifest, the evaluator
 analysis/       the pipeline that produces every reported number, plus the side studies
 results/        everything the pipeline and the side studies write -- CSVs, figures, LaTeX
-docs/           the hand-written derivations behind the generated results
 thesis_code/    the appendix listings (Listings A.1-A.6) + a parity check against the package
 tests/          the validation suite
 notebooks/      a walkthrough of the model and a sandbox for the safeguard
@@ -31,12 +30,11 @@ notebooks/      a walkthrough of the model and a sandbox for the safeguard
 ```bash
 pip install numpy scipy pandas matplotlib
 
-python analysis/run.py --quick       # ~2 min smoke run, identical code path
-python analysis/run.py --max         # the production sweep (~5 h on 24 cores)
-python analysis/run.py --max --resume --keep-traces   # continue, and keep probe-level traces
-python analysis/run.py --max --report-only            # rebuild derived tables + REPORT.md, no sim
+python analysis/run.py --quick       # ~13 min smoke run, identical code path
+python analysis/run.py --max         # the production sweep (~25 h on 24 cores)
+python analysis/run.py --max --resume        # continue an interrupted sweep
+python analysis/run.py --max --report-only   # rebuild the derived tables, no simulation
 
-python analysis/full_report.py       # rebuild FULL_RESULTS.md
 python analysis/thesis_tables.py     # the thesis tables -> results/tex/ (--long -> results/tex_long/)
 python analysis/thesis_figures.py    # the Chapter-4 figures
 python analysis/error_curves.py      # |φ̂−φ| quantiles behind fig_error
@@ -45,9 +43,7 @@ python analysis/variance_curves.py   # estimator variance vs budget
 python tests/test_consolidated.py --slow   # the validation suite
 ```
 
-`--keep-traces` writes the full probe list of the headline points to `results/traces/*.jsonl.gz`;
-three of the density figures need them. For unattended runs `analysis/supervise.sh` restarts the
-sweep with `--resume` if the process dies.
+For unattended runs `analysis/supervise.sh` restarts the sweep with `--resume` if the process dies.
 
 **Reported algorithms** (`qmetrology/manifest.py`, `ORDER`) — and only these:
 
@@ -87,7 +83,7 @@ Stage C decides, so it gets the trials — it controls the variance of *which* c
 one uncertainty component that cannot be recovered from stored output afterwards. `winners.csv`
 carries `at_axis_bound`, flagging a winner pinned at the endpoint of any axis.
 
-Every aggregate in `REPORT.md` is over the **live** operating points only — those where the best
+Every aggregate in the thesis tables is over the **live** operating points only — those where the best
 algorithm converges between 3% and 99%. At a saturated point every configuration ties, so the
 tuner's argmax and every diagnostic measured there is Monte-Carlo noise rather than a property of
 the algorithm. The per-point CSVs keep all points; join on `operating_points.csv` to filter.
@@ -100,53 +96,25 @@ same-seed run returns identical `φ̂` and budget use with tracing on and off.
 
 ## Results
 
-Start with **[results/FULL_RESULTS.md](results/FULL_RESULTS.md)** — the complete standalone record:
-model, algorithms, every scenario/seed/R, the statistical methodology, all results, validation and
-limitations. **[results/REPORT.md](results/REPORT.md)** is the short version.
-
-Key outputs in `results/`:
+Every reported number lives in `results/tex/` as paste-ready LaTeX, with
+**[results/tex/all_thesis_tables.tex](results/tex/all_thesis_tables.tex)** collecting all of them in
+one document (`results/tex_long/` is the per-scenario long form). The CSVs behind them:
 
 | file | what |
 |---|---|
 | `performance_curves.csv` | convergence vs budget, Wilson intervals at the row's own R |
 | `budget_crossings.csv` | B(p\*) and the ratio vs brute force, bootstrap intervals + grid sensitivity |
 | `winners.csv` | the frozen tuning winner, its per-block evidence, runner-up and margin |
-| `optimal_params.csv` | the appendix parameter tables |
 | `operating_points.csv` | per (scenario, budget): best rate and the live/saturated/floored label |
 | `diagnostics_by_point.csv` | exploration and safeguard telemetry, every share with its denominator |
-| `diagnostics_by_phase.csv` | the same, split by quantile bins of the true phase |
 | `detector_confusion.csv` | linear/binary false-alarm and miss rates, probe-level TP/FP/TN/FN |
 | `budget_audit.csv` | per-trial spend (mean/median/p90/max) and the violation count |
 | `experiment_manifest.json` | every scenario/algorithm/seed/R the run used |
-| `algorithm_code_audit.md` | which function is which thesis algorithm |
-| `tex/`, `tex_long/` | paste-ready LaTeX tables (short and per-scenario) |
 
 Headline: for φ ~ U(0.01, 0.1) all three adaptive algorithms beat brute force already at ε=10⁻³, and
-the advantage grows with precision, plateauing near **1.84×** less budget for reverse engineering.
+the advantage grows with precision, plateauing near **1.85×** less budget for reverse engineering.
 At a fixed budget of 10,000 (ε=10⁻³): brute 56.1%, linear 64.1%, binary 65.1%, reverse engineering
 **66.3%**, against an attainable ceiling of 73.5%.
-
-## Derivations
-
-`docs/` holds the hand-written arguments the generated results rest on:
-
-| document | subject |
-|---|---|
-| [SAFEGUARD_DERIVATION.md](docs/SAFEGUARD_DERIVATION.md) | the statistical safeguard, its assumptions and what each one buys |
-| [OVERSHOOT_CRITERION.md](docs/OVERSHOOT_CRITERION.md) | the binary-search overshoot rule, its size and power |
-| [BERRY_ESSEEN.md](docs/BERRY_ESSEEN.md) | the non-asymptotic justification of the normal quantile in Eq. (3.6) |
-| [LINEAR_SEARCH.md](docs/LINEAR_SEARCH.md) | the linear-search detector bake-off and the `mean_window` axis |
-| [POSTERIOR.md](docs/POSTERIOR.md) | the exact-posterior depth criterion |
-| [BROAD_DIST.md](docs/BROAD_DIST.md) | broad priors, where the ranking reverses |
-
-Their numbers are regenerated by:
-
-```bash
-python analysis/overshoot_criterion.py           # -> the overshoot_*.csv tables
-python analysis/linear_detector_study.py --curve # -> the linear_detector_*.csv tables
-python analysis/linear_search_claims.py          # re-derives Section 3.2.1's claims from results/
-python analysis/audit.py                         # -> algorithm_code_audit.md
-```
 
 ## Beyond the thesis
 

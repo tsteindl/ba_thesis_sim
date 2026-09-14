@@ -1,4 +1,4 @@
-"""Figures for docs/POSTERIOR.md — what the exact-posterior depth criterion does and what it buys.
+"""Figures for the exact-posterior depth criterion — what it does and what it buys.
 
 Four figures, no new simulation sweeps: figures 1-2 replay ONE bisection trial to show the mechanism,
 figures 3-4 read the existing result CSVs.

@@ -23,7 +23,7 @@ thesis dataset instead:
 
 The cell key is `(scenario_id, algorithm, budget)`, plus `phase_bin` for the phase-stratified table.
 
-Nothing derived is produced here. `add_baselines`, `finalize`, `full_report.py`, the error/variance
+Nothing derived is produced here. `add_baselines`, `finalize`, the error/variance
 curves, `thesis_tables.py` and `thesis_figures.py` are run afterwards against the staging directory
 via RESULTS_OUT, and only a checked staging directory is ever promoted.
 """
@@ -184,8 +184,7 @@ def main():
     check_manifests(base, part, algos, keep_ids)
 
     # ---------------------------------------------------------------- copy, then rebuild tables
-    shutil.copytree(base, out, ignore=shutil.ignore_patterns("traces"))
-    os.makedirs(os.path.join(out, "traces"), exist_ok=True)
+    shutil.copytree(base, out)
 
     total_kept = total_new = 0
     for name, extra in TABLES.items():
@@ -246,19 +245,6 @@ def main():
         print(f"  {name:<28} kept {len(kept):>5}  replaced {len(new):>5}  "
               f"dropped {len(brows) - len(kept) - len(old_keys):>5}  -> {len(merged):>5}")
 
-    # ------------------------------------------------------------------------------- traces
-    n_tr = 0
-    for src_dir, only in ((os.path.join(base, "traces"), lambda f: not any(
-                              f.startswith(s + "__") for s in drop_ids)
-                              and not any(f"__{x}__" in f for x in algos)),
-                          (os.path.join(part, "traces"), lambda f: True)):
-        if not os.path.isdir(src_dir):
-            continue
-        for fn in sorted(os.listdir(src_dir)):
-            if only(fn):
-                shutil.copy2(os.path.join(src_dir, fn), os.path.join(out, "traces", fn))
-                n_tr += 1
-
     # --------------------------------------------------------------------------- the manifest
     pm = json.load(open(os.path.join(part, "experiment_manifest.json")))
     pm["selection"] = {
@@ -276,7 +262,6 @@ def main():
         "scenarios_dropped": drop_ids,
         "rows_kept_from_base": total_kept,
         "rows_taken_from_partial": total_new,
-        "traces_copied": n_tr,
     }
     with open(os.path.join(out, "experiment_manifest.json"), "w") as f:
         json.dump(pm, f, indent=2, default=str)
@@ -312,7 +297,7 @@ def main():
             shutil.copy2(src, os.path.join(out, fn))
             from_partial.append(fn)
 
-    print(f"\n{total_kept} rows kept, {total_new} replaced, {n_tr} trace file(s) copied")
+    print(f"\n{total_kept} rows kept, {total_new} replaced")
     print(f"removed {len(stale)} derived file(s) -- regenerate them against {out}")
     print(f"carried over {len(kept_files)} file(s) from independent studies "
           f"(linear detector, overshoot criterion) that the depth rule cannot affect")
@@ -326,7 +311,6 @@ def main():
           "  python analysis/add_baselines.py\n"
           "  python -c \"import sys;sys.path.insert(0,'analysis');"
           "import finalize;finalize.main('max')\"\n"
-          "  python analysis/full_report.py\n"
           "  python analysis/error_curves.py\n"
           "  python analysis/variance_curves.py\n"
           "  python analysis/thesis_tables.py\n"

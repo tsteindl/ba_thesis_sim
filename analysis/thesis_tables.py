@@ -16,7 +16,7 @@ non-broad scenario and is meant for an appendix. Both are generated from the sam
 numbers agree by construction.
 
 Nothing here simulates. Every number is read from results/*.csv, so these tables cannot
-drift from the data or from FULL_RESULTS.md.
+drift from the data.
 """
 import csv
 import json

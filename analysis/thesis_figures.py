@@ -15,9 +15,6 @@ Figures (written to results/):
     fig_error           estimator-error distribution vs budget (median + IQR band)
     fig_variance        sample variance of signed estimator error vs budget; analytic Oracle
     fig_error_variance  error median and variance side by side
-    fig_error_density   density of normalized per-trial errors at the headline fixed budget
-    fig_signed_error_density density of signed normalized errors at the headline fixed budget
-    fig_phi_hat_density density of final estimates at the headline fixed budget
     fig_algorithm_diagnostics exploration cost and final overshoot near 90% convergence
     fig_overshoot_criterion   exact operating characteristic of the overshoot rule (Sec. 3.2.2)
     fig_linear_detector       linear search under alternative stopping rules (Sec. 4.5)
@@ -26,7 +23,6 @@ Every panel is annotated with the R it was produced at, read from the data rathe
 so a figure can never silently disagree with the tables.
 """
 import csv
-import gzip
 import json
 import os
 import sys
@@ -76,50 +72,6 @@ def load(name):
         return []
     with open(p, newline="") as fh:
         return list(csv.DictReader(fh))
-
-
-def trace_errors(sid, algo, budget):
-    """Absolute final-estimator errors from an existing held-out trace subset."""
-    p = path("traces", f"{sid}__{algo}__B{int(budget)}.jsonl.gz")
-    if not os.path.exists(p):
-        return np.array([], float)
-    errors = []
-    with gzip.open(p, "rt") as fh:
-        for line in fh:
-            row = json.loads(line)
-            phi, phi_hat = f(row.get("phi")), f(row.get("phi_hat_final"))
-            if np.isfinite(phi) and np.isfinite(phi_hat):
-                errors.append(abs(phi_hat - phi))
-    return np.asarray(errors, float)
-
-
-def trace_signed_errors(sid, algo, budget):
-    """Signed final-estimator errors from an existing held-out trace subset."""
-    p = path("traces", f"{sid}__{algo}__B{int(budget)}.jsonl.gz")
-    if not os.path.exists(p):
-        return np.array([], float)
-    errors = []
-    with gzip.open(p, "rt") as fh:
-        for line in fh:
-            row = json.loads(line)
-            phi, phi_hat = f(row.get("phi")), f(row.get("phi_hat_final"))
-            if np.isfinite(phi) and np.isfinite(phi_hat):
-                errors.append(phi_hat - phi)
-    return np.asarray(errors, float)
-
-
-def trace_phi_hats(sid, algo, budget):
-    """Final estimates from an existing held-out trace subset."""
-    p = path("traces", f"{sid}__{algo}__B{int(budget)}.jsonl.gz")
-    if not os.path.exists(p):
-        return np.array([], float)
-    estimates = []
-    with gzip.open(p, "rt") as fh:
-        for line in fh:
-            phi_hat = f(json.loads(line).get("phi_hat_final"))
-            if np.isfinite(phi_hat):
-                estimates.append(phi_hat)
-    return np.asarray(estimates, float)
 
 
 def out_path(name):
@@ -480,151 +432,6 @@ def _gaussian_kde(samples, grid):
     return np.exp(-0.5 * z**2).mean(axis=1) / (np.sqrt(2 * np.pi) * bandwidth)
 
 
-def fig_error_density(d, sid=HEAD, budget=10_000):
-    """Distribution of |phi_hat - phi| / eps at one fixed-budget operating point."""
-    eps = f(d.scen[sid]["eps"])
-    errors = {}
-    for a in M.ORDER:
-        raw = trace_errors(sid, a, budget)
-        if raw.size:
-            errors[a] = raw / eps
-    if not errors:
-        print("   (fig_error_density skipped: no stored traces for "
-              f"{sid} at budget {budget:,})")
-        return None
-
-    pooled = np.concatenate(list(errors.values()))
-    xmax = max(1.2, float(np.quantile(pooled, 0.995)))
-    grid = np.linspace(0, xmax, 500)
-    fig, ax = plt.subplots(figsize=(6.6, 4.0))
-    ax.axvspan(0, 1, color="#2ca02c", alpha=0.06, lw=0)
-    for a in M.ORDER:
-        x = errors.get(a)
-        if x is None:
-            continue
-        ax.plot(grid, _reflected_kde(x, grid), color=COL[a], lw=2.0,
-                ls=DASHED.get(a, "-"), label=NICE[a])
-    ax.axvline(1, color="k", ls="--", lw=0.9)
-    ax.annotate(r"convergence threshold $|\hat{\phi}-\phi|=\epsilon$",
-                xy=(1, 0.98), xycoords=("data", "axes fraction"),
-                xytext=(5, -3), textcoords="offset points", ha="left", va="top", fontsize=8)
-    ax.set_xlim(0, xmax)
-    ax.set_ylim(bottom=0)
-    ax.set_xlabel(r"Normalized absolute error $|\hat{\phi}-\phi|/\epsilon$")
-    ax.set_ylabel("Probability density")
-    ax.set_title(f"{d.scen[sid]['label']},  budget $C={budget:,}$", fontsize=10)
-    ax.legend(fontsize=8.5, loc="upper right")
-    fig.tight_layout(rect=(0, 0.05, 1, 1))
-    n_min = min(len(x) for x in errors.values())
-    fig.text(
-        0.005, 0.005,
-        f"Held-out seed {M.SEED_TEST}; {n_min:,} stored traced trials per algorithm; "
-        "parameters frozen on tuning seeds "
-        + ",".join(str(x) for x in M.SEED_TUNE_BLOCKS)
-        + "; reflected Gaussian KDE. Display ends at the pooled 99.5th percentile.",
-        fontsize=6.5, color="#555555", ha="left", va="bottom")
-    fig.savefig(out_path("fig_error_density.png"), bbox_inches="tight")
-    plt.close(fig)
-    return "fig_error_density.png"
-
-
-def fig_signed_error_density(d, sid=HEAD, budget=10_000):
-    """Distribution of (phi_hat - phi) / eps at one fixed-budget operating point."""
-    eps = f(d.scen[sid]["eps"])
-    errors = {}
-    for a in M.ORDER:
-        raw = trace_signed_errors(sid, a, budget)
-        if raw.size:
-            errors[a] = raw / eps
-    if not errors:
-        print("   (fig_signed_error_density skipped: no stored traces for "
-              f"{sid} at budget {budget:,})")
-        return None
-
-    pooled = np.concatenate(list(errors.values()))
-    xmax = max(2.0, float(np.quantile(np.abs(pooled), 0.995)))
-    grid = np.linspace(-xmax, xmax, 600)
-    fig, ax = plt.subplots(figsize=(6.6, 4.0))
-    line_styles = {
-        "brute": (0, (4, 2)),
-        "linear": "-",
-        "binary_deep": (0, (7, 2)),
-        "reverse_eng_risk": (0, (2, 1.5)),
-    }
-    for a in M.ORDER:
-        x = errors.get(a)
-        if x is None:
-            continue
-        ax.plot(grid, _gaussian_kde(x, grid), color=COL[a], lw=2.0,
-                ls=line_styles.get(a, "-"), label=NICE[a])
-    ax.axvline(0, color="#555555", ls=":", lw=0.9)
-    ax.set_xlim(-xmax, xmax)
-    ax.set_ylim(bottom=0)
-    ax.set_xlabel(r"Normalized signed error $(\hat{\phi}-\phi)/\epsilon$")
-    ax.set_ylabel("Probability density")
-    ax.set_title(f"{d.scen[sid]['label']},  budget $C={budget:,}$", fontsize=10)
-    ax.legend(fontsize=8.5, loc="upper right")
-    fig.tight_layout(rect=(0, 0.05, 1, 1))
-    n_min = min(len(x) for x in errors.values())
-    fig.text(
-        0.005, 0.005,
-        f"Held-out seed {M.SEED_TEST}; {n_min:,} stored traced trials per algorithm; "
-        "parameters frozen on tuning seeds "
-        + ",".join(str(x) for x in M.SEED_TUNE_BLOCKS)
-        + "; Gaussian KDE. Display is limited symmetrically at the pooled "
-          "99.5th percentile of the absolute normalized error.",
-        fontsize=6.5, color="#555555", ha="left", va="bottom")
-    fig.savefig(out_path("fig_signed_error_density.png"), bbox_inches="tight")
-    plt.close(fig)
-    return "fig_signed_error_density.png"
-
-
-def fig_phi_hat_density(d, sid=HEAD, budget=10_000):
-    """Distribution of the final estimates at one fixed-budget operating point."""
-    estimates = {}
-    for a in M.ORDER:
-        x = trace_phi_hats(sid, a, budget)
-        if x.size:
-            estimates[a] = x
-    if not estimates:
-        print("   (fig_phi_hat_density skipped: no stored traces for "
-              f"{sid} at budget {budget:,})")
-        return None
-
-    pooled = np.concatenate(list(estimates.values()))
-    span = float(np.quantile(pooled, 0.995) - np.quantile(pooled, 0.005))
-    xmin = float(pooled.min() - 0.03 * span)
-    xmax = float(pooled.max() + 0.03 * span)
-    grid = np.linspace(xmin, xmax, 500)
-    fig, ax = plt.subplots(figsize=(6.6, 4.0))
-    scen = d.scen[sid]
-    ax.axvspan(f(scen["phi_min"]), f(scen["phi_max"]), color="#7f7f7f", alpha=0.05, lw=0)
-    for a in M.ORDER:
-        x = estimates.get(a)
-        if x is None:
-            continue
-        ax.plot(grid, _gaussian_kde(x, grid), color=COL[a], lw=2.0,
-                ls=DASHED.get(a, "-"), label=NICE[a])
-    ax.set_xlim(xmin, xmax)
-    ax.set_ylim(bottom=0)
-    ax.set_xlabel(r"Final estimate $\hat{\phi}$")
-    ax.set_ylabel("Probability density")
-    ax.set_title(f"{d.scen[sid]['label']},  budget $C={budget:,}$", fontsize=10)
-    ax.legend(fontsize=8.5, loc="upper right")
-    fig.tight_layout(rect=(0, 0.05, 1, 1))
-    n_min = min(len(x) for x in estimates.values())
-    fig.text(
-        0.005, 0.005,
-        f"Held-out seed {M.SEED_TEST}; {n_min:,} stored traced trials per algorithm; "
-        "parameters frozen on tuning seeds "
-        + ",".join(str(x) for x in M.SEED_TUNE_BLOCKS)
-        + "; Gaussian KDE. Shading marks the prior support.",
-        fontsize=6.5, color="#555555", ha="left", va="bottom")
-    fig.savefig(out_path("fig_phi_hat_density.png"), bbox_inches="tight")
-    plt.close(fig)
-    return "fig_phi_hat_density.png"
-
-
 def fig_broad(d):
     sids = [s["id"] for s in M.SCENARIOS
             if "broad_prior" in s["families"] and s["id"] in d.scen]
@@ -724,7 +531,7 @@ RULE_MARK = {"cumulative": "o", "window": "^", "prepost": "v", "threshold": "D",
 
 def fig_linear_detector(d):
     """What Algorithm 4 would do with a different stopping rule -- the study that led to the
-    `mean_window` parameter (docs/LINEAR_SEARCH.md).
+    `mean_window` parameter.
 
     (a) Held-out convergence of each candidate rule relative to the cumulative-mean rule re-tuned by
     the same tuner, so the curves isolate the RULE rather than the tuning. (b) How often the
@@ -914,9 +721,6 @@ def main():
                         ("error", lambda: fig_error(d)),
                         ("variance", lambda: fig_variance(d)),
                         ("error_variance", lambda: fig_error_variance(d)),
-                        ("error_density", lambda: fig_error_density(d)),
-                        ("signed_error_density", lambda: fig_signed_error_density(d)),
-                        ("phi_hat_density", lambda: fig_phi_hat_density(d)),
                         ("overshoot", lambda: fig_overshoot_criterion(d)),
                         ("linear_detector", lambda: fig_linear_detector(d))):
             if only and tag not in only:

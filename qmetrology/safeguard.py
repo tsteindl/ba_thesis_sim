@@ -3,7 +3,7 @@
 CORE ASSUMPTIONS
 ----------------
 The rule below is only as good as these. Full derivation and the numbers behind each verdict:
-docs/SAFEGUARD_DERIVATION.md.
+the thesis (Section 3.2.2).
 
   A1  The estimator is asymptotically normal with Var(phi_hat) = 1/(4 N^2 m), *independent of phi*.
       EXACT to leading order -- the p0(1-p0) factors cancel, the Fisher information is a constant
@@ -126,7 +126,7 @@ def pilot_sd(N, m):
 
 def _p_safe(N, phi_hat, sigma, support=None):
     """P(phi < pi/(2N) | pilot). `support` = (phi_min, phi_max) uses the exact TRUNCATED posterior;
-    None uses the untruncated normal (assumption A4). See docs/SAFEGUARD_DERIVATION.md §3.7."""
+    None uses the untruncated normal (assumption A4)."""
     t = np.pi / (2.0 * np.asarray(N, dtype=float))
     if support is None:
         return ndtr((t - phi_hat) / sigma)

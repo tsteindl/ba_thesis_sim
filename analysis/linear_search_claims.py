@@ -267,7 +267,7 @@ def code_claims():
     expl = inspect.getsource(A._linear_search_explore)
     # The notes describe the rule as testing the cumulative mean. That was the whole rule when they
     # were written; the live code has since made the width a tuned parameter, `mean_window`, whose
-    # 0 is exactly that cumulative mean (docs/LINEAR_SEARCH.md). Both halves are
+    # 0 is exactly that cumulative mean. Both halves are
     # checked, so this row records the generalisation rather than reporting it as a contradiction.
     cumulative_branch = "phi_hat_list[-mean_window:] if mean_window else phi_hat_list" in expl
     still_plain = "np.mean(phi_hat_list)" in expl
