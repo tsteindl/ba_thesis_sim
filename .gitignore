@@ -2,11 +2,12 @@ __pycache__/
 .cache/
 .ipynb_checkpoints
 venv
-
 *.pdf
-
 # isolated output directories for partial reruns (analysis/run.py --algorithms/--scenarios)
 results_partial/
 results_staging/
 sweep.log
 *.pyc
+testrun.log
+side_studies.log
+.claude/
