@@ -2,6 +2,30 @@
 \toprule
 Scenario & Algorithm & Budget & Frozen configuration & Note \\
 \midrule
+U(0.01,pi/2), eps=1e-03 & Binary search & 425,275 & conf: 0.5, m\_exploration: 6064 & B90 nearest \\
+U(0.01,pi/2), eps=1e-03 & Binary search & 425,275 & conf: 0.5, m\_exploration: 6064 & B90 bracket lo \\
+U(0.01,pi/2), eps=1e-03 & Binary search & 579,619 & conf: 0.5, m\_exploration: 9665 & B90 bracket hi \\
+U(0.01,pi/2), eps=1e-03 & Linear search & 579,619 & inc: 1, lookback\_window: 5, m\_exploration: 234, mean\_window: 6, safeguard: 1 & B90 nearest \\
+U(0.01,pi/2), eps=1e-03 & Linear search & 579,619 & inc: 1, lookback\_window: 5, m\_exploration: 234, mean\_window: 6, safeguard: 1 & B90 bracket lo \\
+U(0.01,pi/2), eps=1e-03 & Linear search & 789,977 & inc: 1, lookback\_window: 2, m\_exploration: 1481, mean\_window: 3, safeguard: 0 & B90 bracket hi \\
+U(0.01,pi/2), eps=1e-03 & Reverse engineering & 425,275 & m\_exploration: 3696 & B90 nearest \\
+U(0.01,pi/2), eps=1e-03 & Reverse engineering & 425,275 & m\_exploration: 3696 & B90 bracket lo \\
+U(0.01,pi/2), eps=1e-03 & Reverse engineering & 579,619 & m\_exploration: 512 & B90 bracket hi \\
+U(0.01,pi/2), eps=1e-03 & separable & 789,977 &  & B90 nearest \\
+U(0.01,pi/2), eps=1e-03 & separable & 579,619 &  & B90 bracket lo \\
+U(0.01,pi/2), eps=1e-03 & separable & 789,977 &  & B90 bracket hi \\
+U(0.01,pi/4), eps=1e-03 & Binary search & 228,942 & conf: 0.5, m\_exploration: 3899 & B90 nearest \\
+U(0.01,pi/4), eps=1e-03 & Binary search & 167,979 & conf: 0.5, m\_exploration: 2283 & B90 bracket lo \\
+U(0.01,pi/4), eps=1e-03 & Binary search & 228,942 & conf: 0.5, m\_exploration: 3899 & B90 bracket hi \\
+U(0.01,pi/4), eps=1e-03 & Linear search & 312,031 & inc: 1, lookback\_window: 2, m\_exploration: 752, mean\_window: 1, safeguard: 0 & B90 nearest \\
+U(0.01,pi/4), eps=1e-03 & Linear search & 228,942 & inc: 1, lookback\_window: 2, m\_exploration: 566, mean\_window: 1, safeguard: 0 & B90 bracket lo \\
+U(0.01,pi/4), eps=1e-03 & Linear search & 312,031 & inc: 1, lookback\_window: 2, m\_exploration: 752, mean\_window: 1, safeguard: 0 & B90 bracket hi \\
+U(0.01,pi/4), eps=1e-03 & Reverse engineering & 228,942 & m\_exploration: 368 & B90 nearest \\
+U(0.01,pi/4), eps=1e-03 & Reverse engineering & 167,979 & m\_exploration: 1696 & B90 bracket lo \\
+U(0.01,pi/4), eps=1e-03 & Reverse engineering & 228,942 & m\_exploration: 368 & B90 bracket hi \\
+U(0.01,pi/4), eps=1e-03 & separable & 789,977 &  & B90 nearest \\
+U(0.01,pi/4), eps=1e-03 & separable & 579,619 &  & B90 bracket lo \\
+U(0.01,pi/4), eps=1e-03 & separable & 789,977 &  & B90 bracket hi \\
 U(0.01,0.1), eps=1e-03 & Binary search & 29,173 & conf: 0.5, m\_exploration: 289 & B90 nearest \\
 U(0.01,0.1), eps=1e-03 & Binary search & 29,173 & conf: 0.5, m\_exploration: 289 & B90 bracket lo \\
 U(0.01,0.1), eps=1e-03 & Binary search & 41,326 & conf: 0.5, m\_exploration: 421 & B90 bracket hi \\
