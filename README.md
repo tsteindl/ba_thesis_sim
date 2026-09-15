@@ -36,8 +36,8 @@ python analysis/run.py --max --resume        # continue an interrupted sweep
 python analysis/run.py --max --report-only   # rebuild the derived tables, no simulation
 
 python analysis/thesis_tables.py     # the thesis tables -> results/tex/ (--long -> results/tex_long/)
-python analysis/thesis_figures.py    # all 11 figures (--only NAME,NAME for a subset)
-python analysis/error_curves.py      # |φ̂−φ| quantiles behind fig_error
+python analysis/thesis_figures.py    # the four thesis figures (--only NAME,NAME for a subset)
+python analysis/error_curves.py      # |φ̂−φ| quantiles behind fig_error_variance
 python analysis/variance_curves.py   # estimator variance vs budget
 
 python tests/test_consolidated.py --slow   # the validation suite
@@ -96,9 +96,10 @@ same-seed run returns identical `φ̂` and budget use with tracing on and off.
 
 ## Results
 
-Every reported number lives in `results/tex/` as paste-ready LaTeX, with
-**[results/tex/all_thesis_tables.tex](results/tex/all_thesis_tables.tex)** collecting all of them in
-one document (`results/tex_long/` is the per-scenario long form). The CSVs behind them:
+Every reported number lives in `results/tex/` as paste-ready LaTeX (`results/tex_long/` is the
+per-scenario long form). Only the 11 tables and 4 figures the thesis actually includes are
+generated; the builders for the others are still in place but their call sites are commented out,
+so no artifact exists that the thesis does not use. The CSVs behind them:
 
 | file | what |
 |---|---|
@@ -146,7 +147,7 @@ write their own files into `results/`:
 ```bash
 python analysis/posterior_all_study.py  # exact posterior, all 3 algorithms -> posterior_all.csv
 python analysis/binary_rescue_study.py  # can bisection inform the depth rule -> binary_rescue.csv
-python analysis/posterior_explain.py    # the five fig_posterior_*/fig_binary_cap_cost figures
+python analysis/posterior_explain.py    # the five posterior figures (exploratory, not in the thesis)
 ```
 
 Run `binary_rescue_study.py` before `posterior_explain.py` — two of its figures read

@@ -7,16 +7,17 @@ disagree with the tables, and each carries its R and seeds in a footer strip.
     python analysis/thesis_figures.py --only story,precision
     python analysis/thesis_figures.py --out DIR  # write somewhere else
 
-Figures (written to results/):
+Figures. Only the four the thesis includes are written by default; the rest are still
+implemented and can be re-enabled in the registry at the bottom of main().
+
+  drawn:
     fig_story           convergence vs budget for the headline scenario, with the 90% crossing
-    fig_story_small     the same, compact, for a single-column layout
-    fig_pareto          the budget/convergence frontier across scenarios
     fig_precision       budget ratio vs brute force at 90%, against the precision requirement
-    fig_error           estimator-error distribution vs budget (median + IQR band)
-    fig_variance        sample variance of signed estimator error vs budget; analytic Oracle
     fig_error_variance  error median and variance side by side
     fig_algorithm_diagnostics exploration cost and final overshoot near 90% convergence
-    fig_overshoot_criterion   exact operating characteristic of the overshoot rule (Sec. 3.2.2)
+  kept, not drawn:
+    fig_story_small, fig_pareto, fig_error, fig_variance, fig_overshoot_criterion,
+    fig_diagnostics_vs_budget, fig_guess_vs_final_depth
 
 Every panel is annotated with the R it was produced at, read from the data rather than hard-coded,
 so a figure can never silently disagree with the tables.
@@ -598,17 +599,19 @@ def main(only=None):
     d = D()
     made = []
     with plt.rc_context(PAPER_RC):
+        # Only the four figures the thesis \includegraphics are drawn. Every builder below is
+        # kept and still works; uncomment a line here to bring one back.
         for tag, fn in (("story", lambda: fig_story(d, False)),
-                        ("story_small", lambda: fig_story(d, True)),
+                        # ("story_small", lambda: fig_story(d, True)),          # commented out in 04-results.tex
                         ("precision", lambda: fig_precision(d)),
                         ("algorithm_diagnostics", lambda: fig_algorithm_diagnostics(d)),
-                        ("pareto", lambda: fig_pareto(d)),
-                        ("error", lambda: fig_error(d)),
-                        ("variance", lambda: fig_variance(d)),
-                        ("error_variance", lambda: fig_error_variance(d)),
-                        ("overshoot", lambda: fig_overshoot_criterion(d)),
-                        ("diagnostics_vs_budget", lambda: fig_diagnostics_vs_budget(d)),
-                        ("guess_vs_final_depth", lambda: fig_guess_vs_final_depth(d))):
+                        # ("pareto", lambda: fig_pareto(d)),                    # not included by the thesis
+                        # ("error", lambda: fig_error(d)),                      # superseded by error_variance
+                        # ("variance", lambda: fig_variance(d)),                # superseded by error_variance
+                        # ("overshoot", lambda: fig_overshoot_criterion(d)),    # only Table 3.1 is used
+                        # ("diagnostics_vs_budget", lambda: fig_diagnostics_vs_budget(d)),
+                        # ("guess_vs_final_depth", lambda: fig_guess_vs_final_depth(d)),
+                        ("error_variance", lambda: fig_error_variance(d))):
             if only and tag not in only:
                 continue
             n = fn()
